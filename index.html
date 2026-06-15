@@ -225,6 +225,23 @@
             color: white;
         }
 
+        .btn-share {
+            background: #1a3c5e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-size: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-share:hover {
+            background: #c0392b;
+        }
+
         /* Layout de 3 colunas */
         .newspaper-grid {
             display: grid;
@@ -429,6 +446,16 @@
             color: #666;
         }
 
+        .share-url-container {
+            background: #f0f0f0;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
         .google-login-btn {
             background: #4285F4;
             color: white;
@@ -591,7 +618,7 @@
 <div class="newspaper-container">
     <!-- CABEÇALHO -->
     <div class="newspaper-header">
-        <div class="newspaper-name" onclick="location.reload()">WAZZIMA<span>GIYGG</span></div>
+        <div class="newspaper-name" onclick="navigateToHome()">WAZZIMA<span>GIYGG</span></div>
         <div class="newspaper-motto">"Inevit vel!" — O Jornal da Verdade</div>
         <div class="issue-info">
             <span class="issue-date"><i class="far fa-calendar-alt"></i> <span id="currentDate"></span></span>
@@ -666,6 +693,19 @@
     </div>
 </div>
 
+<!-- Modal Compartilhar -->
+<div id="shareModal" class="modal">
+    <div class="modal-content">
+        <h2><i class="fas fa-share-alt"></i> Compartilhar Matéria</h2>
+        <p>Copie o link abaixo para compartilhar esta matéria:</p>
+        <div class="share-url-container" id="shareUrlContainer"></div>
+        <button class="btn btn-primary" onclick="copyShareUrl()" style="width: 100%; margin-bottom: 10px;">
+            <i class="fas fa-copy"></i> Copiar Link
+        </button>
+        <button class="btn-close" onclick="closeModals()">Fechar</button>
+    </div>
+</div>
+
 <!-- Modal Nova Matéria -->
 <div id="articleModal" class="modal">
     <div class="modal-content">
@@ -709,10 +749,21 @@
         <div id="viewArticleContent"></div>
         <div id="viewAdminActions" style="margin-top: 20px; display: none;">
             <hr>
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button class="btn btn-warning" onclick="editCurrentArticle()">✏️ Editar</button>
-                <button class="btn btn-danger" onclick="deleteCurrentArticle()">🗑️ Excluir</button>
+            <div style="display: flex; gap: 10px; justify-content: space-between; flex-wrap: wrap;">
+                <button class="btn-share" onclick="showShareModal()">
+                    <i class="fas fa-share-alt"></i> Compartilhar
+                </button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-warning" onclick="editCurrentArticle()">✏️ Editar</button>
+                    <button class="btn btn-danger" onclick="deleteCurrentArticle()">🗑️ Excluir</button>
+                </div>
             </div>
+        </div>
+        <div id="viewUserActions" style="margin-top: 20px; display: none;">
+            <hr>
+            <button class="btn-share" onclick="showShareModal()" style="width: 100%;">
+                <i class="fas fa-share-alt"></i> Compartilhar esta matéria
+            </button>
         </div>
         <button class="btn-close" onclick="closeModals()">Fechar</button>
     </div>
@@ -762,14 +813,44 @@
         }, 3000);
     }
 
+    // ==================== NAVEGAÇÃO POR URL ====================
+    function getUrlParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            categoria: params.get('categoria'),
+            id: params.get('id')
+        };
+    }
+
+    function updateUrl(categoria, id = null) {
+        let url = window.location.pathname;
+        const params = [];
+        
+        if (categoria && categoria !== 'todos') {
+            params.push(`categoria=${encodeURIComponent(categoria)}`);
+        }
+        
+        if (id) {
+            params.push(`id=${encodeURIComponent(id)}`);
+        }
+        
+        if (params.length > 0) {
+            url += '?' + params.join('&');
+        }
+        
+        window.history.pushState({ categoria, id }, '', url);
+    }
+
+    function navigateToHome() {
+        window.location.href = window.location.pathname;
+    }
+
     // ==================== VERIFICAÇÃO DE ADMIN ====================
     async function checkIfUserIsAdmin(user) {
         if (!user) return false;
         
-        // Verifica se é o admin específico
         if (user.uid === SPECIFIC_ADMIN_UID) return true;
         
-        // Verifica na coleção users se isAdmin == true
         try {
             const userDoc = await db.collection('users').doc(user.uid).get();
             if (userDoc.exists && userDoc.data().isAdmin === true) {
@@ -798,6 +879,7 @@
     async function logout() {
         await auth.signOut();
         showToast('Logout realizado com sucesso!');
+        navigateToHome();
     }
 
     // ==================== ESTADO DE AUTENTICAÇÃO ====================
@@ -821,10 +903,8 @@
             
             if (currentUserIsAdmin) {
                 document.getElementById('adminButtons').style.display = 'flex';
-                showToast('✅ Modo Administrador ativado! Você pode criar, editar e excluir matérias.');
             } else {
                 document.getElementById('adminButtons').style.display = 'none';
-                showToast(`👋 Olá, ${displayName}! Você está logado como leitor.`);
             }
         } else {
             currentUser = null;
@@ -834,8 +914,101 @@
             document.getElementById('authButtons').style.display = 'flex';
             document.getElementById('adminButtons').style.display = 'none';
         }
-        loadArticles();
+        
+        // Carregar conteúdo baseado na URL
+        const params = getUrlParams();
+        
+        if (params.id) {
+            // Se tem ID, abre a matéria diretamente
+            await loadArticleById(params.id);
+        } else if (params.categoria) {
+            // Se tem categoria, filtra por ela
+            currentCategory = params.categoria;
+            highlightActiveCategory(currentCategory);
+            loadArticles();
+        } else {
+            // Padrão: carrega todas as matérias
+            currentCategory = 'todos';
+            highlightActiveCategory('todos');
+            loadArticles();
+        }
     });
+
+    function highlightActiveCategory(category) {
+        document.querySelectorAll('.nav-menu a').forEach(a => {
+            const isActive = a.dataset.cat === category;
+            a.classList.toggle('active', isActive);
+        });
+    }
+
+    // ==================== CARREGAR MATÉRIA POR ID ====================
+    async function loadArticleById(articleId) {
+        const grid = document.getElementById('newspaperGrid');
+        grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando matéria...</p></div>';
+        
+        try {
+            const doc = await db.collection('articlesdoc').doc(articleId).get();
+            
+            if (!doc.exists) {
+                grid.innerHTML = '<div class="loading"><p>📭 Matéria não encontrada. <a onclick="navigateToHome()" style="color:#c0392b; cursor:pointer;">Voltar para página inicial</a></p></div>';
+                return;
+            }
+            
+            const article = { id: doc.id, ...doc.data() };
+            currentViewArticleId = articleId;
+            currentViewArticleData = article;
+            
+            // Incrementar visualizações
+            if (!currentUserIsAdmin) {
+                const novasViews = (article.visualizacoes || 0) + 1;
+                await db.collection('articlesdoc').doc(articleId).update({ visualizacoes: novasViews });
+            }
+            
+            renderSingleArticle(article);
+        } catch (error) {
+            grid.innerHTML = `<div class="loading"><p>❌ Erro ao carregar: ${error.message}</p></div>`;
+        }
+    }
+
+    function renderSingleArticle(article) {
+        const date = article.dataPublicacao?.toDate?.() ? article.dataPublicacao.toDate().toLocaleDateString('pt-BR') : 'Data desconhecida';
+        const categoryIcon = getCategoryIcon(article.categoria);
+        
+        const adminButtonsHtml = currentUserIsAdmin ? `
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 20px;">
+                <button class="admin-btn" onclick="editArticle('${article.id}')">✏️ Editar</button>
+                <button class="admin-btn delete" onclick="deleteArticle('${article.id}')">🗑️ Excluir</button>
+            </div>
+        ` : '';
+        
+        document.getElementById('newspaperGrid').innerHTML = `
+            <div style="grid-column: 1 / -1; max-width: 900px; margin: 0 auto;">
+                ${adminButtonsHtml}
+                <div class="main-article">
+                    <div class="article-tag">${categoryIcon} ${article.categoria?.toUpperCase() || 'GERAL'}</div>
+                    <div class="article-title">${escapeHtml(article.titulo)}</div>
+                    <div class="article-meta">
+                        <span><i class="far fa-user"></i> Por ${escapeHtml(article.autorNome || 'Redação')}</span>
+                        <span><i class="far fa-calendar"></i> ${date}</span>
+                        <span><i class="fas fa-eye"></i> ${article.visualizacoes || 0} visualizações</span>
+                    </div>
+                    ${article.imagemUrl ? `<div class="article-image"><img src="${article.imagemUrl}" alt="${escapeHtml(article.titulo)}"><div class="image-caption">Foto: Divulgação</div></div>` : ''}
+                    <div class="article-excerpt" style="font-size: 16px; line-height: 1.8;">
+                        ${article.conteudo || article.resumo || 'Conteúdo não disponível.'}
+                    </div>
+                    <hr style="margin: 30px 0 20px 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                        <button class="btn-share" onclick="showShareModal()">
+                            <i class="fas fa-share-alt"></i> Compartilhar esta matéria
+                        </button>
+                        <button class="btn-outline" onclick="navigateToHome()" style="background: #1a3c5e; color: white; border: none;">
+                            <i class="fas fa-home"></i> Voltar para página inicial
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
 
     // ==================== ARTIGOS ====================
     async function loadArticles() {
@@ -867,24 +1040,24 @@
         }
     }
 
+    function getCategoryIcon(cat) {
+        const icons = {
+            'política': '🏛️', 'internacional': '🌍', 'economia': '📊',
+            'justiça': '⚖️', 'cultura': '🎭', 'investigação': '🔍', 'opinião': '✍️'
+        };
+        return icons[cat] || '📰';
+    }
+
+    function formatDate(timestamp) {
+        if (!timestamp) return 'Data desconhecida';
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        return date.toLocaleDateString('pt-BR');
+    }
+
     function renderArticles(articles) {
         const mainArticle = articles[0];
         const leftArticles = articles.slice(1, 4);
         const rightArticles = articles.slice(4, 8);
-
-        const getCategoryIcon = (cat) => {
-            const icons = {
-                'política': '🏛️', 'internacional': '🌍', 'economia': '📊',
-                'justiça': '⚖️', 'cultura': '🎭', 'investigação': '🔍', 'opinião': '✍️'
-            };
-            return icons[cat] || '📰';
-        };
-
-        const formatDate = (timestamp) => {
-            if (!timestamp) return 'Data desconhecida';
-            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-            return date.toLocaleDateString('pt-BR');
-        };
 
         const renderAdminActions = (articleId) => {
             if (!currentUserIsAdmin) return '';
@@ -899,13 +1072,14 @@
         const renderArticleCard = (article, isMain = false) => {
             const tag = getCategoryIcon(article.categoria) + ' ' + (article.categoria || 'geral').toUpperCase();
             const date = formatDate(article.dataPublicacao);
+            const articleUrl = `${window.location.pathname}?id=${article.id}`;
             
             if (isMain) {
                 return `
                     <div class="main-article" style="position: relative;">
                         ${renderAdminActions(article.id)}
                         <div class="article-tag">${tag} · DESTAQUE</div>
-                        <div class="article-title"><a onclick="viewArticle('${article.id}')">${escapeHtml(article.titulo)}</a></div>
+                        <div class="article-title"><a onclick="openArticleById('${article.id}')">${escapeHtml(article.titulo)}</a></div>
                         <div class="article-meta">
                             <span><i class="far fa-user"></i> Por ${escapeHtml(article.autorNome || 'Redação')}</span>
                             <span><i class="far fa-calendar"></i> ${date}</span>
@@ -913,7 +1087,7 @@
                         </div>
                         ${article.imagemUrl ? `<div class="article-image"><img src="${article.imagemUrl}" alt="${escapeHtml(article.titulo)}"><div class="image-caption">Foto: Divulgação</div></div>` : ''}
                         <div class="article-excerpt">${escapeHtml(article.resumo || (article.conteudo?.substring(0, 300) + '...'))}</div>
-                        <a class="read-more" onclick="viewArticle('${article.id}')">Continue lendo →</a>
+                        <a class="read-more" onclick="openArticleById('${article.id}')">Continue lendo →</a>
                     </div>
                 `;
             }
@@ -922,13 +1096,13 @@
                 <div class="article-card" style="position: relative;">
                     ${renderAdminActions(article.id)}
                     <div class="article-tag">${tag}</div>
-                    <div class="article-title"><a onclick="viewArticle('${article.id}')">${escapeHtml(article.titulo)}</a></div>
+                    <div class="article-title"><a onclick="openArticleById('${article.id}')">${escapeHtml(article.titulo)}</a></div>
                     <div class="article-meta">
                         <span><i class="far fa-user"></i> ${escapeHtml(article.autorNome || 'Redação')}</span>
                         <span><i class="far fa-calendar"></i> ${date}</span>
                     </div>
                     <div class="article-excerpt">${escapeHtml(article.resumo || (article.conteudo?.substring(0, 150) + '...'))}</div>
-                    <a class="read-more" onclick="viewArticle('${article.id}')">Continue lendo →</a>
+                    <a class="read-more" onclick="openArticleById('${article.id}')">Continue lendo →</a>
                 </div>
             `;
         };
@@ -943,58 +1117,42 @@
         `;
     }
 
-    // Visualizar matéria completa
-    window.viewArticle = async function(articleId) {
-        try {
-            const doc = await db.collection('articlesdoc').doc(articleId).get();
-            if (!doc.exists) {
-                showToast('Matéria não encontrada!', true);
-                return;
-            }
-            
-            const article = doc.data();
-            currentViewArticleId = articleId;
-            currentViewArticleData = article;
-            
-            const date = article.dataPublicacao?.toDate?.() ? article.dataPublicacao.toDate().toLocaleDateString('pt-BR') : 'Data desconhecida';
-            
-            // Incrementar visualizações se não for admin
-            if (!currentUserIsAdmin) {
-                const novasViews = (article.visualizacoes || 0) + 1;
-                await db.collection('articlesdoc').doc(articleId).update({ visualizacoes: novasViews });
-            }
-            
-            document.getElementById('viewArticleContent').innerHTML = `
-                <h2 style="color:#1a3c5e;">${escapeHtml(article.titulo)}</h2>
-                <div class="article-meta" style="margin: 15px 0;">
-                    <span><i class="far fa-user"></i> Por ${escapeHtml(article.autorNome || 'Redação')}</span>
-                    <span><i class="far fa-calendar"></i> ${date}</span>
-                    <span><i class="fas fa-tag"></i> ${article.categoria?.toUpperCase() || 'GERAL'}</span>
-                    <span><i class="fas fa-eye"></i> ${(article.visualizacoes || 0) + (currentUserIsAdmin ? 0 : 1)} visualizações</span>
-                </div>
-                ${article.imagemUrl ? `<img src="${article.imagemUrl}" style="max-width:100%; border-radius:8px; margin:15px 0;">` : ''}
-                <div class="article-excerpt" style="font-size:16px; line-height:1.8;">
-                    ${article.conteudo || article.resumo || 'Conteúdo não disponível.'}
-                </div>
-                <hr style="margin: 20px 0;">
-                <p style="font-size:12px; color:#888;"><i class="fas fa-link"></i> ID do artigo: ${article.id}</p>
-            `;
-            
-            // Mostrar botões de admin se for admin
-            const adminActionsDiv = document.getElementById('viewAdminActions');
-            if (currentUserIsAdmin) {
-                adminActionsDiv.style.display = 'block';
-            } else {
-                adminActionsDiv.style.display = 'none';
-            }
-            
-            document.getElementById('viewArticleModal').classList.add('show');
-        } catch (error) {
-            showToast('Erro ao carregar matéria: ' + error.message, true);
-        }
+    // Abrir matéria por ID (com atualização da URL)
+    window.openArticleById = function(articleId) {
+        updateUrl(currentCategory, articleId);
+        loadArticleById(articleId);
     };
 
-    // Editar artigo (admin)
+    // Visualizar matéria (para compatibilidade)
+    window.viewArticle = async function(articleId) {
+        openArticleById(articleId);
+    };
+
+    // ==================== COMPARTILHAMENTO ====================
+    function getCurrentArticleUrl() {
+        if (currentViewArticleId) {
+            return `${window.location.origin}${window.location.pathname}?id=${currentViewArticleId}`;
+        }
+        return window.location.href;
+    }
+
+    window.showShareModal = function() {
+        const url = getCurrentArticleUrl();
+        document.getElementById('shareUrlContainer').innerHTML = url;
+        document.getElementById('shareModal').classList.add('show');
+    };
+
+    window.copyShareUrl = function() {
+        const url = document.getElementById('shareUrlContainer').textContent;
+        navigator.clipboard.writeText(url).then(() => {
+            showToast('Link copiado para compartilhar!');
+            closeModals();
+        }).catch(() => {
+            showToast('Erro ao copiar link', true);
+        });
+    };
+
+    // ==================== EDIÇÃO DE ARTIGOS ====================
     window.editArticle = async function(articleId) {
         if (!currentUserIsAdmin) {
             showToast('Apenas administradores podem editar matérias!', true);
@@ -1024,7 +1182,6 @@
         }
     };
 
-    // Deletar artigo (admin)
     window.deleteArticle = async function(articleId) {
         if (!currentUserIsAdmin) {
             showToast('Apenas administradores podem excluir matérias!', true);
@@ -1038,13 +1195,19 @@
         try {
             await db.collection('articlesdoc').doc(articleId).delete();
             showToast('Matéria excluída com sucesso!');
-            loadArticles();
+            closeModals();
+            
+            const params = getUrlParams();
+            if (params.id === articleId) {
+                navigateToHome();
+            } else {
+                loadArticles();
+            }
         } catch (error) {
             showToast('Erro ao excluir: ' + error.message, true);
         }
     };
 
-    // Editar artigo atual (do modal de visualização)
     window.editCurrentArticle = function() {
         closeModals();
         setTimeout(() => {
@@ -1052,7 +1215,6 @@
         }, 300);
     };
 
-    // Deletar artigo atual (do modal de visualização)
     window.deleteCurrentArticle = function() {
         closeModals();
         setTimeout(() => {
@@ -1122,9 +1284,8 @@
     // Filtros
     window.filterByCategory = function(category) {
         currentCategory = category;
-        document.querySelectorAll('.nav-menu a').forEach(a => {
-            a.classList.toggle('active', a.dataset.cat === category);
-        });
+        updateUrl(category);
+        highlightActiveCategory(category);
         loadArticles();
     };
 
@@ -1145,6 +1306,22 @@
     // Fechar modais clicando fora
     window.onclick = (e) => {
         if (e.target.classList.contains('modal')) closeModals();
+    };
+    
+    // Suporte ao botão voltar/avançar do navegador
+    window.onpopstate = (event) => {
+        const params = getUrlParams();
+        if (params.id) {
+            loadArticleById(params.id);
+        } else if (params.categoria) {
+            currentCategory = params.categoria;
+            highlightActiveCategory(currentCategory);
+            loadArticles();
+        } else {
+            currentCategory = 'todos';
+            highlightActiveCategory('todos');
+            loadArticles();
+        }
     };
 </script>
 </body>
