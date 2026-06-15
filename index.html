@@ -6,6 +6,7 @@
     <meta name="description" content="Jornal WazzimaGiygg - Notícias, análises e investigações com credibilidade e independência">
     <meta name="keywords" content="jornal, notícias, WazzimaGiygg, política, economia, internacional">
     <meta name="author" content="WazzimaGiygg Core">
+    <link rel="icon" href="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/Favicom.png" type="image/x-icon">
     <title>Jornal WazzimaGiygg - Edição Digital</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -196,6 +197,16 @@
             background: rgba(255,255,255,0.1);
         }
 
+        .btn-warning {
+            background: #e67e22;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #c0392b;
+            color: white;
+        }
+
         /* Layout de 3 colunas */
         .newspaper-grid {
             display: grid;
@@ -217,6 +228,7 @@
             border-bottom: 2px solid #e0dcd5;
             padding-bottom: 20px;
             margin-bottom: 20px;
+            position: relative;
         }
 
         .article-card:last-child {
@@ -328,25 +340,36 @@
             text-decoration: underline;
         }
 
-        /* Editorial Box */
-        .editorial-box {
-            background: #f8f6f2;
-            padding: 20px;
-            border-left: 4px solid #c0392b;
+        /* Botões de admin */
+        .admin-actions {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            gap: 5px;
         }
 
-        .editorial-box h4 {
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #c0392b;
-            margin-bottom: 12px;
+        .admin-btn {
+            background: #1a3c5e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .editorial-box p {
-            font-size: 13px;
-            line-height: 1.6;
-            color: #444;
+        .admin-btn:hover {
+            background: #c0392b;
+        }
+
+        .admin-btn.delete {
+            background: #c0392b;
+        }
+
+        .admin-btn.delete:hover {
+            background: #a93226;
         }
 
         /* Modal */
@@ -502,6 +525,28 @@
                 padding: 8px 15px;
             }
         }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 2000;
+            display: none;
+            animation: fadeInOut 3s ease;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
     </style>
 </head>
 <body>
@@ -520,11 +565,10 @@
     <div class="user-bar">
         <div class="user-info" id="userInfo">
             <div class="user-avatar" id="userAvatar">👤</div>
-            <span id="userName">Carregando...</span>
+            <span id="userName">Visitante</span>
         </div>
         <div id="authButtons">
             <button class="btn btn-outline" onclick="showLoginModal()">Entrar</button>
-            <button class="btn btn-outline" onclick="showRegisterModal()">Cadastrar</button>
         </div>
         <div id="adminButtons" style="display: none;">
             <button class="btn btn-primary" onclick="showNewArticleModal()">
@@ -587,31 +631,10 @@
     </div>
 </div>
 
-<!-- Modal Cadastro -->
-<div id="registerModal" class="modal">
-    <div class="modal-content">
-        <h2>Cadastrar Jornalista</h2>
-        <div class="form-group">
-            <label>Nome Completo</label>
-            <input type="text" id="registerName" placeholder="Seu nome">
-        </div>
-        <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="registerEmail" placeholder="seu@email.com">
-        </div>
-        <div class="form-group">
-            <label>Senha</label>
-            <input type="password" id="registerPassword" placeholder="••••••••">
-        </div>
-        <button class="btn btn-primary" onclick="register()" style="width: 100%;">Cadastrar</button>
-        <button class="btn-close" onclick="closeModals()" style="margin-top: 15px; width: 100%;">Fechar</button>
-    </div>
-</div>
-
 <!-- Modal Nova Matéria -->
 <div id="articleModal" class="modal">
     <div class="modal-content">
-        <h2><i class="fas fa-edit"></i> Nova Matéria</h2>
+        <h2><i class="fas fa-edit"></i> <span id="modalTitle">Nova Matéria</span></h2>
         <div class="form-group">
             <label>Título da Matéria</label>
             <input type="text" id="articleTitle" placeholder="Título principal">
@@ -640,11 +663,6 @@
             <label>URL da Imagem (opcional)</label>
             <input type="text" id="articleImage" placeholder="https://exemplo.com/imagem.jpg">
         </div>
-        <div class="share-uid" id="shareUidContainer" style="display: none;">
-            <strong>🔗 Link para compartilhar esta matéria:</strong><br>
-            <span id="shareUrl"></span>
-            <button class="btn btn-outline" onclick="copyShareUrl()" style="margin-top: 10px;">Copiar Link</button>
-        </div>
         <button class="btn btn-primary" onclick="saveArticle()" style="width: 100%;">Publicar Matéria</button>
         <button class="btn-close" onclick="closeModals()" style="margin-top: 15px; width: 100%;">Cancelar</button>
     </div>
@@ -654,9 +672,19 @@
 <div id="viewArticleModal" class="modal">
     <div class="modal-content">
         <div id="viewArticleContent"></div>
+        <div id="viewAdminActions" style="margin-top: 20px; display: none;">
+            <hr>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-warning" onclick="editCurrentArticle()">✏️ Editar</button>
+                <button class="btn btn-danger" onclick="deleteCurrentArticle()">🗑️ Excluir</button>
+            </div>
+        </div>
         <button class="btn-close" onclick="closeModals()" style="margin-top: 20px; width: 100%;">Fechar</button>
     </div>
 </div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
 
 <script>
     // Configuração do Firebase
@@ -674,27 +702,73 @@
     const auth = firebase.auth();
 
     let currentUser = null;
+    let currentUserIsAdmin = false;
     let currentCategory = 'todos';
     let currentEditArticleId = null;
+    let currentViewArticleId = null;
+    let currentViewArticleData = null;
+
+    // IDs dos administradores específicos
+    const SPECIFIC_ADMIN_UID = "sZxfMuOBPbXdR8nttVPXIN8QOOl1";
 
     // Data atual
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('pt-BR', {
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
 
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.background = isError ? '#c0392b' : '#27ae60';
+        toast.style.display = 'block';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3000);
+    }
+
+    // ==================== VERIFICAÇÃO DE ADMIN ====================
+    async function checkIfUserIsAdmin(user) {
+        if (!user) return false;
+        
+        // Verifica se é o admin específico
+        if (user.uid === SPECIFIC_ADMIN_UID) return true;
+        
+        // Verifica na coleção users se isAdmin == true
+        try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists && userDoc.data().isAdmin === true) {
+                return true;
+            }
+        } catch (error) {
+            console.log("Erro ao verificar admin:", error);
+        }
+        
+        return false;
+    }
+
     // ==================== AUTENTICAÇÃO ====================
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             currentUser = user;
-            const userDoc = await db.collection('jornalistas').doc(user.uid).get();
-            const userData = userDoc.data();
+            currentUserIsAdmin = await checkIfUserIsAdmin(user);
             
-            document.getElementById('userName').textContent = userData?.nome || user.email?.split('@')[0] || 'Jornalista';
-            document.getElementById('userAvatar').textContent = (userData?.nome?.charAt(0) || 'U').toUpperCase();
+            const userEmail = user.email || '';
+            const userName = userEmail.split('@')[0] || 'Jornalista';
+            
+            document.getElementById('userName').textContent = userName;
+            document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
             document.getElementById('authButtons').style.display = 'none';
-            document.getElementById('adminButtons').style.display = 'flex';
+            
+            if (currentUserIsAdmin) {
+                document.getElementById('adminButtons').style.display = 'flex';
+                showToast('✅ Modo Administrador ativado! Você pode criar, editar e excluir matérias.');
+            } else {
+                document.getElementById('adminButtons').style.display = 'none';
+                showToast('👋 Bem-vindo! Você está logado como leitor.');
+            }
         } else {
             currentUser = null;
+            currentUserIsAdmin = false;
             document.getElementById('userName').textContent = 'Visitante';
             document.getElementById('userAvatar').textContent = '👤';
             document.getElementById('authButtons').style.display = 'flex';
@@ -709,34 +783,17 @@
         try {
             await auth.signInWithEmailAndPassword(email, password);
             closeModals();
-            alert('Login realizado com sucesso!');
+            showToast('Login realizado com sucesso!');
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
         } catch (error) {
-            alert('Erro: ' + error.message);
-        }
-    }
-
-    async function register() {
-        const nome = document.getElementById('registerName').value;
-        const email = document.getElementById('registerEmail').value;
-        const password = document.getElementById('registerPassword').value;
-        try {
-            const userCred = await auth.createUserWithEmailAndPassword(email, password);
-            await db.collection('jornalistas').doc(userCred.user.uid).set({
-                nome: nome,
-                email: email,
-                criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-                tipo: 'jornalista'
-            });
-            closeModals();
-            alert('Cadastro realizado com sucesso!');
-        } catch (error) {
-            alert('Erro: ' + error.message);
+            showToast('Erro: ' + error.message, true);
         }
     }
 
     async function logout() {
         await auth.signOut();
-        alert('Logout realizado!');
+        showToast('Logout realizado!');
     }
 
     // ==================== ARTIGOS ====================
@@ -745,17 +802,23 @@
         grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando notícias...</p></div>';
         
         try {
-            let query = db.collection('jornal').orderBy('dataPublicacao', 'desc');
+            let query = db.collection('articlesdoc').orderBy('dataPublicacao', 'desc');
             
             if (currentCategory !== 'todos') {
-                query = db.collection('jornal').where('categoria', '==', currentCategory).orderBy('dataPublicacao', 'desc');
+                query = db.collection('articlesdoc').where('categoria', '==', currentCategory).orderBy('dataPublicacao', 'desc');
             }
             
             const snapshot = await query.get();
             const articles = [];
             snapshot.forEach(doc => {
-                articles.push({ id: doc.id, ...doc.data() });
+                const data = doc.data();
+                articles.push({ id: doc.id, ...data });
             });
+            
+            if (articles.length === 0) {
+                grid.innerHTML = '<div class="loading"><p>📭 Nenhuma matéria encontrada nesta categoria.</p></div>';
+                return;
+            }
             
             renderArticles(articles);
         } catch (error) {
@@ -764,11 +827,6 @@
     }
 
     function renderArticles(articles) {
-        if (articles.length === 0) {
-            document.getElementById('newspaperGrid').innerHTML = '<div class="loading"><p>📭 Nenhuma matéria encontrada nesta categoria.</p></div>';
-            return;
-        }
-
         const mainArticle = articles[0];
         const leftArticles = articles.slice(1, 4);
         const rightArticles = articles.slice(4, 8);
@@ -787,19 +845,30 @@
             return date.toLocaleDateString('pt-BR');
         };
 
+        const renderAdminActions = (articleId) => {
+            if (!currentUserIsAdmin) return '';
+            return `
+                <div class="admin-actions">
+                    <button class="admin-btn" onclick="event.stopPropagation(); editArticle('${articleId}')">✏️</button>
+                    <button class="admin-btn delete" onclick="event.stopPropagation(); deleteArticle('${articleId}')">🗑️</button>
+                </div>
+            `;
+        };
+
         const renderArticleCard = (article, isMain = false) => {
-            const tag = getCategoryIcon(article.categoria) + ' ' + article.categoria.toUpperCase();
+            const tag = getCategoryIcon(article.categoria) + ' ' + (article.categoria || 'geral').toUpperCase();
             const date = formatDate(article.dataPublicacao);
             
             if (isMain) {
                 return `
-                    <div class="main-article">
+                    <div class="main-article" style="position: relative;">
+                        ${renderAdminActions(article.id)}
                         <div class="article-tag">${tag} · DESTAQUE</div>
                         <div class="article-title"><a onclick="viewArticle('${article.id}')">${escapeHtml(article.titulo)}</a></div>
                         <div class="article-meta">
                             <span><i class="far fa-user"></i> Por ${escapeHtml(article.autorNome || 'Redação')}</span>
                             <span><i class="far fa-calendar"></i> ${date}</span>
-                            <span><i class="fas fa-share-alt"></i> UID: ${article.uid || article.id.substring(0, 8)}</span>
+                            <span><i class="fas fa-eye"></i> ${article.visualizacoes || 0} visualizações</span>
                         </div>
                         ${article.imagemUrl ? `<div class="article-image"><img src="${article.imagemUrl}" alt="${escapeHtml(article.titulo)}"><div class="image-caption">Foto: Divulgação</div></div>` : ''}
                         <div class="article-excerpt">${escapeHtml(article.resumo || (article.conteudo?.substring(0, 300) + '...'))}</div>
@@ -809,7 +878,8 @@
             }
             
             return `
-                <div class="article-card">
+                <div class="article-card" style="position: relative;">
+                    ${renderAdminActions(article.id)}
                     <div class="article-tag">${tag}</div>
                     <div class="article-title"><a onclick="viewArticle('${article.id}')">${escapeHtml(article.titulo)}</a></div>
                     <div class="article-meta">
@@ -834,39 +904,117 @@
 
     // Visualizar matéria completa
     window.viewArticle = async function(articleId) {
-        const doc = await db.collection('jornal').doc(articleId).get();
-        if (!doc.exists) return;
-        
-        const article = doc.data();
-        const date = article.dataPublicacao?.toDate?.() ? article.dataPublicacao.toDate().toLocaleDateString('pt-BR') : 'Data desconhecida';
-        
-        document.getElementById('viewArticleContent').innerHTML = `
-            <h2 style="color:#1a3c5e;">${escapeHtml(article.titulo)}</h2>
-            <div class="article-meta" style="margin: 15px 0;">
-                <span><i class="far fa-user"></i> Por ${escapeHtml(article.autorNome || 'Redação')}</span>
-                <span><i class="far fa-calendar"></i> ${date}</span>
-                <span><i class="fas fa-tag"></i> ${article.categoria?.toUpperCase()}</span>
-                <span><i class="fas fa-share-alt"></i> Compartilhar: <code style="background:#f0f0f0;padding:2px 6px;">/artigo?uid=${article.uid || article.id}</code></span>
-            </div>
-            ${article.imagemUrl ? `<img src="${article.imagemUrl}" style="max-width:100%; border-radius:8px; margin:15px 0;">` : ''}
-            <div class="article-excerpt" style="font-size:16px; line-height:1.8;">
-                ${article.conteudo || article.resumo || 'Conteúdo não disponível.'}
-            </div>
-            <hr style="margin: 20px 0;">
-            <p style="font-size:12px; color:#888;"><i class="fas fa-link"></i> UID do artigo: ${article.uid || article.id}</p>
-        `;
-        document.getElementById('viewArticleModal').classList.add('show');
+        try {
+            const doc = await db.collection('articlesdoc').doc(articleId).get();
+            if (!doc.exists) {
+                showToast('Matéria não encontrada!', true);
+                return;
+            }
+            
+            const article = doc.data();
+            currentViewArticleId = articleId;
+            currentViewArticleData = article;
+            
+            const date = article.dataPublicacao?.toDate?.() ? article.dataPublicacao.toDate().toLocaleDateString('pt-BR') : 'Data desconhecida';
+            
+            // Incrementar visualizações se não for admin
+            if (!currentUserIsAdmin) {
+                const novasViews = (article.visualizacoes || 0) + 1;
+                await db.collection('articlesdoc').doc(articleId).update({ visualizacoes: novasViews });
+            }
+            
+            document.getElementById('viewArticleContent').innerHTML = `
+                <h2 style="color:#1a3c5e;">${escapeHtml(article.titulo)}</h2>
+                <div class="article-meta" style="margin: 15px 0;">
+                    <span><i class="far fa-user"></i> Por ${escapeHtml(article.autorNome || 'Redação')}</span>
+                    <span><i class="far fa-calendar"></i> ${date}</span>
+                    <span><i class="fas fa-tag"></i> ${article.categoria?.toUpperCase() || 'GERAL'}</span>
+                    <span><i class="fas fa-eye"></i> ${(article.visualizacoes || 0) + (currentUserIsAdmin ? 0 : 1)} visualizações</span>
+                </div>
+                ${article.imagemUrl ? `<img src="${article.imagemUrl}" style="max-width:100%; border-radius:8px; margin:15px 0;">` : ''}
+                <div class="article-excerpt" style="font-size:16px; line-height:1.8;">
+                    ${article.conteudo || article.resumo || 'Conteúdo não disponível.'}
+                </div>
+                <hr style="margin: 20px 0;">
+                <p style="font-size:12px; color:#888;"><i class="fas fa-link"></i> ID do artigo: ${article.id}</p>
+            `;
+            
+            // Mostrar botões de admin se for admin
+            const adminActionsDiv = document.getElementById('viewAdminActions');
+            if (currentUserIsAdmin) {
+                adminActionsDiv.style.display = 'block';
+            } else {
+                adminActionsDiv.style.display = 'none';
+            }
+            
+            document.getElementById('viewArticleModal').classList.add('show');
+        } catch (error) {
+            showToast('Erro ao carregar matéria: ' + error.message, true);
+        }
     };
 
-    // Salvar nova matéria
-    async function saveArticle() {
-        if (!currentUser) {
-            alert('Faça login para publicar uma matéria!');
+    // Editar artigo (admin)
+    window.editArticle = async function(articleId) {
+        try {
+            const doc = await db.collection('articlesdoc').doc(articleId).get();
+            if (!doc.exists) {
+                showToast('Matéria não encontrada!', true);
+                return;
+            }
+            
+            const article = doc.data();
+            currentEditArticleId = articleId;
+            
+            document.getElementById('modalTitle').textContent = 'Editar Matéria';
+            document.getElementById('articleTitle').value = article.titulo || '';
+            document.getElementById('articleCategory').value = article.categoria || 'política';
+            document.getElementById('articleExcerpt').value = article.resumo || '';
+            document.getElementById('articleContent').value = article.conteudo || '';
+            document.getElementById('articleImage').value = article.imagemUrl || '';
+            
+            document.getElementById('articleModal').classList.add('show');
+        } catch (error) {
+            showToast('Erro ao carregar matéria para edição: ' + error.message, true);
+        }
+    };
+
+    // Deletar artigo (admin)
+    window.deleteArticle = async function(articleId) {
+        if (!confirm('Tem certeza que deseja excluir esta matéria? Esta ação não pode ser desfeita!')) {
             return;
         }
         
-        const userDoc = await db.collection('jornalistas').doc(currentUser.uid).get();
-        const userData = userDoc.data();
+        try {
+            await db.collection('articlesdoc').doc(articleId).delete();
+            showToast('Matéria excluída com sucesso!');
+            loadArticles();
+        } catch (error) {
+            showToast('Erro ao excluir: ' + error.message, true);
+        }
+    };
+
+    // Editar artigo atual (do modal de visualização)
+    window.editCurrentArticle = function() {
+        closeModals();
+        setTimeout(() => {
+            editArticle(currentViewArticleId);
+        }, 300);
+    };
+
+    // Deletar artigo atual (do modal de visualização)
+    window.deleteCurrentArticle = function() {
+        closeModals();
+        setTimeout(() => {
+            deleteArticle(currentViewArticleId);
+        }, 300);
+    };
+
+    // Salvar nova matéria ou atualizar
+    async function saveArticle() {
+        if (!currentUserIsAdmin) {
+            showToast('Apenas administradores podem publicar matérias!', true);
+            return;
+        }
         
         const articleData = {
             titulo: document.getElementById('articleTitle').value,
@@ -875,35 +1023,41 @@
             conteudo: document.getElementById('articleContent').value,
             imagemUrl: document.getElementById('articleImage').value || null,
             autorId: currentUser.uid,
-            autorNome: userData?.nome || currentUser.email?.split('@')[0],
-            uid: generateUID(),
+            autorNome: currentUser.email?.split('@')[0] || 'Administrador',
             dataPublicacao: firebase.firestore.FieldValue.serverTimestamp(),
+            ultimaEdicao: firebase.firestore.FieldValue.serverTimestamp(),
             visualizacoes: 0
         };
         
         if (!articleData.titulo || !articleData.resumo) {
-            alert('Preencha pelo menos o título e o resumo da matéria!');
+            showToast('Preencha pelo menos o título e o resumo da matéria!', true);
             return;
         }
         
         try {
             if (currentEditArticleId) {
-                await db.collection('jornal').doc(currentEditArticleId).update(articleData);
-                alert('Matéria atualizada com sucesso!');
+                await db.collection('articlesdoc').doc(currentEditArticleId).update(articleData);
+                showToast('Matéria atualizada com sucesso!');
             } else {
-                const docRef = await db.collection('jornal').add(articleData);
-                await db.collection('jornal').doc(docRef.id).update({ uid: docRef.id });
-                alert('Matéria publicada com sucesso!');
+                const docRef = await db.collection('articlesdoc').add(articleData);
+                showToast('Matéria publicada com sucesso!');
             }
             closeModals();
+            resetArticleForm();
             loadArticles();
         } catch (error) {
-            alert('Erro ao salvar: ' + error.message);
+            showToast('Erro ao salvar: ' + error.message, true);
         }
     }
 
-    function generateUID() {
-        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    function resetArticleForm() {
+        currentEditArticleId = null;
+        document.getElementById('modalTitle').textContent = 'Nova Matéria';
+        document.getElementById('articleTitle').value = '';
+        document.getElementById('articleCategory').value = 'política';
+        document.getElementById('articleExcerpt').value = '';
+        document.getElementById('articleContent').value = '';
+        document.getElementById('articleImage').value = '';
     }
 
     function escapeHtml(text) {
@@ -924,24 +1078,16 @@
 
     // Modais
     window.showLoginModal = () => document.getElementById('loginModal').classList.add('show');
-    window.showRegisterModal = () => document.getElementById('registerModal').classList.add('show');
     window.showNewArticleModal = () => {
-        document.getElementById('articleTitle').value = '';
-        document.getElementById('articleCategory').value = 'política';
-        document.getElementById('articleExcerpt').value = '';
-        document.getElementById('articleContent').value = '';
-        document.getElementById('articleImage').value = '';
-        document.getElementById('shareUidContainer').style.display = 'none';
-        currentEditArticleId = null;
+        if (!currentUserIsAdmin) {
+            showToast('Apenas administradores podem criar matérias!', true);
+            return;
+        }
+        resetArticleForm();
         document.getElementById('articleModal').classList.add('show');
     };
     window.closeModals = () => {
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
-    };
-    window.copyShareUrl = () => {
-        const url = document.getElementById('shareUrl').textContent;
-        navigator.clipboard.writeText(url);
-        alert('Link copiado para compartilhar!');
     };
     
     // Fechar modais clicando fora
