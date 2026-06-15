@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="description" content="Jornal WazzimaGiygg - Notícias, análises e investigações com credibilidade e independência">
+    <meta name="keywords" content="jornal, notícias, WazzimaGiygg, política, economia, internacional">
+    <meta name="author" content="WazzimaGiygg Core">
+    <title>Jornal WazzimaGiygg - Edição Digital</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="https://wazzimagiygg.com/favicom.png" type="image/x-icon">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #e8e5df;
+            font-family: 'Lato', sans-serif;
+            color: #1a1a1a;
+            line-height: 1.5;
+        }
+
+        /* Layout do Jornal */
+        .newspaper-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #fffcf8;
+            box-shadow: 0 0 30px rgba(0,0,0,0.15);
+        }
+
+        /* CABEÇALHO PADRONIZADO */
+        .newspaper-header {
+            border-bottom: 4px solid #c0392b;
+            background: white;
+            text-align: center;
+            padding: 20px 20px 10px;
+        }
+
+        .newspaper-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 68px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            color: #1a3c5e;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        .newspaper-name span {
+            color: #c0392b;
+        }
+
+        .newspaper-motto {
+            font-family: 'Merriweather', serif;
+            font-size: 13px;
+            color: #666;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            display: inline-block;
+            padding: 6px 20px;
+            margin-top: 8px;
+        }
+
+        .issue-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #555;
+            text-transform: uppercase;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .issue-date {
+            font-weight: 600;
+        }
+
+        /* Menu de navegação */
+        .nav-menu {
+            background: #1a3c5e;
+            padding: 0;
+            margin-top: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-menu ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-menu li {
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .nav-menu li:last-child {
+            border-right: none;
+        }
+
+        .nav-menu a {
+            display: block;
+            padding: 12px 24px;
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-menu a:hover, .nav-menu a.active {
+            background: #c0392b;
+        }
+
+        /* Barra de usuário */
+        .user-bar {
+            background: #2c3e50;
+            padding: 8px 30px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            font-size: 13px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #c0392b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #c0392b;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #a93226;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid white;
+            color: white;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Layout de 3 colunas */
+        .newspaper-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        /* Sidebars */
+        .sidebar-left, .sidebar-right {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* Cards de artigos */
+        .article-card {
+            background: white;
+            border-bottom: 2px solid #e0dcd5;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .article-card:last-child {
+            border-bottom: none;
+        }
+
+        .article-tag {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #c0392b;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .article-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            color: #1a3c5e;
+        }
+
+        .article-title a {
+            text-decoration: none;
+            color: inherit;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+
+        .article-title a:hover {
+            color: #c0392b;
+        }
+
+        .article-meta {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .article-meta i {
+            margin-right: 4px;
+        }
+
+        .article-excerpt {
+            font-family: 'Merriweather', serif;
+            font-size: 14px;
+            line-height: 1.55;
+            color: #3a3a3a;
+            margin-bottom: 12px;
+        }
+
+        .article-image {
+            width: 100%;
+            margin: 15px 0;
+        }
+
+        .article-image img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .image-caption {
+            font-size: 11px;
+            color: #777;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* Main article */
+        .main-article {
+            background: white;
+        }
+
+        .main-article .article-tag {
+            font-size: 14px;
+        }
+
+        .main-article .article-title {
+            font-size: 36px;
+        }
+
+        .main-article .article-excerpt {
+            font-size: 17px;
+            line-height: 1.6;
+        }
+
+        /* Botão Leia Mais */
+        .read-more {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #c0392b;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+        }
+
+        .read-more:hover {
+            text-decoration: underline;
+        }
+
+        /* Editorial Box */
+        .editorial-box {
+            background: #f8f6f2;
+            padding: 20px;
+            border-left: 4px solid #c0392b;
+        }
+
+        .editorial-box h4 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #c0392b;
+            margin-bottom: 12px;
+        }
+
+        .editorial-box p {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #444;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .modal-content h2 {
+            color: #1a3c5e;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        .share-uid {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        .btn-close {
+            background: #666;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #eee;
+            border-top-color: #c0392b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        .newspaper-footer {
+            background: #1a1a1a;
+            color: #aaa;
+            text-align: center;
+            padding: 25px;
+            font-size: 12px;
+            border-top: 3px solid #c0392b;
+        }
+
+        .newspaper-footer a {
+            color: #ddd;
+            text-decoration: none;
+        }
+
+        .newspaper-footer a:hover {
+            color: #c0392b;
+        }
+
+        .footer-links {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        /* Responsividade */
+        @media (max-width: 992px) {
+            .newspaper-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+            .newspaper-name {
+                font-size: 48px;
+            }
+            .main-article .article-title {
+                font-size: 28px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .issue-info {
+                flex-direction: column;
+                align-items: center;
+            }
+            .newspaper-name {
+                font-size: 36px;
+            }
+            .nav-menu a {
+                padding: 10px 15px;
+                font-size: 11px;
+            }
+            .user-bar {
+                padding: 8px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="newspaper-container">
+    <!-- CABEÇALHO -->
+    <div class="newspaper-header">
+        <div class="newspaper-name" onclick="location.reload()">WAZZIMA<span>GIYGG</span></div>
+        <div class="newspaper-motto">"Inevit vel!" — O Jornal da Verdade</div>
+        <div class="issue-info">
+            <span class="issue-date"><i class="far fa-calendar-alt"></i> <span id="currentDate"></span></span>
+            <span><i class="fas fa-map-marker-alt"></i> Rio de Janeiro · Brasília · Islamabad</span>
+        </div>
+    </div>
+
+    <!-- Barra de Usuário -->
+    <div class="user-bar">
+        <div class="user-info" id="userInfo">
+            <div class="user-avatar" id="userAvatar">👤</div>
+            <span id="userName">Carregando...</span>
+        </div>
+        <div id="authButtons">
+            <button class="btn btn-outline" onclick="showLoginModal()">Entrar</button>
+            <button class="btn btn-outline" onclick="showRegisterModal()">Cadastrar</button>
+        </div>
+        <div id="adminButtons" style="display: none;">
+            <button class="btn btn-primary" onclick="showNewArticleModal()">
+                <i class="fas fa-plus"></i> Nova Matéria
+            </button>
+            <button class="btn btn-outline" onclick="logout()">Sair</button>
+        </div>
+    </div>
+
+    <!-- Menu de Navegação -->
+    <div class="nav-menu">
+        <ul>
+            <li><a onclick="filterByCategory('todos')" class="active" data-cat="todos">📰 TODOS</a></li>
+            <li><a onclick="filterByCategory('política')" data-cat="política">🏛️ POLÍTICA</a></li>
+            <li><a onclick="filterByCategory('internacional')" data-cat="internacional">🌍 INTERNACIONAL</a></li>
+            <li><a onclick="filterByCategory('economia')" data-cat="economia">📊 ECONOMIA</a></li>
+            <li><a onclick="filterByCategory('justiça')" data-cat="justiça">⚖️ JUSTIÇA</a></li>
+            <li><a onclick="filterByCategory('cultura')" data-cat="cultura">🎭 CULTURA</a></li>
+            <li><a onclick="filterByCategory('investigação')" data-cat="investigação">🔍 INVESTIGAÇÃO</a></li>
+            <li><a onclick="filterByCategory('opinião')" data-cat="opinião">✍️ OPINIÃO</a></li>
+        </ul>
+    </div>
+
+    <!-- Grid Principal -->
+    <div class="newspaper-grid" id="newspaperGrid">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Carregando notícias...</p>
+        </div>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="newspaper-footer">
+        <p><strong>WAZZIMAGIYGG CORE</strong> — O Jornal da Verdade</p>
+        <div class="footer-links">
+            <a href="#">Política de Privacidade (LGPD)</a>
+            <a href="#">Marco Civil da Internet</a>
+            <a href="#">Relatório Completo</a>
+            <a href="#">🎫 Contato por Ticket</a>
+            <a href="#" style="color: #c0392b;">🛍️ Produtos WazzimaGiygg</a>
+        </div>
+        <p style="margin-top: 15px; font-size: 10px;">© 2026 WazzimaGiygg Core</p>
+    </div>
+</div>
+
+<!-- Modal Login -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <h2>Entrar no Jornal</h2>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="loginEmail" placeholder="seu@email.com">
+        </div>
+        <div class="form-group">
+            <label>Senha</label>
+            <input type="password" id="loginPassword" placeholder="••••••••">
+        </div>
+        <button class="btn btn-primary" onclick="login()" style="width: 100%;">Entrar</button>
+        <button class="btn-close" onclick="closeModals()" style="margin-top: 15px; width: 100%;">Fechar</button>
+    </div>
+</div>
+
+<!-- Modal Cadastro -->
+<div id="registerModal" class="modal">
+    <div class="modal-content">
+        <h2>Cadastrar Jornalista</h2>
+        <div class="form-group">
+            <label>Nome Completo</label>
+            <input type="text" id="registerName" placeholder="Seu nome">
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="registerEmail" placeholder="seu@email.com">
+        </div>
+        <div class="form-group">
+            <label>Senha</label>
+            <input type="password" id="registerPassword" placeholder="••••••••">
+        </div>
+        <button class="btn btn-primary" onclick="register()" style="width: 100%;">Cadastrar</button>
+        <button class="btn-close" onclick="closeModals()" style="margin-top: 15px; width: 100%;">Fechar</button>
+    </div>
+</div>
+
+<!-- Modal Nova Matéria -->
+<div id="articleModal" class="modal">
+    <div class="modal-content">
+        <h2><i class="fas fa-edit"></i> Nova Matéria</h2>
+        <div class="form-group">
+            <label>Título da Matéria</label>
+            <input type="text" id="articleTitle" placeholder="Título principal">
+        </div>
+        <div class="form-group">
+            <label>Tipo de Matéria</label>
+            <select id="articleCategory">
+                <option value="política">Política</option>
+                <option value="internacional">Internacional</option>
+                <option value="economia">Economia</option>
+                <option value="justiça">Justiça</option>
+                <option value="cultura">Cultura</option>
+                <option value="investigação">Investigação</option>
+                <option value="opinião">Opinião</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Resumo/Descrição</label>
+            <textarea id="articleExcerpt" placeholder="Breve resumo da matéria..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>Conteúdo Completo (HTML)</label>
+            <textarea id="articleContent" placeholder="Conteúdo completo da matéria com formatação HTML..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>URL da Imagem (opcional)</label>
+            <input type="text" id="articleImage" placeholder="https://exemplo.com/imagem.jpg">
+        </div>
+        <div class="share-uid" id="shareUidContainer" style="display: none;">
+            <strong>🔗 Link para compartilhar esta matéria:</strong><br>
+            <span id="shareUrl"></span>
+            <button class="btn btn-outline" onclick="copyShareUrl()" style="margin-top: 10px;">Copiar Link</button>
+        </div>
+        <button class="btn btn-primary" onclick="saveArticle()" style="width: 100%;">Publicar Matéria</button>
+        <button class="btn-close" onclick="closeModals()" style="margin-top: 15px; width: 100%;">Cancelar</button>
+    </div>
+</div>
+
+<!-- Modal Visualizar Matéria -->
+<div id="viewArticleModal" class="modal">
+    <div class="modal-content">
+        <div id="viewArticleContent"></div>
+        <button class="btn-close" onclick="closeModals()" style="margin-top: 20px; width: 100%;">Fechar</button>
+    </div>
+</div>
+
+<script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyB9GkSqTIZ0kbVsba_WOdQeVAETrF9qna0",
+        authDomain: "wzzm-ce3fc.firebaseapp.com",
+        projectId: "wzzm-ce3fc",
+        storageBucket: "wzzm-ce3fc.appspot.com",
+        messagingSenderId: "249427877153",
+        appId: "1:249427877153:web:0e4297294794a5aadeb260"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    let currentUser = null;
+    let currentCategory = 'todos';
+    let currentEditArticleId = null;
+
+    // Data atual
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('pt-BR', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    // ==================== AUTENTICAÇÃO ====================
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            currentUser = user;
+            const userDoc = await db.collection('jornalistas').doc(user.uid).get();
+            const userData = userDoc.data();
+            
+            document.getElementById('userName').textContent = userData?.nome || user.email?.split('@')[0] || 'Jornalista';
+            document.getElementById('userAvatar').textContent = (userData?.nome?.charAt(0) || 'U').toUpperCase();
+            document.getElementById('authButtons').style.display = 'none';
+            document.getElementById('adminButtons').style.display = 'flex';
+        } else {
+            currentUser = null;
+            document.getElementById('userName').textContent = 'Visitante';
+            document.getElementById('userAvatar').textContent = '👤';
+            document.getElementById('authButtons').style.display = 'flex';
+            document.getElementById('adminButtons').style.display = 'none';
+        }
+        loadArticles();
+    });
+
+    async function login() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+            closeModals();
+            alert('Login realizado com sucesso!');
+        } catch (error) {
+            alert('Erro: ' + error.message);
+        }
+    }
+
+    async function register() {
+        const nome = document.getElementById('registerName').value;
+        const email = document.getElementById('registerEmail').value;
+        const password = document.getElementById('registerPassword').value;
+        try {
+            const userCred = await auth.createUserWithEmailAndPassword(email, password);
+            await db.collection('jornalistas').doc(userCred.user.uid).set({
+                nome: nome,
+                email: email,
+                criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+                tipo: 'jornalista'
+            });
+            closeModals();
+            alert('Cadastro realizado com sucesso!');
+        } catch (error) {
+            alert('Erro: ' + error.message);
+        }
+    }
+
+    async function logout() {
+        await auth.signOut();
+        alert('Logout realizado!');
+    }
+
+    // ==================== ARTIGOS ====================
+    async function loadArticles() {
+        const grid = document.getElementById('newspaperGrid');
+        grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando notícias...</p></div>';
+        
+        try {
+            let query = db.collection('jornal').orderBy('dataPublicacao', 'desc');
+            
+            if (currentCategory !== 'todos') {
+                query = db.collection('jornal').where('categoria', '==', currentCategory).orderBy('dataPublicacao', 'desc');
+            }
+            
+            const snapshot = await query.get();
+            const articles = [];
+            snapshot.forEach(doc => {
+                articles.push({ id: doc.id, ...doc.data() });
+            });
+            
+            renderArticles(articles);
+        } catch (error) {
+            grid.innerHTML = `<div class="loading"><p>❌ Erro ao carregar: ${error.message}</p></div>`;
+        }
+    }
+
+    function renderArticles(articles) {
+        if (articles.length === 0) {
+            document.getElementById('newspaperGrid').innerHTML = '<div class="loading"><p>📭 Nenhuma matéria encontrada nesta categoria.</p></div>';
+            return;
+        }
+
+        const mainArticle = articles[0];
+        const leftArticles = articles.slice(1, 4);
+        const rightArticles = articles.slice(4, 8);
+
+        const getCategoryIcon = (cat) => {
+            const icons = {
+                'política': '🏛️', 'internacional': '🌍', 'economia': '📊',
+                'justiça': '⚖️', 'cultura': '🎭', 'investigação': '🔍', 'opinião': '✍️'
+            };
+            return icons[cat] || '📰';
+        };
+
+        const formatDate = (timestamp) => {
+            if (!timestamp) return 'Data desconhecida';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            return date.toLocaleDateString('pt-BR');
+        };
+
+        const renderArticleCard = (article, isMain = false) => {
+            const tag = getCategoryIcon(article.categoria) + ' ' + article.categoria.toUpperCase();
+            const date = formatDate(article.dataPublicacao);
+            
+            if (isMain) {
+                return `
+                    <div class="main-article">
+                        <div class="article-tag">${tag} · DESTAQUE</div>
+                        <div class="article-title"><a onclick="viewArticle('${article.id}')">${escapeHtml(article.titulo)}</a></div>
+                        <div class="article-meta">
+                            <span><i class="far fa-user"></i> Por ${escapeHtml(article.autorNome || 'Redação')}</span>
+                            <span><i class="far fa-calendar"></i> ${date}</span>
+                            <span><i class="fas fa-share-alt"></i> UID: ${article.uid || article.id.substring(0, 8)}</span>
+                        </div>
+                        ${article.imagemUrl ? `<div class="article-image"><img src="${article.imagemUrl}" alt="${escapeHtml(article.titulo)}"><div class="image-caption">Foto: Divulgação</div></div>` : ''}
+                        <div class="article-excerpt">${escapeHtml(article.resumo || (article.conteudo?.substring(0, 300) + '...'))}</div>
+                        <a class="read-more" onclick="viewArticle('${article.id}')">Continue lendo →</a>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="article-card">
+                    <div class="article-tag">${tag}</div>
+                    <div class="article-title"><a onclick="viewArticle('${article.id}')">${escapeHtml(article.titulo)}</a></div>
+                    <div class="article-meta">
+                        <span><i class="far fa-user"></i> ${escapeHtml(article.autorNome || 'Redação')}</span>
+                        <span><i class="far fa-calendar"></i> ${date}</span>
+                    </div>
+                    <div class="article-excerpt">${escapeHtml(article.resumo || (article.conteudo?.substring(0, 150) + '...'))}</div>
+                    <a class="read-more" onclick="viewArticle('${article.id}')">Continue lendo →</a>
+                </div>
+            `;
+        };
+
+        const leftHtml = leftArticles.map(a => renderArticleCard(a, false)).join('');
+        const rightHtml = rightArticles.map(a => renderArticleCard(a, false)).join('');
+
+        document.getElementById('newspaperGrid').innerHTML = `
+            <div class="sidebar-left">${leftHtml || '<div class="article-card"><p>📭 Mais matérias em breve...</p></div>'}</div>
+            <div>${renderArticleCard(mainArticle, true)}</div>
+            <div class="sidebar-right">${rightHtml || '<div class="article-card"><p>📭 Aguardem novas publicações...</p></div>'}</div>
+        `;
+    }
+
+    // Visualizar matéria completa
+    window.viewArticle = async function(articleId) {
+        const doc = await db.collection('jornal').doc(articleId).get();
+        if (!doc.exists) return;
+        
+        const article = doc.data();
+        const date = article.dataPublicacao?.toDate?.() ? article.dataPublicacao.toDate().toLocaleDateString('pt-BR') : 'Data desconhecida';
+        
+        document.getElementById('viewArticleContent').innerHTML = `
+            <h2 style="color:#1a3c5e;">${escapeHtml(article.titulo)}</h2>
+            <div class="article-meta" style="margin: 15px 0;">
+                <span><i class="far fa-user"></i> Por ${escapeHtml(article.autorNome || 'Redação')}</span>
+                <span><i class="far fa-calendar"></i> ${date}</span>
+                <span><i class="fas fa-tag"></i> ${article.categoria?.toUpperCase()}</span>
+                <span><i class="fas fa-share-alt"></i> Compartilhar: <code style="background:#f0f0f0;padding:2px 6px;">/artigo?uid=${article.uid || article.id}</code></span>
+            </div>
+            ${article.imagemUrl ? `<img src="${article.imagemUrl}" style="max-width:100%; border-radius:8px; margin:15px 0;">` : ''}
+            <div class="article-excerpt" style="font-size:16px; line-height:1.8;">
+                ${article.conteudo || article.resumo || 'Conteúdo não disponível.'}
+            </div>
+            <hr style="margin: 20px 0;">
+            <p style="font-size:12px; color:#888;"><i class="fas fa-link"></i> UID do artigo: ${article.uid || article.id}</p>
+        `;
+        document.getElementById('viewArticleModal').classList.add('show');
+    };
+
+    // Salvar nova matéria
+    async function saveArticle() {
+        if (!currentUser) {
+            alert('Faça login para publicar uma matéria!');
+            return;
+        }
+        
+        const userDoc = await db.collection('jornalistas').doc(currentUser.uid).get();
+        const userData = userDoc.data();
+        
+        const articleData = {
+            titulo: document.getElementById('articleTitle').value,
+            categoria: document.getElementById('articleCategory').value,
+            resumo: document.getElementById('articleExcerpt').value,
+            conteudo: document.getElementById('articleContent').value,
+            imagemUrl: document.getElementById('articleImage').value || null,
+            autorId: currentUser.uid,
+            autorNome: userData?.nome || currentUser.email?.split('@')[0],
+            uid: generateUID(),
+            dataPublicacao: firebase.firestore.FieldValue.serverTimestamp(),
+            visualizacoes: 0
+        };
+        
+        if (!articleData.titulo || !articleData.resumo) {
+            alert('Preencha pelo menos o título e o resumo da matéria!');
+            return;
+        }
+        
+        try {
+            if (currentEditArticleId) {
+                await db.collection('jornal').doc(currentEditArticleId).update(articleData);
+                alert('Matéria atualizada com sucesso!');
+            } else {
+                const docRef = await db.collection('jornal').add(articleData);
+                await db.collection('jornal').doc(docRef.id).update({ uid: docRef.id });
+                alert('Matéria publicada com sucesso!');
+            }
+            closeModals();
+            loadArticles();
+        } catch (error) {
+            alert('Erro ao salvar: ' + error.message);
+        }
+    }
+
+    function generateUID() {
+        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Filtros
+    window.filterByCategory = function(category) {
+        currentCategory = category;
+        document.querySelectorAll('.nav-menu a').forEach(a => {
+            a.classList.toggle('active', a.dataset.cat === category);
+        });
+        loadArticles();
+    };
+
+    // Modais
+    window.showLoginModal = () => document.getElementById('loginModal').classList.add('show');
+    window.showRegisterModal = () => document.getElementById('registerModal').classList.add('show');
+    window.showNewArticleModal = () => {
+        document.getElementById('articleTitle').value = '';
+        document.getElementById('articleCategory').value = 'política';
+        document.getElementById('articleExcerpt').value = '';
+        document.getElementById('articleContent').value = '';
+        document.getElementById('articleImage').value = '';
+        document.getElementById('shareUidContainer').style.display = 'none';
+        currentEditArticleId = null;
+        document.getElementById('articleModal').classList.add('show');
+    };
+    window.closeModals = () => {
+        document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
+    };
+    window.copyShareUrl = () => {
+        const url = document.getElementById('shareUrl').textContent;
+        navigator.clipboard.writeText(url);
+        alert('Link copiado para compartilhar!');
+    };
+    
+    // Fechar modais clicando fora
+    window.onclick = (e) => {
+        if (e.target.classList.contains('modal')) closeModals();
+    };
+</script>
+</body>
+</html>
