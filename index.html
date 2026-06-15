@@ -6,7 +6,6 @@
     <meta name="description" content="Jornal WazzimaGiygg - Notícias, análises e investigações com credibilidade e independência">
     <meta name="keywords" content="jornal, notícias, WazzimaGiygg, política, economia, internacional">
     <meta name="author" content="WazzimaGiygg Core">
-    <link rel="icon" href="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/Favicom.png" type="image/x-icon">
     <title>Jornal WazzimaGiygg - Edição Digital</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -168,6 +167,13 @@
             font-weight: bold;
         }
 
+        .user-avatar img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
         .btn {
             padding: 6px 16px;
             border: none;
@@ -176,6 +182,18 @@
             font-size: 12px;
             font-weight: 600;
             transition: all 0.2s;
+        }
+
+        .btn-google {
+            background: #4285F4;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-google:hover {
+            background: #357ae8;
         }
 
         .btn-primary {
@@ -393,11 +411,12 @@
         .modal-content {
             background: white;
             border-radius: 12px;
-            max-width: 800px;
+            max-width: 500px;
             width: 90%;
             max-height: 85vh;
             overflow-y: auto;
             padding: 30px;
+            text-align: center;
         }
 
         .modal-content h2 {
@@ -405,8 +424,34 @@
             margin-bottom: 20px;
         }
 
+        .modal-content p {
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .google-login-btn {
+            background: #4285F4;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .google-login-btn:hover {
+            background: #357ae8;
+        }
+
         .form-group {
             margin-bottom: 20px;
+            text-align: left;
         }
 
         .form-group label {
@@ -429,15 +474,6 @@
             resize: vertical;
         }
 
-        .share-uid {
-            background: #f0f0f0;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-family: monospace;
-            word-break: break-all;
-        }
-
         .btn-close {
             background: #666;
             color: white;
@@ -445,6 +481,8 @@
             border: none;
             border-radius: 6px;
             cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
         }
 
         /* Loading */
@@ -568,7 +606,9 @@
             <span id="userName">Visitante</span>
         </div>
         <div id="authButtons">
-            <button class="btn btn-outline" onclick="showLoginModal()">Entrar</button>
+            <button class="btn btn-google" onclick="loginWithGoogle()">
+                <i class="fab fa-google"></i> Entrar com Google
+            </button>
         </div>
         <div id="adminButtons" style="display: none;">
             <button class="btn btn-primary" onclick="showNewArticleModal()">
@@ -614,20 +654,15 @@
     </div>
 </div>
 
-<!-- Modal Login -->
+<!-- Modal Login com Google -->
 <div id="loginModal" class="modal">
     <div class="modal-content">
-        <h2>Entrar no Jornal</h2>
-        <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="loginEmail" placeholder="seu@email.com">
-        </div>
-        <div class="form-group">
-            <label>Senha</label>
-            <input type="password" id="loginPassword" placeholder="••••••••">
-        </div>
-        <button class="btn btn-primary" onclick="login()" style="width: 100%;">Entrar</button>
-        <button class="btn-close" onclick="closeModals()" style="margin-top: 15px; width: 100%;">Fechar</button>
+        <h2><i class="fab fa-google"></i> Entrar com Google</h2>
+        <p>Faça login com sua conta Google para acessar recursos administrativos.</p>
+        <button class="google-login-btn" onclick="loginWithGoogle()">
+            <i class="fab fa-google"></i> Entrar com Google
+        </button>
+        <button class="btn-close" onclick="closeModals()">Fechar</button>
     </div>
 </div>
 
@@ -664,13 +699,13 @@
             <input type="text" id="articleImage" placeholder="https://exemplo.com/imagem.jpg">
         </div>
         <button class="btn btn-primary" onclick="saveArticle()" style="width: 100%;">Publicar Matéria</button>
-        <button class="btn-close" onclick="closeModals()" style="margin-top: 15px; width: 100%;">Cancelar</button>
+        <button class="btn-close" onclick="closeModals()">Cancelar</button>
     </div>
 </div>
 
 <!-- Modal Visualizar Matéria -->
 <div id="viewArticleModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 800px;">
         <div id="viewArticleContent"></div>
         <div id="viewAdminActions" style="margin-top: 20px; display: none;">
             <hr>
@@ -679,7 +714,7 @@
                 <button class="btn btn-danger" onclick="deleteCurrentArticle()">🗑️ Excluir</button>
             </div>
         </div>
-        <button class="btn-close" onclick="closeModals()" style="margin-top: 20px; width: 100%;">Fechar</button>
+        <button class="btn-close" onclick="closeModals()">Fechar</button>
     </div>
 </div>
 
@@ -700,6 +735,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
+    const googleProvider = new firebase.auth.GoogleAuthProvider();
 
     let currentUser = null;
     let currentUserIsAdmin = false;
@@ -746,17 +782,41 @@
         return false;
     }
 
-    // ==================== AUTENTICAÇÃO ====================
+    // ==================== AUTENTICAÇÃO COM GOOGLE ====================
+    async function loginWithGoogle() {
+        try {
+            const result = await auth.signInWithPopup(googleProvider);
+            const user = result.user;
+            showToast(`Bem-vindo, ${user.displayName || user.email}!`);
+            closeModals();
+        } catch (error) {
+            console.error("Erro no login com Google:", error);
+            showToast('Erro ao fazer login: ' + error.message, true);
+        }
+    }
+
+    async function logout() {
+        await auth.signOut();
+        showToast('Logout realizado com sucesso!');
+    }
+
+    // ==================== ESTADO DE AUTENTICAÇÃO ====================
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             currentUser = user;
             currentUserIsAdmin = await checkIfUserIsAdmin(user);
             
-            const userEmail = user.email || '';
-            const userName = userEmail.split('@')[0] || 'Jornalista';
+            const displayName = user.displayName || user.email?.split('@')[0] || 'Usuário';
+            const photoURL = user.photoURL;
             
-            document.getElementById('userName').textContent = userName;
-            document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
+            document.getElementById('userName').textContent = displayName;
+            
+            if (photoURL) {
+                document.getElementById('userAvatar').innerHTML = `<img src="${photoURL}" alt="Avatar">`;
+            } else {
+                document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
+            }
+            
             document.getElementById('authButtons').style.display = 'none';
             
             if (currentUserIsAdmin) {
@@ -764,37 +824,18 @@
                 showToast('✅ Modo Administrador ativado! Você pode criar, editar e excluir matérias.');
             } else {
                 document.getElementById('adminButtons').style.display = 'none';
-                showToast('👋 Bem-vindo! Você está logado como leitor.');
+                showToast(`👋 Olá, ${displayName}! Você está logado como leitor.`);
             }
         } else {
             currentUser = null;
             currentUserIsAdmin = false;
             document.getElementById('userName').textContent = 'Visitante';
-            document.getElementById('userAvatar').textContent = '👤';
+            document.getElementById('userAvatar').innerHTML = '👤';
             document.getElementById('authButtons').style.display = 'flex';
             document.getElementById('adminButtons').style.display = 'none';
         }
         loadArticles();
     });
-
-    async function login() {
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        try {
-            await auth.signInWithEmailAndPassword(email, password);
-            closeModals();
-            showToast('Login realizado com sucesso!');
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
-        } catch (error) {
-            showToast('Erro: ' + error.message, true);
-        }
-    }
-
-    async function logout() {
-        await auth.signOut();
-        showToast('Logout realizado!');
-    }
 
     // ==================== ARTIGOS ====================
     async function loadArticles() {
@@ -955,6 +996,11 @@
 
     // Editar artigo (admin)
     window.editArticle = async function(articleId) {
+        if (!currentUserIsAdmin) {
+            showToast('Apenas administradores podem editar matérias!', true);
+            return;
+        }
+        
         try {
             const doc = await db.collection('articlesdoc').doc(articleId).get();
             if (!doc.exists) {
@@ -980,6 +1026,11 @@
 
     // Deletar artigo (admin)
     window.deleteArticle = async function(articleId) {
+        if (!currentUserIsAdmin) {
+            showToast('Apenas administradores podem excluir matérias!', true);
+            return;
+        }
+        
         if (!confirm('Tem certeza que deseja excluir esta matéria? Esta ação não pode ser desfeita!')) {
             return;
         }
@@ -1023,7 +1074,8 @@
             conteudo: document.getElementById('articleContent').value,
             imagemUrl: document.getElementById('articleImage').value || null,
             autorId: currentUser.uid,
-            autorNome: currentUser.email?.split('@')[0] || 'Administrador',
+            autorNome: currentUser.displayName || currentUser.email?.split('@')[0] || 'Administrador',
+            autorEmail: currentUser.email,
             dataPublicacao: firebase.firestore.FieldValue.serverTimestamp(),
             ultimaEdicao: firebase.firestore.FieldValue.serverTimestamp(),
             visualizacoes: 0
@@ -1077,8 +1129,7 @@
     };
 
     // Modais
-    window.showLoginModal = () => document.getElementById('loginModal').classList.add('show');
-    window.showNewArticleModal = () => {
+    window.showNewArticleModal = function() {
         if (!currentUserIsAdmin) {
             showToast('Apenas administradores podem criar matérias!', true);
             return;
@@ -1086,7 +1137,8 @@
         resetArticleForm();
         document.getElementById('articleModal').classList.add('show');
     };
-    window.closeModals = () => {
+    
+    window.closeModals = function() {
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
     };
     
