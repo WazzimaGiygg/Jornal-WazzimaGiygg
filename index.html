@@ -824,42 +824,52 @@
     const SPECIFIC_ADMIN_UID = "sZxfMuOBPbXdR8nttVPXIN8QOOl1";
 
     // ============================================
-    // FUNÇÃO PARA REGISTRAR USUÁRIO
+    // FUNÇÃO PARA REGISTRAR/ATUALIZAR USUÁRIO (PRESERVANDO isAdmin)
     // ============================================
     async function registerUser(user) {
         try {
             const uid = user.uid;
+            
+            // Primeiro, verifica se o usuário já existe no Firestore
+            const userDoc = await db.collection('users').doc(uid).get();
+            const existingData = userDoc.exists ? userDoc.data() : {};
+            
+            // Preserva o valor de isAdmin se já existir, senão usa false
+            // A menos que seja o admin específico
+            let isAdminValue = false;
+            if (uid === SPECIFIC_ADMIN_UID) {
+                isAdminValue = true;
+            } else if (existingData.isAdmin === true) {
+                isAdminValue = true; // Mantém o valor existente
+            }
+            
+            // Preserva também outros campos importantes
             const userData = {
                 uid: uid,
                 email: user.email || '',
                 name: user.displayName || 'Usuário',
                 profilePictureUrl: user.photoURL || '',
-                isAdmin: false,
-                isBan: false,
-                isBanned: false,
-                isTeacher: false,
-                isTeatcher: false,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                isAdmin: isAdminValue,
+                isBan: existingData.isBan || false,
+                isBanned: existingData.isBanned || false,
+                isTeacher: existingData.isTeacher || false,
+                isTeatcher: existingData.isTeatcher || false,
+                createdAt: existingData.createdAt || firebase.firestore.FieldValue.serverTimestamp(),
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            // Verifica se é o admin específico
-            if (uid === SPECIFIC_ADMIN_UID) {
-                userData.isAdmin = true;
-            }
-
-            // Registra na coleção 'users'
+            // Registra/atualiza na coleção 'users'
             await db.collection('users').doc(uid).set(userData, { merge: true });
             
-            // Registra na coleção 'usuários'
+            // Registra/atualiza na coleção 'usuários'
             await db.collection('usuários').doc(uid).set(userData, { merge: true });
 
-            console.log(`Usuário ${uid} registrado com sucesso!`);
-            return true;
+            console.log(`Usuário ${uid} registrado/atualizado com sucesso! isAdmin: ${isAdminValue}`);
+            return userData;
         } catch (error) {
             console.error('Erro ao registrar usuário:', error);
-            return false;
+            return null;
         }
     }
 
@@ -934,8 +944,8 @@
             const result = await auth.signInWithPopup(googleProvider);
             const user = result.user;
             
-            // Registra o usuário no Firestore
-            await registerUser(user);
+            // Registra/atualiza o usuário no Firestore (preservando isAdmin)
+            const userData = await registerUser(user);
             
             showToast(`Bem-vindo, ${user.displayName || user.email}!`);
             closeModals();
@@ -967,10 +977,16 @@
         if (user) {
             currentUser = user;
             
-            // Registra/atualiza o usuário no Firestore
-            await registerUser(user);
+            // Registra/atualiza o usuário no Firestore (preservando isAdmin)
+            const userData = await registerUser(user);
             
+            // Verifica se é admin (primeiro pelo UID específico, depois pelo banco)
             currentUserIsAdmin = await checkIfUserIsAdmin(user);
+            
+            // Se o userData retornou com isAdmin true, atualiza a flag
+            if (userData && userData.isAdmin === true) {
+                currentUserIsAdmin = true;
+            }
             
             const displayName = user.displayName || user.email?.split('@')[0] || 'Usuário';
             const photoURL = user.photoURL;
@@ -991,8 +1007,10 @@
             const newArticleBtn = document.getElementById('adminNewArticleBtn');
             if (currentUserIsAdmin) {
                 newArticleBtn.style.display = 'inline-block';
+                console.log('✅ Usuário é ADMIN - botão "Nova Matéria" visível');
             } else {
                 newArticleBtn.style.display = 'none';
+                console.log('👤 Usuário comum - sem permissões de admin');
             }
         } else {
             currentUser = null;
