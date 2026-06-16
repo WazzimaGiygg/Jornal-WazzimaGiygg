@@ -165,6 +165,7 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            flex-shrink: 0;
         }
 
         .user-avatar img {
@@ -239,6 +240,23 @@
         }
 
         .btn-share:hover {
+            background: #c0392b;
+        }
+
+        /* Botão de logout para usuários comuns */
+        .btn-logout-user {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-logout-user:hover {
             background: #c0392b;
         }
 
@@ -589,6 +607,10 @@
             .user-bar {
                 padding: 8px 15px;
             }
+            .btn {
+                font-size: 10px;
+                padding: 4px 10px;
+            }
         }
 
         /* Toast */
@@ -637,11 +659,14 @@
                 <i class="fab fa-google"></i> Entrar com Google
             </button>
         </div>
-        <div id="adminButtons" style="display: none;">
-            <button class="btn btn-primary" onclick="showNewArticleModal()">
+        <!-- Botões para usuários logados (comuns e admin) -->
+        <div id="userButtons" style="display: none;">
+            <button class="btn btn-primary" onclick="showNewArticleModal()" id="adminNewArticleBtn" style="display: none;">
                 <i class="fas fa-plus"></i> Nova Matéria
             </button>
-            <button class="btn btn-outline" onclick="logout()">Sair</button>
+            <button class="btn btn-logout-user" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </button>
         </div>
     </div>
 
@@ -923,9 +948,17 @@
     }
 
     async function logout() {
-        await auth.signOut();
-        showToast('Logout realizado com sucesso!');
-        navigateToHome();
+        try {
+            await auth.signOut();
+            showToast('Logout realizado com sucesso!');
+            // Redireciona para a página inicial após o logout
+            setTimeout(() => {
+                navigateToHome();
+            }, 500);
+        } catch (error) {
+            console.error("Erro ao fazer logout:", error);
+            showToast('Erro ao sair: ' + error.message, true);
+        }
     }
 
     // ==================== ESTADO DE AUTENTICAÇÃO ====================
@@ -950,12 +983,16 @@
                 document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
             }
             
+            // Esconde botão de login, mostra botões do usuário
             document.getElementById('authButtons').style.display = 'none';
+            document.getElementById('userButtons').style.display = 'flex';
             
+            // Mostra/esconde botão de nova matéria baseado no admin
+            const newArticleBtn = document.getElementById('adminNewArticleBtn');
             if (currentUserIsAdmin) {
-                document.getElementById('adminButtons').style.display = 'flex';
+                newArticleBtn.style.display = 'inline-block';
             } else {
-                document.getElementById('adminButtons').style.display = 'none';
+                newArticleBtn.style.display = 'none';
             }
         } else {
             currentUser = null;
@@ -963,7 +1000,7 @@
             document.getElementById('userName').textContent = 'Visitante';
             document.getElementById('userAvatar').innerHTML = '👤';
             document.getElementById('authButtons').style.display = 'flex';
-            document.getElementById('adminButtons').style.display = 'none';
+            document.getElementById('userButtons').style.display = 'none';
         }
         
         // Carregar conteúdo baseado na URL - SEMPRE CARREGA, MESMO SEM LOGIN!
