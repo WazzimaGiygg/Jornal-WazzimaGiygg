@@ -634,9 +634,96 @@
             85% { opacity: 1; transform: translateX(-50%) translateY(0); }
             100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
         }
+
+        /* BANNED OVERLAY */
+        .banned-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .banned-overlay.show {
+            display: flex;
+        }
+
+        .banned-box {
+            background: #1a1a1a;
+            border: 2px solid #c0392b;
+            border-radius: 16px;
+            padding: 50px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            color: white;
+        }
+
+        .banned-box .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .banned-box h2 {
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+
+        .banned-box p {
+            color: #aaa;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .banned-box .btn-logout-banned {
+            background: #c0392b;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .banned-box .btn-logout-banned:hover {
+            background: #e74c3c;
+        }
+
+        .banned-box .ban-details {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 13px;
+            color: #888;
+        }
     </style>
 </head>
 <body>
+
+<!-- BANNED OVERLAY -->
+<div id="bannedOverlay" class="banned-overlay">
+    <div class="banned-box">
+        <div class="icon">🚫</div>
+        <h2>⚠️ Conta Banida</h2>
+        <p>Sua conta foi banida permanentemente do sistema.</p>
+        <div id="banDetails" class="ban-details">
+            Motivo: Violação das políticas de uso
+        </div>
+        <p style="font-size: 14px; color: #666;">Se você acredita que isso é um erro, entre em contato com o suporte.</p>
+        <button class="btn-logout-banned" onclick="logoutBanned()">🚪 Sair da conta</button>
+    </div>
+</div>
+
 <div class="newspaper-container">
     <!-- CABEÇALHO -->
     <div class="newspaper-header">
@@ -815,6 +902,7 @@
 
     let currentUser = null;
     let currentUserIsAdmin = false;
+    let currentUserIsBanned = false;
     let currentCategory = 'todos';
     let currentEditArticleId = null;
     let currentViewArticleId = null;
@@ -824,7 +912,7 @@
     const SPECIFIC_ADMIN_UID = "sZxfMuOBPbXdR8nttVPXIN8QOOl1";
 
     // ============================================
-    // FUNÇÃO PARA REGISTRAR/ATUALIZAR USUÁRIO (PRESERVANDO isAdmin)
+    // FUNÇÃO PARA REGISTRAR/ATUALIZAR USUÁRIO
     // ============================================
     async function registerUser(user) {
         try {
@@ -834,16 +922,17 @@
             const userDoc = await db.collection('users').doc(uid).get();
             const existingData = userDoc.exists ? userDoc.data() : {};
             
-            // Preserva o valor de isAdmin se já existir, senão usa false
-            // A menos que seja o admin específico
+            // Preserva o valor de isAdmin se já existir
             let isAdminValue = false;
             if (uid === SPECIFIC_ADMIN_UID) {
                 isAdminValue = true;
             } else if (existingData.isAdmin === true) {
-                isAdminValue = true; // Mantém o valor existente
+                isAdminValue = true;
             }
             
-            // Preserva também outros campos importantes
+            // Preserva o valor de isBanned
+            let isBannedValue = existingData.isBanned || false;
+            
             const userData = {
                 uid: uid,
                 email: user.email || '',
@@ -851,7 +940,7 @@
                 profilePictureUrl: user.photoURL || '',
                 isAdmin: isAdminValue,
                 isBan: existingData.isBan || false,
-                isBanned: existingData.isBanned || false,
+                isBanned: isBannedValue,
                 isTeacher: existingData.isTeacher || false,
                 isTeatcher: existingData.isTeatcher || false,
                 createdAt: existingData.createdAt || firebase.firestore.FieldValue.serverTimestamp(),
@@ -865,7 +954,7 @@
             // Registra/atualiza na coleção 'usuários'
             await db.collection('usuários').doc(uid).set(userData, { merge: true });
 
-            console.log(`Usuário ${uid} registrado/atualizado com sucesso! isAdmin: ${isAdminValue}`);
+            console.log(`Usuário ${uid} registrado/atualizado. isAdmin: ${isAdminValue}, isBanned: ${isBannedValue}`);
             return userData;
         } catch (error) {
             console.error('Erro ao registrar usuário:', error);
@@ -886,6 +975,42 @@
         setTimeout(() => {
             toast.style.display = 'none';
         }, 3000);
+    }
+
+    // ==================== VERIFICAÇÃO DE BANIMENTO ====================
+    async function checkIfUserIsBanned(user) {
+        if (!user) return false;
+        
+        try {
+            // Tenta buscar da coleção 'users'
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists) {
+                const data = userDoc.data();
+                return data.isBanned === true || data.isBan === true;
+            }
+        } catch (error) {
+            console.log("Erro ao verificar banimento:", error);
+        }
+        
+        return false;
+    }
+
+    // ==================== FUNÇÃO PARA USUÁRIO BANIDO ====================
+    function showBannedScreen(reason = 'Violação das políticas de uso') {
+        const overlay = document.getElementById('bannedOverlay');
+        const details = document.getElementById('banDetails');
+        details.textContent = `Motivo: ${reason}`;
+        overlay.classList.add('show');
+        
+        // Esconde o conteúdo principal
+        document.querySelector('.newspaper-container').style.opacity = '0.5';
+        document.querySelector('.newspaper-container').style.pointerEvents = 'none';
+    }
+
+    function logoutBanned() {
+        auth.signOut().then(() => {
+            location.reload();
+        });
     }
 
     // ==================== NAVEGAÇÃO POR URL ====================
@@ -944,12 +1069,11 @@
             const result = await auth.signInWithPopup(googleProvider);
             const user = result.user;
             
-            // Registra/atualiza o usuário no Firestore (preservando isAdmin)
-            const userData = await registerUser(user);
+            // Registra/atualiza o usuário no Firestore
+            await registerUser(user);
             
             showToast(`Bem-vindo, ${user.displayName || user.email}!`);
             closeModals();
-            // Recarregar para mostrar botões de admin se for admin
             location.reload();
         } catch (error) {
             console.error("Erro no login com Google:", error);
@@ -961,7 +1085,6 @@
         try {
             await auth.signOut();
             showToast('Logout realizado com sucesso!');
-            // Redireciona para a página inicial após o logout
             setTimeout(() => {
                 navigateToHome();
             }, 500);
@@ -972,18 +1095,25 @@
     }
 
     // ==================== ESTADO DE AUTENTICAÇÃO ====================
-    // IMPORTANTE: Leitura de matérias é permitida mesmo sem login!
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             currentUser = user;
             
-            // Registra/atualiza o usuário no Firestore (preservando isAdmin)
+            // Registra/atualiza o usuário no Firestore
             const userData = await registerUser(user);
             
-            // Verifica se é admin (primeiro pelo UID específico, depois pelo banco)
-            currentUserIsAdmin = await checkIfUserIsAdmin(user);
+            // VERIFICA BANIMENTO PRIMEIRO
+            currentUserIsBanned = await checkIfUserIsBanned(user);
             
-            // Se o userData retornou com isAdmin true, atualiza a flag
+            if (currentUserIsBanned) {
+                // Usuário banido - mostra tela de bloqueio
+                showBannedScreen('Sua conta foi banida por violação das políticas de uso.');
+                // Não carrega o conteúdo
+                return;
+            }
+            
+            // Verifica se é admin
+            currentUserIsAdmin = await checkIfUserIsAdmin(user);
             if (userData && userData.isAdmin === true) {
                 currentUserIsAdmin = true;
             }
@@ -999,41 +1129,46 @@
                 document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
             }
             
-            // Esconde botão de login, mostra botões do usuário
             document.getElementById('authButtons').style.display = 'none';
             document.getElementById('userButtons').style.display = 'flex';
             
-            // Mostra/esconde botão de nova matéria baseado no admin
             const newArticleBtn = document.getElementById('adminNewArticleBtn');
             if (currentUserIsAdmin) {
                 newArticleBtn.style.display = 'inline-block';
-                console.log('✅ Usuário é ADMIN - botão "Nova Matéria" visível');
+                console.log('✅ Usuário é ADMIN');
             } else {
                 newArticleBtn.style.display = 'none';
-                console.log('👤 Usuário comum - sem permissões de admin');
+                console.log('👤 Usuário comum');
             }
         } else {
             currentUser = null;
             currentUserIsAdmin = false;
+            currentUserIsBanned = false;
             document.getElementById('userName').textContent = 'Visitante';
             document.getElementById('userAvatar').innerHTML = '👤';
             document.getElementById('authButtons').style.display = 'flex';
             document.getElementById('userButtons').style.display = 'none';
+            
+            // Remove overlay de banido se estiver ativo
+            document.getElementById('bannedOverlay').classList.remove('show');
+            document.querySelector('.newspaper-container').style.opacity = '1';
+            document.querySelector('.newspaper-container').style.pointerEvents = 'auto';
         }
         
-        // Carregar conteúdo baseado na URL - SEMPRE CARREGA, MESMO SEM LOGIN!
-        const params = getUrlParams();
-        
-        if (params.id) {
-            await loadArticleById(params.id);
-        } else if (params.categoria) {
-            currentCategory = params.categoria;
-            highlightActiveCategory(currentCategory);
-            await loadArticles();
-        } else {
-            currentCategory = 'todos';
-            highlightActiveCategory('todos');
-            await loadArticles();
+        // Carregar conteúdo (apenas se não estiver banido)
+        if (!currentUserIsBanned) {
+            const params = getUrlParams();
+            if (params.id) {
+                await loadArticleById(params.id);
+            } else if (params.categoria) {
+                currentCategory = params.categoria;
+                highlightActiveCategory(currentCategory);
+                await loadArticles();
+            } else {
+                currentCategory = 'todos';
+                highlightActiveCategory('todos');
+                await loadArticles();
+            }
         }
     });
 
@@ -1045,7 +1180,6 @@
     }
 
     // ==================== CARREGAR MATÉRIA POR ID ====================
-    // FUNÇÃO PÚBLICA - NÃO EXIGE LOGIN
     async function loadArticleById(articleId) {
         const grid = document.getElementById('newspaperGrid');
         grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando matéria...</p></div>';
@@ -1062,7 +1196,6 @@
             currentViewArticleId = articleId;
             currentViewArticleData = article;
             
-            // Incrementar visualizações (apenas se não for admin)
             if (!currentUserIsAdmin) {
                 try {
                     const novasViews = (article.visualizacoes || 0) + 1;
@@ -1082,7 +1215,6 @@
         const date = article.dataPublicacao?.toDate?.() ? article.dataPublicacao.toDate().toLocaleDateString('pt-BR') : 'Data desconhecida';
         const categoryIcon = getCategoryIcon(article.categoria);
         
-        // Botões de admin APENAS se for administrador
         const adminButtonsHtml = currentUserIsAdmin ? `
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 20px;">
                 <button class="admin-btn" onclick="editArticle('${article.id}')">✏️ Editar</button>
@@ -1120,7 +1252,6 @@
     }
 
     // ==================== ARTIGOS ====================
-    // FUNÇÃO PÚBLICA - NÃO EXIGE LOGIN
     async function loadArticles() {
         const grid = document.getElementById('newspaperGrid');
         grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando notícias...</p></div>';
@@ -1226,7 +1357,6 @@
         `;
     }
 
-    // Abrir matéria por ID (com atualização da URL)
     window.openArticleById = function(articleId) {
         updateUrl(currentCategory, articleId);
         loadArticleById(articleId);
@@ -1256,7 +1386,7 @@
         });
     };
 
-    // ==================== EDIÇÃO DE ARTIGOS (APENAS ADMIN) ====================
+    // ==================== EDIÇÃO DE ARTIGOS ====================
     window.editArticle = async function(articleId) {
         if (!currentUserIsAdmin) {
             showToast('Apenas administradores podem editar matérias!', true);
@@ -1326,7 +1456,6 @@
         }, 300);
     };
 
-    // Salvar nova matéria (APENAS ADMIN)
     async function saveArticle() {
         if (!currentUserIsAdmin) {
             showToast('Apenas administradores podem publicar matérias!', true);
@@ -1385,7 +1514,6 @@
         return div.innerHTML;
     }
 
-    // Filtros - PÚBLICO
     window.filterByCategory = function(category) {
         currentCategory = category;
         updateUrl(category);
@@ -1393,7 +1521,6 @@
         loadArticles();
     };
 
-    // Modais
     window.showNewArticleModal = function() {
         if (!currentUserIsAdmin) {
             showToast('Apenas administradores podem criar matérias!', true);
@@ -1407,12 +1534,10 @@
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
     };
     
-    // Fechar modais clicando fora
     window.onclick = (e) => {
         if (e.target.classList.contains('modal')) closeModals();
     };
     
-    // Suporte ao botão voltar/avançar do navegador
     window.onpopstate = (event) => {
         const params = getUrlParams();
         if (params.id) {
@@ -1427,6 +1552,11 @@
             loadArticles();
         }
     };
+
+    // Expor funções globalmente
+    window.logoutBanned = logoutBanned;
+    window.logout = logout;
+    window.loginWithGoogle = loginWithGoogle;
 </script>
 
 <!-- Iframe do verificador/logs -->
