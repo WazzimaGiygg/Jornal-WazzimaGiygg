@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://jornal.wazzimagiygg.com/sitemap.xml
+
+# Evita indexar páginas internas
+Disallow: /admin/
+Disallow: /login/
+Disallow: /modal/
+Disallow: /*?id=*  # Evita duplicidade de URLs com parâmetros
