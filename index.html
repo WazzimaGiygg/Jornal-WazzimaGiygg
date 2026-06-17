@@ -768,6 +768,8 @@
             <li><a onclick="filterByCategory('cultura')" data-cat="cultura">🎭 CULTURA</a></li>
             <li><a onclick="filterByCategory('investigação')" data-cat="investigação">🔍 INVESTIGAÇÃO</a></li>
             <li><a onclick="filterByCategory('opinião')" data-cat="opinião">✍️ OPINIÃO</a></li>
+            <li><a onclick="filterByCategory('esporte')" data-cat="esporte">⚽ ESPORTE</a></li>
+            <li><a onclick="filterByCategory('tecnologia')" data-cat="tecnologia">💻 TECNOLOGIA</a></li>
         </ul>
     </div>
 
@@ -829,13 +831,15 @@
         <div class="form-group">
             <label>Tipo de Matéria</label>
             <select id="articleCategory">
-                <option value="política">Política</option>
-                <option value="internacional">Internacional</option>
-                <option value="economia">Economia</option>
-                <option value="justiça">Justiça</option>
-                <option value="cultura">Cultura</option>
-                <option value="investigação">Investigação</option>
-                <option value="opinião">Opinião</option>
+                <option value="política">🏛️ Política</option>
+                <option value="internacional">🌍 Internacional</option>
+                <option value="economia">📊 Economia</option>
+                <option value="justiça">⚖️ Justiça</option>
+                <option value="cultura">🎭 Cultura</option>
+                <option value="investigação">🔍 Investigação</option>
+                <option value="opinião">✍️ Opinião</option>
+                <option value="esporte">⚽ Esporte</option>
+                <option value="tecnologia">💻 Tecnologia</option>
             </select>
         </div>
         <div class="form-group">
@@ -1284,7 +1288,8 @@
     function getCategoryIcon(cat) {
         const icons = {
             'política': '🏛️', 'internacional': '🌍', 'economia': '📊',
-            'justiça': '⚖️', 'cultura': '🎭', 'investigação': '🔍', 'opinião': '✍️'
+            'justiça': '⚖️', 'cultura': '🎭', 'investigação': '🔍', 
+            'opinião': '✍️', 'esporte': '⚽', 'tecnologia': '💻'
         };
         return icons[cat] || '📰';
     }
