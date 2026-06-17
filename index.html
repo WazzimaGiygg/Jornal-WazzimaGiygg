@@ -1053,6 +1053,7 @@
     let currentEditArticleId = null;
     let currentViewArticleId = null;
     let currentViewArticleData = null;
+    let weatherLoaded = false;
 
     // IDs dos administradores específicos
     const SPECIFIC_ADMIN_UID = "sZxfMuOBPbXdR8nttVPXIN8QOOl1";
@@ -1261,7 +1262,6 @@
     }
 
     function getWeatherEmoji(code) {
-        // Códigos da Open-Meteo: https://open-meteo.com/en/docs
         if (code === 0) return '☀️';
         if (code === 1 || code === 2 || code === 3) return '⛅';
         if (code === 45 || code === 48) return '🌫️';
@@ -1332,6 +1332,14 @@
     }
 
     async function renderWeather() {
+        // Verifica se já existe um widget para evitar duplicação
+        const existingWidget = document.getElementById('weatherWidget');
+        if (existingWidget) {
+            // Se já existe, apenas atualiza o conteúdo
+            await updateWeatherContent(existingWidget);
+            return;
+        }
+
         const weatherContainer = document.createElement('div');
         weatherContainer.className = 'weather-widget';
         weatherContainer.id = 'weatherWidget';
@@ -1351,10 +1359,12 @@
         const rightSidebar = document.querySelector('.sidebar-right');
         if (rightSidebar) {
             rightSidebar.insertBefore(weatherContainer, rightSidebar.firstChild);
+            await updateWeatherContent(weatherContainer);
         }
-        
+    }
+
+    async function updateWeatherContent(widget) {
         const data = await fetchWeather();
-        const widget = document.getElementById('weatherWidget');
         
         if (!data || !data.current) {
             widget.innerHTML = `
@@ -1416,6 +1426,8 @@
                 <i class="far fa-clock"></i> Atualizado agora • Santa Fé do Sul - SP
             </div>
         `;
+        
+        weatherLoaded = true;
     }
 
     // ==================== ESTADO DE AUTENTICAÇÃO ====================
@@ -1494,8 +1506,13 @@
                 await loadArticles();
             }
             
-            // Carrega a previsão do tempo
-            renderWeather();
+            // Carrega a previsão do tempo (apenas se ainda não foi carregada)
+            if (!weatherLoaded) {
+                // Aguarda um pequeno delay para garantir que a sidebar foi renderizada
+                setTimeout(() => {
+                    renderWeather();
+                }, 300);
+            }
         }
     });
 
@@ -1576,6 +1593,11 @@
                 </div>
             </div>
         `;
+        
+        // Renderiza a previsão do tempo na sidebar direita
+        setTimeout(() => {
+            renderWeather();
+        }, 300);
     }
 
     // ==================== ARTIGOS ====================
@@ -1686,7 +1708,9 @@
         `;
         
         // Renderiza a previsão do tempo na sidebar direita
-        renderWeather();
+        setTimeout(() => {
+            renderWeather();
+        }, 300);
     }
 
     window.openArticleById = function(articleId) {
