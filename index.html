@@ -770,6 +770,9 @@
             <li><a onclick="filterByCategory('opinião')" data-cat="opinião">✍️ OPINIÃO</a></li>
             <li><a onclick="filterByCategory('esporte')" data-cat="esporte">⚽ ESPORTE</a></li>
             <li><a onclick="filterByCategory('tecnologia')" data-cat="tecnologia">💻 TECNOLOGIA</a></li>
+            <li><a onclick="filterByCategory('redes-sociais')" data-cat="redes-sociais">📱 REDES SOCIAIS</a></li>
+            <li><a onclick="filterByCategory('saúde')" data-cat="saúde">🏥 SAÚDE</a></li>
+            <li><a onclick="filterByCategory('educação')" data-cat="educação">📚 EDUCAÇÃO</a></li>
         </ul>
     </div>
 
@@ -840,6 +843,9 @@
                 <option value="opinião">✍️ Opinião</option>
                 <option value="esporte">⚽ Esporte</option>
                 <option value="tecnologia">💻 Tecnologia</option>
+                <option value="redes-sociais">📱 Redes Sociais</option>
+                <option value="saúde">🏥 Saúde</option>
+                <option value="educação">📚 Educação</option>
             </select>
         </div>
         <div class="form-group">
@@ -1289,7 +1295,8 @@
         const icons = {
             'política': '🏛️', 'internacional': '🌍', 'economia': '📊',
             'justiça': '⚖️', 'cultura': '🎭', 'investigação': '🔍', 
-            'opinião': '✍️', 'esporte': '⚽', 'tecnologia': '💻'
+            'opinião': '✍️', 'esporte': '⚽', 'tecnologia': '💻',
+            'redes-sociais': '📱', 'saúde': '🏥', 'educação': '📚'
         };
         return icons[cat] || '📰';
     }
