@@ -2049,49 +2049,52 @@
     };
 
     // ============================================
-    // SALVAR ARTIGO
-    // ============================================
+// SALVAR ARTIGO - CORRIGIDO
+// ============================================
 
-    async function saveArticle() {
-        if (!currentUserIsAdmin) {
-            showToast('Apenas administradores podem publicar matérias!', true);
-            return;
-        }
-        
-        const articleData = {
-            titulo: document.getElementById('articleTitle').value,
-            categoria: document.getElementById('articleCategory').value,
-            resumo: document.getElementById('articleExcerpt').value,
-            conteudo: document.getElementById('articleContent').value,
-            imagemUrl: document.getElementById('articleImage').value || null,
-            autorId: currentUser.uid,
-            autorNome: currentUser.displayName || currentUser.email?.split('@')[0] || 'Administrador',
-            autorEmail: currentUser.email,
-            dataPublicacao: firebase.firestore.FieldValue.serverTimestamp(),
-            ultimaEdicao: firebase.firestore.FieldValue.serverTimestamp(),
-            visualizacoes: 0
-        };
-        
-        if (!articleData.titulo || !articleData.resumo) {
-            showToast('Preencha pelo menos o título e o resumo da matéria!', true);
-            return;
-        }
-        
-        try {
-            if (currentEditArticleId) {
-                await db.collection('articlesdoc').doc(currentEditArticleId).update(articleData);
-                showToast('Matéria atualizada com sucesso!');
-            } else {
-                const docRef = await db.collection('articlesdoc').add(articleData);
-                showToast('Matéria publicada com sucesso!');
-            }
-            closeModals();
-            resetArticleForm();
-            loadArticles();
-        } catch (error) {
-            showToast('Erro ao salvar: ' + error.message, true);
-        }
+async function saveArticle() {
+    if (!currentUserIsAdmin) {
+        showToast('Apenas administradores podem publicar matérias!', true);
+        return;
     }
+    
+    const articleData = {
+        titulo: document.getElementById('articleTitle').value,
+        categoria: document.getElementById('articleCategory').value,
+        resumo: document.getElementById('articleExcerpt').value,
+        conteudo: document.getElementById('articleContent').value,
+        imagemUrl: document.getElementById('articleImage').value || null,
+        autorId: currentUser.uid,
+        autorNome: currentUser.displayName || currentUser.email?.split('@')[0] || 'Administrador',
+        autorEmail: currentUser.email,
+        // 🔥 CORREÇÃO: Adicionar userId para compatibilidade com as regras
+        userId: currentUser.uid,
+        dataPublicacao: firebase.firestore.FieldValue.serverTimestamp(),
+        ultimaEdicao: firebase.firestore.FieldValue.serverTimestamp(),
+        visualizacoes: 0
+    };
+    
+    if (!articleData.titulo || !articleData.resumo) {
+        showToast('Preencha pelo menos o título e o resumo da matéria!', true);
+        return;
+    }
+    
+    try {
+        if (currentEditArticleId) {
+            await db.collection('articlesdoc').doc(currentEditArticleId).update(articleData);
+            showToast('Matéria atualizada com sucesso!');
+        } else {
+            const docRef = await db.collection('articlesdoc').add(articleData);
+            showToast('Matéria publicada com sucesso!');
+        }
+        closeModals();
+        resetArticleForm();
+        loadArticles();
+    } catch (error) {
+        console.error('Erro ao salvar:', error);
+        showToast('Erro ao salvar: ' + error.message, true);
+    }
+}
 
     function resetArticleForm() {
         currentEditArticleId = null;
