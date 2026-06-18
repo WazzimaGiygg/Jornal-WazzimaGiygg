@@ -2151,6 +2151,266 @@
     window.logout = logout;
     window.redirectToLogin = redirectToLogin;
     window.navigateToHome = navigateToHome;
+
+    // ============================================
+// FUNÇÃO PARA VERIFICAR AUTENTICAÇÃO E TOKEN
+// ============================================
+
+function isAuthenticated() {
+    // Verifica se há um usuário autenticado
+    if (auth.currentUser) return true;
+    
+    // Verifica se há um token salvo no localStorage
+    const token = localStorage.getItem('jornal_auth_token');
+    const expiry = localStorage.getItem('jornal_auth_expiry');
+    
+    if (token && expiry && Date.now() < parseInt(expiry)) {
+        return true;
+    }
+    
+    return false;
+}
+
+// ============================================
+// FUNÇÃO PARA VERIFICAR SE O TOKEN AINDA É VÁLIDO
+// ============================================
+
+async function validateToken() {
+    try {
+        // Tenta fazer uma operação simples no Firestore para validar o token
+        await db.collection('articlesdoc').limit(1).get();
+        return true;
+    } catch (error) {
+        if (error.code === 'permission-denied' || error.code === 'unauthenticated') {
+            console.log('🔑 Token expirado ou inválido');
+            return false;
+        }
+        return true; // Outros erros podem ser ignorados
+    }
+}
+
+// ============================================
+// FUNÇÃO PARA RENOVAR A SESSÃO
+// ============================================
+
+async function renewSession() {
+    console.log('🔄 Tentando renovar sessão...');
+    
+    // Tenta restaurar do localStorage
+    const userData = localStorage.getItem('jornal_auth_user');
+    if (userData) {
+        try {
+            const user = JSON.parse(userData);
+            applyUserSession(user);
+            return true;
+        } catch (e) {
+            console.error('Erro ao restaurar sessão:', e);
+        }
+    }
+    
+    // Se não conseguir, redireciona para login
+    redirectToLogin();
+    return false;
+}
+
+// ============================================
+// FUNÇÃO PARA CARREGAR DADOS COM VERIFICAÇÃO DE PERMISSÃO
+// ============================================
+
+async function loadDataWithAuth(loadFunction) {
+    // Verifica se está autenticado
+    if (!isAuthenticated()) {
+        console.log('🔒 Usuário não autenticado, redirecionando para login...');
+        redirectToLogin();
+        return;
+    }
+    
+    // Verifica se o token ainda é válido
+    const isValid = await validateToken();
+    if (!isValid) {
+        console.log('🔑 Token inválido, tentando renovar...');
+        const renewed = await renewSession();
+        if (!renewed) {
+            redirectToLogin();
+            return;
+        }
+    }
+    
+    // Carrega os dados
+    try {
+        await loadFunction();
+    } catch (error) {
+        if (error.code === 'permission-denied' || error.code === 'unauthenticated') {
+            console.log('🔒 Permissão negada ao carregar dados:', error);
+            redirectToLogin();
+        } else {
+            console.error('Erro ao carregar dados:', error);
+            throw error;
+        }
+    }
+}
+
+// ============================================
+// FUNÇÃO PARA VERIFICAR USUÁRIO COM FALLBACK
+// ============================================
+
+async function checkUserWithFallback(user) {
+    if (!user) {
+        // Tenta restaurar do localStorage
+        const userData = localStorage.getItem('jornal_auth_user');
+        if (userData) {
+            try {
+                const parsed = JSON.parse(userData);
+                console.log('📂 Usuário restaurado do localStorage:', parsed.displayName);
+                return parsed;
+            } catch (e) {
+                console.error('Erro ao restaurar usuário:', e);
+            }
+        }
+        return null;
+    }
+    return user;
+}
+
+// ============================================
+// FUNÇÃO PARA VERIFICAR SE É ADMIN COM FALLBACK
+// ============================================
+
+async function checkAdminWithFallback(user) {
+    if (!user) return false;
+    
+    // Verifica se é admin específico
+    if (user.uid === SPECIFIC_ADMIN_UID) return true;
+    
+    try {
+        // Tenta buscar do Firestore
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists && userDoc.data().isAdmin === true) {
+            return true;
+        }
+    } catch (error) {
+        console.log('Erro ao verificar admin, usando fallback:', error);
+        // Se não conseguir verificar, assume que não é admin
+    }
+    
+    return false;
+}
+
+// ============================================
+// INICIALIZAÇÃO CORRIGIDA
+// ============================================
+
+// Função principal de inicialização
+async function initApp() {
+    try {
+        // Verifica se há token na URL
+        const hasToken = checkAuthToken();
+        
+        if (hasToken) {
+            console.log('✅ Token processado com sucesso!');
+            // Já tem token, carrega conteúdo
+            await loadArticles();
+            return;
+        }
+        
+        // Verifica se há sessão salva
+        const hasSession = checkStoredSession();
+        
+        if (hasSession) {
+            console.log('✅ Sessão restaurada com sucesso!');
+            // Já tem sessão, carrega conteúdo
+            await loadArticles();
+            return;
+        }
+        
+        // Aguarda autenticação do Firebase
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                await loadFirebaseUser(user);
+            } else {
+                // Se não tem usuário, tenta restaurar do localStorage
+                const restoredUser = await checkUserWithFallback(null);
+                if (restoredUser) {
+                    await applyUserSession(restoredUser);
+                    await loadArticles();
+                } else {
+                    // Se não tem nada, carrega público
+                    await loadArticlesPublic();
+                }
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro na inicialização:', error);
+        // Fallback: tenta carregar conteúdo público
+        await loadArticlesPublic();
+    }
+}
+
+// ============================================
+// FUNÇÃO PARA CARREGAR CONTEÚDO PÚBLICO (SEM LOGIN)
+// ============================================
+
+async function loadArticlesPublic() {
+    try {
+        const snapshot = await db.collection('articlesdoc')
+            .orderBy('dataPublicacao', 'desc')
+            .limit(10)
+            .get();
+        
+        const articles = [];
+        snapshot.forEach(doc => {
+            articles.push({ id: doc.id, ...doc.data() });
+        });
+        
+        if (articles.length > 0) {
+            renderArticles(articles);
+        } else {
+            document.getElementById('newspaperGrid').innerHTML = `
+                <div style="grid-column:1/-1; text-align:center; padding:40px;">
+                    <h3>📰 Bem-vindo ao Jornal WazzimaGiygg</h3>
+                    <p style="color:#666; margin-top:10px;">
+                        Faça login para ver todas as notícias e conteúdos exclusivos.
+                    </p>
+                    <button onclick="redirectToLogin()" style="margin-top:20px; padding:12px 30px; background:#c0392b; color:white; border:none; border-radius:8px; cursor:pointer; font-size:16px;">
+                        🔑 Entrar
+                    </button>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar conteúdo público:', error);
+        document.getElementById('newspaperGrid').innerHTML = `
+            <div style="grid-column:1/-1; text-align:center; padding:40px;">
+                <h3>📰 Jornal WazzimaGiygg</h3>
+                <p style="color:#666;">Erro ao carregar conteúdo. Tente recarregar a página.</p>
+            </div>
+        `;
+    }
+}
+
+// ============================================
+// INICIALIZAR A APLICAÇÃO
+// ============================================
+
+// Inicializa a aplicação
+initApp();
+
+// ============================================
+// VERIFICAR SESSÃO PERIODICAMENTE
+// ============================================
+
+// Verifica a cada 5 minutos se o token ainda é válido
+setInterval(async () => {
+    if (currentUser) {
+        const isValid = await validateToken();
+        if (!isValid) {
+            console.log('🔑 Token expirado, renovando sessão...');
+            await renewSession();
+        }
+    }
+}, 5 * 60 * 1000);
+    
 </script>
 
 <!-- Iframe do verificador/logs -->
