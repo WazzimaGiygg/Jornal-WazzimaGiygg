@@ -881,8 +881,8 @@
             <span id="userName">Visitante</span>
         </div>
         <div id="authButtons">
-            <button class="btn btn-google" onclick="redirectToLogin()">
-                <i class="fab fa-google"></i> Entrar
+            <button class="btn btn-google" onclick="loginWithGoogle()">
+                <i class="fab fa-google"></i> Entrar com Google
             </button>
         </div>
         <!-- Botões para usuários logados (comuns e admin) -->
@@ -931,6 +931,18 @@
             <a href="https://wazzimagiygg.com/produtos/" style="color: #c0392b;">🛍️ Produtos WazzimaGiygg</a>
         </div>
         <p style="margin-top: 15px; font-size: 10px;">© 2026 WazzimaGiygg Core</p>
+    </div>
+</div>
+
+<!-- Modal Login com Google -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <h2><i class="fab fa-google"></i> Entrar com Google</h2>
+        <p>Faça login com sua conta Google para acessar recursos administrativos.</p>
+        <button class="google-login-btn" onclick="loginWithGoogle()">
+            <i class="fab fa-google"></i> Entrar com Google
+        </button>
+        <button class="btn-close" onclick="closeModals()">Fechar</button>
     </div>
 </div>
 
@@ -1032,6 +1044,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
+    const googleProvider = new firebase.auth.GoogleAuthProvider();
 
     let currentUser = null;
     let currentUserIsAdmin = false;
@@ -1046,290 +1059,17 @@
     const SPECIFIC_ADMIN_UID = "sZxfMuOBPbXdR8nttVPXIN8QOOl1";
 
     // ============================================
-    // SISTEMA DE REDIRECIONAMENTO UNIFICADO
+    // FUNÇÃO PARA REGISTRAR/ATUALIZAR USUÁRIO
     // ============================================
-
-    // URL do login unificado
-    const LOGIN_URL = 'https://painel.wazzimagiygg.com/login.html';
-
-    // Obtém a URL atual para usar como parâmetro uid
-    function getCurrentPageUrl() {
-        return window.location.href;
-    }
-
-    // Redireciona para o login com o parâmetro uid
-    function redirectToLogin() {
-        const currentUrl = getCurrentPageUrl();
-        const loginWithReturn = `${LOGIN_URL}?uid=${encodeURIComponent(currentUrl)}`;
-        console.log('🔄 Redirecionando para login unificado:', loginWithReturn);
-        window.location.href = loginWithReturn;
-    }
-
-    // ============================================
-    // SISTEMA DE AUTENTICAÇÃO ENTRE DOMÍNIOS - CORRIGIDO
-    // ============================================
-
-    // Verifica se há um token de autenticação na URL (retorno do login)
-    function checkAuthToken() {
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get('auth_token');
-        const userData = params.get('user_data');
-        
-        if (token && userData) {
-            try {
-                const user = JSON.parse(decodeURIComponent(userData));
-                console.log('🔑 Token de autenticação recebido:', user);
-                
-                localStorage.setItem('jornal_auth_user', JSON.stringify(user));
-                localStorage.setItem('jornal_auth_token', token);
-                localStorage.setItem('jornal_auth_expiry', (Date.now() + 3600000).toString());
-                
-                const newUrl = window.location.pathname + window.location.hash;
-                window.history.replaceState({}, document.title, newUrl);
-                
-                applyUserSession(user);
-                return true;
-            } catch (e) {
-                console.error('Erro ao processar token:', e);
-            }
-        }
-        return false;
-    }
-
-    // Verifica se há uma sessão salva no localStorage
-    function checkStoredSession() {
-        try {
-            const token = localStorage.getItem('jornal_auth_token');
-            const userData = localStorage.getItem('jornal_auth_user');
-            const expiry = localStorage.getItem('jornal_auth_expiry');
-            
-            if (token && userData && expiry && Date.now() < parseInt(expiry)) {
-                const user = JSON.parse(userData);
-                console.log('📂 Sessão restaurada do localStorage:', user);
-                applyUserSession(user);
-                return true;
-            }
-        } catch (e) {
-            console.error('Erro ao restaurar sessão:', e);
-        }
-        return false;
-    }
-
-    // ============================================
-    // FUNÇÃO PARA APLICAR SESSÃO DO USUÁRIO - ÚNICA VERSÃO
-    // ============================================
-
-    async function applyUserSession(user) {
-        if (!user || !user.uid) {
-            console.log('❌ Usuário inválido');
-            return;
-        }
-        
-        console.log('🔄 Aplicando sessão do usuário:', user.displayName);
-        
-        currentUser = {
-            uid: user.uid,
-            displayName: user.displayName || 'Usuário',
-            email: user.email || '',
-            photoURL: user.photoURL || '',
-            isGuest: user.isGuest || false
-        };
-        
-        currentUserIsAdmin = user.uid === SPECIFIC_ADMIN_UID;
-        
-        try {
-            const isBanned = await checkIfUserIsBanned(currentUser);
-            
-            if (isBanned) {
-                console.log('🚫 Usuário está banido!');
-                currentUserIsBanned = true;
-                showBannedScreen('Sua conta foi banida por violação das políticas de uso.');
-                document.querySelector('.newspaper-container').style.opacity = '0.5';
-                document.querySelector('.newspaper-container').style.pointerEvents = 'none';
-                return;
-            }
-            
-            currentUserIsBanned = false;
-            console.log('✅ Usuário não está banido');
-            
-            updateUIAfterLogin();
-            
-            const params = getUrlParams();
-            if (params.id) {
-                await loadArticleById(params.id);
-            } else {
-                currentCategory = params.categoria || 'todos';
-                highlightActiveCategory(currentCategory);
-                await loadArticles();
-            }
-            
-            if (!weatherLoaded) {
-                setTimeout(() => renderWeather(), 300);
-            }
-            
-        } catch (error) {
-            console.error('❌ Erro ao verificar banimento:', error);
-            updateUIAfterLogin();
-        }
-    }
-
-    // ============================================
-    // FUNÇÃO PARA VERIFICAR BANIMENTO
-    // ============================================
-
-    async function checkUserBanned(uid) {
-        if (!uid) return false;
-        
-        try {
-            const userDoc = await db.collection('users').doc(uid).get();
-            if (userDoc.exists) {
-                const data = userDoc.data();
-                currentUserIsBanned = data.isBanned === true || data.isBan === true;
-                
-                if (currentUserIsBanned) {
-                    showBannedScreen(data.banReason || 'Violação das políticas de uso');
-                    document.querySelector('.newspaper-container').style.opacity = '0.5';
-                    document.querySelector('.newspaper-container').style.pointerEvents = 'none';
-                } else {
-                    updateUIAfterLogin();
-                }
-                return currentUserIsBanned;
-            }
-        } catch (error) {
-            console.log("Erro ao verificar banimento:", error);
-        }
-        return false;
-    }
-
-    // ============================================
-    // FUNÇÃO PARA USUÁRIO BANIDO
-    // ============================================
-
-    function showBannedScreen(reason = 'Violação das políticas de uso') {
-        const overlay = document.getElementById('bannedOverlay');
-        const details = document.getElementById('banDetails');
-        details.textContent = `Motivo: ${reason}`;
-        overlay.classList.add('show');
-        
-        document.querySelector('.newspaper-container').style.opacity = '0.5';
-        document.querySelector('.newspaper-container').style.pointerEvents = 'none';
-    }
-
-    function logoutBanned() {
-        localStorage.removeItem('jornal_auth_user');
-        localStorage.removeItem('jornal_auth_token');
-        localStorage.removeItem('jornal_auth_expiry');
-        auth.signOut().then(() => {
-            location.reload();
-        });
-    }
-
-    // ============================================
-    // FUNÇÃO PARA CARREGAR USUÁRIO DO FIREBASE
-    // ============================================
-
-    async function loadFirebaseUser(user) {
-        if (!user) {
-            console.log('❌ Usuário não logado no Firebase');
-            currentUser = null;
-            currentUserIsAdmin = false;
-            currentUserIsBanned = false;
-            document.getElementById('userName').textContent = 'Visitante';
-            document.getElementById('userAvatar').innerHTML = '👤';
-            document.getElementById('authButtons').style.display = 'flex';
-            document.getElementById('userButtons').style.display = 'none';
-            
-            document.getElementById('bannedOverlay').classList.remove('show');
-            document.querySelector('.newspaper-container').style.opacity = '1';
-            document.querySelector('.newspaper-container').style.pointerEvents = 'auto';
-            
-            const params = getUrlParams();
-            if (params.id) {
-                await loadArticleById(params.id);
-            } else {
-                currentCategory = params.categoria || 'todos';
-                highlightActiveCategory(currentCategory);
-                await loadArticles();
-            }
-            
-            if (!weatherLoaded) {
-                setTimeout(() => renderWeather(), 300);
-            }
-            return;
-        }
-        
-        try {
-            console.log('🔄 Carregando usuário do Firebase:', user.uid);
-            
-            currentUser = {
-                uid: user.uid,
-                displayName: user.displayName || 'Usuário',
-                email: user.email || '',
-                photoURL: user.photoURL || '',
-                isGuest: false
-            };
-            
-            await registerUser(user);
-            
-            const isBanned = await checkIfUserIsBanned(user);
-            
-            if (isBanned) {
-                console.log('🚫 Usuário banido!');
-                currentUserIsBanned = true;
-                showBannedScreen('Sua conta foi banida por violação das políticas de uso.');
-                document.querySelector('.newspaper-container').style.opacity = '0.5';
-                document.querySelector('.newspaper-container').style.pointerEvents = 'none';
-                return;
-            }
-            
-            currentUserIsBanned = false;
-            currentUserIsAdmin = await checkIfUserIsAdmin(user);
-            
-            const userData = {
-                uid: user.uid,
-                displayName: user.displayName,
-                email: user.email,
-                photoURL: user.photoURL,
-                isGuest: false
-            };
-            localStorage.setItem('jornal_auth_user', JSON.stringify(userData));
-            localStorage.setItem('jornal_auth_token', 'firebase_' + Date.now());
-            localStorage.setItem('jornal_auth_expiry', (Date.now() + 3600000).toString());
-            
-            updateUIAfterLogin();
-            
-            const params = getUrlParams();
-            if (params.id) {
-                await loadArticleById(params.id);
-            } else {
-                currentCategory = params.categoria || 'todos';
-                highlightActiveCategory(currentCategory);
-                await loadArticles();
-            }
-            
-            if (!weatherLoaded) {
-                setTimeout(() => renderWeather(), 300);
-            }
-            
-        } catch (error) {
-            console.error('❌ Erro ao carregar usuário Firebase:', error);
-            currentUser = null;
-            currentUserIsAdmin = false;
-            currentUserIsBanned = false;
-        }
-    }
-
-    // ============================================
-    // FUNÇÃO PARA REGISTRAR USUÁRIO
-    // ============================================
-
     async function registerUser(user) {
         try {
             const uid = user.uid;
             
+            // Primeiro, verifica se o usuário já existe no Firestore
             const userDoc = await db.collection('users').doc(uid).get();
             const existingData = userDoc.exists ? userDoc.data() : {};
             
+            // Preserva o valor de isAdmin se já existir
             let isAdminValue = false;
             if (uid === SPECIFIC_ADMIN_UID) {
                 isAdminValue = true;
@@ -1337,6 +1077,7 @@
                 isAdminValue = true;
             }
             
+            // Preserva o valor de isBanned
             let isBannedValue = existingData.isBanned || false;
             
             const userData = {
@@ -1354,7 +1095,10 @@
                 lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
+            // Registra/atualiza na coleção 'users'
             await db.collection('users').doc(uid).set(userData, { merge: true });
+            
+            // Registra/atualiza na coleção 'usuários'
             await db.collection('usuários').doc(uid).set(userData, { merge: true });
 
             console.log(`Usuário ${uid} registrado/atualizado. isAdmin: ${isAdminValue}, isBanned: ${isBannedValue}`);
@@ -1364,111 +1108,6 @@
             return null;
         }
     }
-
-    // ============================================
-    // FUNÇÃO PARA VERIFICAR SE USUÁRIO ESTÁ BANIDO
-    // ============================================
-
-    async function checkIfUserIsBanned(user) {
-        if (!user) return false;
-        
-        try {
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (userDoc.exists) {
-                return userDoc.data().isBanned === true || userDoc.data().isBan === true;
-            }
-        } catch (error) {
-            console.log("Erro ao verificar banimento:", error);
-        }
-        
-        return false;
-    }
-
-    // ============================================
-    // FUNÇÃO PARA VERIFICAR SE USUÁRIO É ADMIN
-    // ============================================
-
-    async function checkIfUserIsAdmin(user) {
-        if (!user) return false;
-        
-        if (user.uid === SPECIFIC_ADMIN_UID) return true;
-        
-        try {
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (userDoc.exists && userDoc.data().isAdmin === true) {
-                return true;
-            }
-        } catch (error) {
-            console.log("Erro ao verificar admin:", error);
-        }
-        
-        return false;
-    }
-
-    // ============================================
-    // FUNÇÃO PARA ATUALIZAR UI APÓS LOGIN
-    // ============================================
-
-    function updateUIAfterLogin() {
-        if (!currentUser) {
-            console.log('❌ updateUIAfterLogin: currentUser é null');
-            return;
-        }
-        
-        console.log('🔄 Atualizando UI para:', currentUser.displayName);
-        
-        const displayName = currentUser.displayName || currentUser.email?.split('@')[0] || 'Usuário';
-        const photoURL = currentUser.photoURL;
-        
-        document.getElementById('userName').textContent = displayName;
-        
-        if (photoURL) {
-            document.getElementById('userAvatar').innerHTML = `<img src="${photoURL}" alt="Avatar">`;
-        } else {
-            document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
-        }
-        
-        document.getElementById('authButtons').style.display = 'none';
-        document.getElementById('userButtons').style.display = 'flex';
-        
-        const newArticleBtn = document.getElementById('adminNewArticleBtn');
-        if (currentUserIsAdmin) {
-            newArticleBtn.style.display = 'inline-block';
-            console.log('✅ Usuário é ADMIN');
-        } else {
-            newArticleBtn.style.display = 'none';
-            console.log('👤 Usuário comum');
-        }
-        
-        console.log('✅ UI atualizada com sucesso!');
-    }
-
-    // ============================================
-    // FUNÇÃO DE LOGOUT
-    // ============================================
-
-    async function logout() {
-        try {
-            localStorage.removeItem('jornal_auth_user');
-            localStorage.removeItem('jornal_auth_token');
-            localStorage.removeItem('jornal_auth_expiry');
-            await auth.signOut();
-            currentUser = null;
-            currentUserIsAdmin = false;
-            currentUserIsBanned = false;
-            showToast('Logout realizado com sucesso!');
-            setTimeout(() => {
-                navigateToHome();
-            }, 500);
-        } catch (error) {
-            console.error("Erro ao fazer logout:", error);
-            showToast('Erro ao sair: ' + error.message, true);
-        }
-    }
-
-    // ============================================
-    // INICIALIZAÇÃO - VERIFICA SESSÃO
-    // ============================================
 
     // Data atual
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('pt-BR', {
@@ -1483,6 +1122,42 @@
         setTimeout(() => {
             toast.style.display = 'none';
         }, 3000);
+    }
+
+    // ==================== VERIFICAÇÃO DE BANIMENTO ====================
+    async function checkIfUserIsBanned(user) {
+        if (!user) return false;
+        
+        try {
+            // Tenta buscar da coleção 'users'
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists) {
+                const data = userDoc.data();
+                return data.isBanned === true || data.isBan === true;
+            }
+        } catch (error) {
+            console.log("Erro ao verificar banimento:", error);
+        }
+        
+        return false;
+    }
+
+    // ==================== FUNÇÃO PARA USUÁRIO BANIDO ====================
+    function showBannedScreen(reason = 'Violação das políticas de uso') {
+        const overlay = document.getElementById('bannedOverlay');
+        const details = document.getElementById('banDetails');
+        details.textContent = `Motivo: ${reason}`;
+        overlay.classList.add('show');
+        
+        // Esconde o conteúdo principal
+        document.querySelector('.newspaper-container').style.opacity = '0.5';
+        document.querySelector('.newspaper-container').style.pointerEvents = 'none';
+    }
+
+    function logoutBanned() {
+        auth.signOut().then(() => {
+            location.reload();
+        });
     }
 
     // ==================== NAVEGAÇÃO POR URL ====================
@@ -1517,11 +1192,60 @@
         window.location.href = window.location.pathname;
     }
 
+    // ==================== VERIFICAÇÃO DE ADMIN ====================
+    async function checkIfUserIsAdmin(user) {
+        if (!user) return false;
+        
+        if (user.uid === SPECIFIC_ADMIN_UID) return true;
+        
+        try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists && userDoc.data().isAdmin === true) {
+                return true;
+            }
+        } catch (error) {
+            console.log("Erro ao verificar admin:", error);
+        }
+        
+        return false;
+    }
+
+    // ==================== AUTENTICAÇÃO COM GOOGLE ====================
+    async function loginWithGoogle() {
+        try {
+            const result = await auth.signInWithPopup(googleProvider);
+            const user = result.user;
+            
+            // Registra/atualiza o usuário no Firestore
+            await registerUser(user);
+            
+            showToast(`Bem-vindo, ${user.displayName || user.email}!`);
+            closeModals();
+            location.reload();
+        } catch (error) {
+            console.error("Erro no login com Google:", error);
+            showToast('Erro ao fazer login: ' + error.message, true);
+        }
+    }
+
+    async function logout() {
+        try {
+            await auth.signOut();
+            showToast('Logout realizado com sucesso!');
+            setTimeout(() => {
+                navigateToHome();
+            }, 500);
+        } catch (error) {
+            console.error("Erro ao fazer logout:", error);
+            showToast('Erro ao sair: ' + error.message, true);
+        }
+    }
+
     // ============================================
     // PREVISÃO DO TEMPO
     // ============================================
-
     async function fetchWeather() {
+        // Coordenadas de Santa Fé do Sul - SP
         const lat = -20.2345;
         const lon = -50.9253;
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=America/Sao_Paulo`;
@@ -1608,8 +1332,10 @@
     }
 
     async function renderWeather() {
+        // Verifica se já existe um widget para evitar duplicação
         const existingWidget = document.getElementById('weatherWidget');
         if (existingWidget) {
+            // Se já existe, apenas atualiza o conteúdo
             await updateWeatherContent(existingWidget);
             return;
         }
@@ -1629,6 +1355,7 @@
             </div>
         `;
         
+        // Insere o widget na sidebar direita
         const rightSidebar = document.querySelector('.sidebar-right');
         if (rightSidebar) {
             rightSidebar.insertBefore(weatherContainer, rightSidebar.firstChild);
@@ -1703,37 +1430,91 @@
         weatherLoaded = true;
     }
 
-    // ============================================
-    // INICIALIZAÇÃO - VERIFICA SESSÃO
-    // ============================================
-
-    // PASSO 1: Verifica token na URL (retorno do login)
-    const hasToken = checkAuthToken();
-
-    // PASSO 2: Se não tem token, verifica sessão no localStorage
-    if (!hasToken) {
-        const hasSession = checkStoredSession();
-        
-        // PASSO 3: Se não tem sessão, verifica Firebase Auth
-        if (!hasSession) {
-            auth.onAuthStateChanged(async (user) => {
-                await loadFirebaseUser(user);
-            });
-        }
-    } else {
-        // Se já tem token, registra listener para manter sincronizado
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                if (!currentUser || currentUser.uid !== user.uid) {
-                    await loadFirebaseUser(user);
-                }
+    // ==================== ESTADO DE AUTENTICAÇÃO ====================
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            currentUser = user;
+            
+            // Registra/atualiza o usuário no Firestore
+            const userData = await registerUser(user);
+            
+            // VERIFICA BANIMENTO PRIMEIRO
+            currentUserIsBanned = await checkIfUserIsBanned(user);
+            
+            if (currentUserIsBanned) {
+                // Usuário banido - mostra tela de bloqueio
+                showBannedScreen('Sua conta foi banida por violação das políticas de uso.');
+                // Não carrega o conteúdo
+                return;
             }
-        });
-    }
-
-    // ============================================
-    // FUNÇÕES DO JORNAL
-    // ============================================
+            
+            // Verifica se é admin
+            currentUserIsAdmin = await checkIfUserIsAdmin(user);
+            if (userData && userData.isAdmin === true) {
+                currentUserIsAdmin = true;
+            }
+            
+            const displayName = user.displayName || user.email?.split('@')[0] || 'Usuário';
+            const photoURL = user.photoURL;
+            
+            document.getElementById('userName').textContent = displayName;
+            
+            if (photoURL) {
+                document.getElementById('userAvatar').innerHTML = `<img src="${photoURL}" alt="Avatar">`;
+            } else {
+                document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
+            }
+            
+            document.getElementById('authButtons').style.display = 'none';
+            document.getElementById('userButtons').style.display = 'flex';
+            
+            const newArticleBtn = document.getElementById('adminNewArticleBtn');
+            if (currentUserIsAdmin) {
+                newArticleBtn.style.display = 'inline-block';
+                console.log('✅ Usuário é ADMIN');
+            } else {
+                newArticleBtn.style.display = 'none';
+                console.log('👤 Usuário comum');
+            }
+        } else {
+            currentUser = null;
+            currentUserIsAdmin = false;
+            currentUserIsBanned = false;
+            document.getElementById('userName').textContent = 'Visitante';
+            document.getElementById('userAvatar').innerHTML = '👤';
+            document.getElementById('authButtons').style.display = 'flex';
+            document.getElementById('userButtons').style.display = 'none';
+            
+            // Remove overlay de banido se estiver ativo
+            document.getElementById('bannedOverlay').classList.remove('show');
+            document.querySelector('.newspaper-container').style.opacity = '1';
+            document.querySelector('.newspaper-container').style.pointerEvents = 'auto';
+        }
+        
+        // Carregar conteúdo (apenas se não estiver banido)
+        if (!currentUserIsBanned) {
+            const params = getUrlParams();
+            if (params.id) {
+                await loadArticleById(params.id);
+            } else if (params.categoria) {
+                currentCategory = params.categoria;
+                highlightActiveCategory(currentCategory);
+                await loadArticles();
+            } else {
+                currentCategory = 'todos';
+                highlightActiveCategory('todos');
+                await loadArticles();
+            }
+            
+            // Carrega a previsão do tempo (apenas se ainda não foi carregada)
+            if (!weatherLoaded) {
+                // Aguarda um pequeno delay para garantir que a sidebar foi renderizada
+                setTimeout(() => {
+                    renderWeather();
+                }, 300);
+            }
+        }
+    });
 
     function highlightActiveCategory(category) {
         document.querySelectorAll('.nav-menu a').forEach(a => {
@@ -1742,132 +1523,7 @@
         });
     }
 
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    function getCategoryIcon(cat) {
-        const icons = {
-            'política': '🏛️', 'internacional': '🌍', 'economia': '📊',
-            'justiça': '⚖️', 'cultura': '🎭', 'investigação': '🔍', 
-            'opinião': '✍️', 'esporte': '⚽', 'tecnologia': '💻',
-            'redes-sociais': '📱', 'saúde': '🏥', 'educação': '📚'
-        };
-        return icons[cat] || '📰';
-    }
-
-    function formatDate(timestamp) {
-        if (!timestamp) return 'Data desconhecida';
-        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        return date.toLocaleDateString('pt-BR');
-    }
-
-    // ============================================
-    // CARREGAR ARTIGOS
-    // ============================================
-
-    async function loadArticles() {
-        const grid = document.getElementById('newspaperGrid');
-        grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando notícias...</p></div>';
-        
-        try {
-            let query = db.collection('articlesdoc').orderBy('dataPublicacao', 'desc');
-            
-            if (currentCategory !== 'todos') {
-                query = db.collection('articlesdoc').where('categoria', '==', currentCategory).orderBy('dataPublicacao', 'desc');
-            }
-            
-            const snapshot = await query.get();
-            const articles = [];
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                articles.push({ id: doc.id, ...data });
-            });
-            
-            if (articles.length === 0) {
-                grid.innerHTML = '<div class="loading"><p>📭 Nenhuma matéria encontrada nesta categoria.</p></div>';
-                return;
-            }
-            
-            renderArticles(articles);
-        } catch (error) {
-            grid.innerHTML = `<div class="loading"><p>❌ Erro ao carregar: ${error.message}</p></div>`;
-        }
-    }
-
-    function renderArticles(articles) {
-        const mainArticle = articles[0];
-        const leftArticles = articles.slice(1, 4);
-        const rightArticles = articles.slice(4, 8);
-
-        const renderAdminActions = (articleId) => {
-            if (!currentUserIsAdmin) return '';
-            return `
-                <div class="admin-actions">
-                    <button class="admin-btn" onclick="event.stopPropagation(); editArticle('${articleId}')">✏️</button>
-                    <button class="admin-btn delete" onclick="event.stopPropagation(); deleteArticle('${articleId}')">🗑️</button>
-                </div>
-            `;
-        };
-
-        const renderArticleCard = (article, isMain = false) => {
-            const tag = getCategoryIcon(article.categoria) + ' ' + (article.categoria || 'geral').toUpperCase();
-            const date = formatDate(article.dataPublicacao);
-            
-            if (isMain) {
-                return `
-                    <div class="main-article" style="position: relative;">
-                        ${renderAdminActions(article.id)}
-                        <div class="article-tag">${tag} · DESTAQUE</div>
-                        <div class="article-title"><a onclick="openArticleById('${article.id}')">${escapeHtml(article.titulo)}</a></div>
-                        <div class="article-meta">
-                            <span><i class="far fa-user"></i> Por ${escapeHtml(article.autorNome || 'Redação')}</span>
-                            <span><i class="far fa-calendar"></i> ${date}</span>
-                            <span><i class="fas fa-eye"></i> ${article.visualizacoes || 0} visualizações</span>
-                        </div>
-                        ${article.imagemUrl ? `<div class="article-image"><img src="${article.imagemUrl}" alt="${escapeHtml(article.titulo)}"><div class="image-caption">Foto: Divulgação</div></div>` : ''}
-                        <div class="article-excerpt">${escapeHtml((article.resumo || article.conteudo || '').substring(0, 300))}${(article.resumo || article.conteudo || '').length > 300 ? '...' : ''}</div>
-                        <a class="read-more" onclick="openArticleById('${article.id}')">Continue lendo →</a>
-                    </div>
-                `;
-            }
-            
-            return `
-                <div class="article-card" style="position: relative;">
-                    ${renderAdminActions(article.id)}
-                    <div class="article-tag">${tag}</div>
-                    <div class="article-title"><a onclick="openArticleById('${article.id}')">${escapeHtml(article.titulo)}</a></div>
-                    <div class="article-meta">
-                        <span><i class="far fa-user"></i> ${escapeHtml(article.autorNome || 'Redação')}</span>
-                        <span><i class="far fa-calendar"></i> ${date}</span>
-                    </div>
-                    <div class="article-excerpt">${escapeHtml((article.resumo || article.conteudo || '').substring(0, 150))}${(article.resumo || article.conteudo || '').length > 150 ? '...' : ''}</div>
-                    <a class="read-more" onclick="openArticleById('${article.id}')">Continue lendo →</a>
-                </div>
-            `;
-        };
-
-        const leftHtml = leftArticles.map(a => renderArticleCard(a, false)).join('');
-        const rightHtml = rightArticles.map(a => renderArticleCard(a, false)).join('');
-
-        document.getElementById('newspaperGrid').innerHTML = `
-            <div class="sidebar-left">${leftHtml || '<div class="article-card"><p>📭 Mais matérias em breve...</p></div>'}</div>
-            <div>${renderArticleCard(mainArticle, true)}</div>
-            <div class="sidebar-right">${rightHtml || '<div class="article-card"><p>📭 Aguardem novas publicações...</p></div>'}</div>
-        `;
-        
-        setTimeout(() => {
-            renderWeather();
-        }, 300);
-    }
-
-    // ============================================
-    // CARREGAR MATÉRIA POR ID
-    // ============================================
-
+    // ==================== CARREGAR MATÉRIA POR ID ====================
     async function loadArticleById(articleId) {
         const grid = document.getElementById('newspaperGrid');
         grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando matéria...</p></div>';
@@ -1938,6 +1594,120 @@
             </div>
         `;
         
+        // Renderiza a previsão do tempo na sidebar direita
+        setTimeout(() => {
+            renderWeather();
+        }, 300);
+    }
+
+    // ==================== ARTIGOS ====================
+    async function loadArticles() {
+        const grid = document.getElementById('newspaperGrid');
+        grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando notícias...</p></div>';
+        
+        try {
+            let query = db.collection('articlesdoc').orderBy('dataPublicacao', 'desc');
+            
+            if (currentCategory !== 'todos') {
+                query = db.collection('articlesdoc').where('categoria', '==', currentCategory).orderBy('dataPublicacao', 'desc');
+            }
+            
+            const snapshot = await query.get();
+            const articles = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                articles.push({ id: doc.id, ...data });
+            });
+            
+            if (articles.length === 0) {
+                grid.innerHTML = '<div class="loading"><p>📭 Nenhuma matéria encontrada nesta categoria.</p></div>';
+                return;
+            }
+            
+            renderArticles(articles);
+        } catch (error) {
+            grid.innerHTML = `<div class="loading"><p>❌ Erro ao carregar: ${error.message}</p></div>`;
+        }
+    }
+
+    function getCategoryIcon(cat) {
+        const icons = {
+            'política': '🏛️', 'internacional': '🌍', 'economia': '📊',
+            'justiça': '⚖️', 'cultura': '🎭', 'investigação': '🔍', 
+            'opinião': '✍️', 'esporte': '⚽', 'tecnologia': '💻',
+            'redes-sociais': '📱', 'saúde': '🏥', 'educação': '📚'
+        };
+        return icons[cat] || '📰';
+    }
+
+    function formatDate(timestamp) {
+        if (!timestamp) return 'Data desconhecida';
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        return date.toLocaleDateString('pt-BR');
+    }
+
+    function renderArticles(articles) {
+        const mainArticle = articles[0];
+        const leftArticles = articles.slice(1, 4);
+        const rightArticles = articles.slice(4, 8);
+
+        const renderAdminActions = (articleId) => {
+            if (!currentUserIsAdmin) return '';
+            return `
+                <div class="admin-actions">
+                    <button class="admin-btn" onclick="event.stopPropagation(); editArticle('${articleId}')">✏️</button>
+                    <button class="admin-btn delete" onclick="event.stopPropagation(); deleteArticle('${articleId}')">🗑️</button>
+                </div>
+            `;
+        };
+
+        const renderArticleCard = (article, isMain = false) => {
+            const tag = getCategoryIcon(article.categoria) + ' ' + (article.categoria || 'geral').toUpperCase();
+            const date = formatDate(article.dataPublicacao);
+            
+            if (isMain) {
+                return `
+                    <div class="main-article" style="position: relative;">
+                        ${renderAdminActions(article.id)}
+                        <div class="article-tag">${tag} · DESTAQUE</div>
+                        <div class="article-title"><a onclick="openArticleById('${article.id}')">${escapeHtml(article.titulo)}</a></div>
+                        <div class="article-meta">
+                            <span><i class="far fa-user"></i> Por ${escapeHtml(article.autorNome || 'Redação')}</span>
+                            <span><i class="far fa-calendar"></i> ${date}</span>
+                            <span><i class="fas fa-eye"></i> ${article.visualizacoes || 0} visualizações</span>
+                        </div>
+                        ${article.imagemUrl ? `<div class="article-image"><img src="${article.imagemUrl}" alt="${escapeHtml(article.titulo)}"><div class="image-caption">Foto: Divulgação</div></div>` : ''}
+                        <div class="article-excerpt">${escapeHtml((article.resumo || article.conteudo || '').substring(0, 300))}${(article.resumo || article.conteudo || '').length > 300 ? '...' : ''}</div>
+                        <a class="read-more" onclick="openArticleById('${article.id}')">Continue lendo →</a>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="article-card" style="position: relative;">
+                    ${renderAdminActions(article.id)}
+                    <div class="article-tag">${tag}</div>
+                    <div class="article-title"><a onclick="openArticleById('${article.id}')">${escapeHtml(article.titulo)}</a></div>
+                    <div class="article-meta">
+                        <span><i class="far fa-user"></i> ${escapeHtml(article.autorNome || 'Redação')}</span>
+                        <span><i class="far fa-calendar"></i> ${date}</span>
+                    </div>
+                    <div class="article-excerpt">${escapeHtml((article.resumo || article.conteudo || '').substring(0, 150))}${(article.resumo || article.conteudo || '').length > 150 ? '...' : ''}</div>
+                    <a class="read-more" onclick="openArticleById('${article.id}')">Continue lendo →</a>
+                </div>
+            `;
+        };
+
+        const leftHtml = leftArticles.map(a => renderArticleCard(a, false)).join('');
+        const rightHtml = rightArticles.map(a => renderArticleCard(a, false)).join('');
+
+        document.getElementById('newspaperGrid').innerHTML = `
+            <div class="sidebar-left">${leftHtml || '<div class="article-card"><p>📭 Mais matérias em breve...</p></div>'}</div>
+            <div>${renderArticleCard(mainArticle, true)}</div>
+            <div class="sidebar-right">${rightHtml || '<div class="article-card"><p>📭 Aguardem novas publicações...</p></div>'}</div>
+        `;
+        
+        // Renderiza a previsão do tempo na sidebar direita
         setTimeout(() => {
             renderWeather();
         }, 300);
@@ -1948,10 +1718,7 @@
         loadArticleById(articleId);
     };
 
-    // ============================================
-    // COMPARTILHAMENTO
-    // ============================================
-
+    // ==================== COMPARTILHAMENTO ====================
     function getCurrentArticleUrl() {
         if (currentViewArticleId) {
             return `${window.location.origin}${window.location.pathname}?id=${currentViewArticleId}`;
@@ -1975,10 +1742,7 @@
         });
     };
 
-    // ============================================
-    // EDIÇÃO DE ARTIGOS
-    // ============================================
-
+    // ==================== EDIÇÃO DE ARTIGOS ====================
     window.editArticle = async function(articleId) {
         if (!currentUserIsAdmin) {
             showToast('Apenas administradores podem editar matérias!', true);
@@ -2048,53 +1812,46 @@
         }, 300);
     };
 
-    // ============================================
-// SALVAR ARTIGO - CORRIGIDO
-// ============================================
-
-async function saveArticle() {
-    if (!currentUserIsAdmin) {
-        showToast('Apenas administradores podem publicar matérias!', true);
-        return;
-    }
-    
-    const articleData = {
-        titulo: document.getElementById('articleTitle').value,
-        categoria: document.getElementById('articleCategory').value,
-        resumo: document.getElementById('articleExcerpt').value,
-        conteudo: document.getElementById('articleContent').value,
-        imagemUrl: document.getElementById('articleImage').value || null,
-        autorId: currentUser.uid,
-        autorNome: currentUser.displayName || currentUser.email?.split('@')[0] || 'Administrador',
-        autorEmail: currentUser.email,
-        // 🔥 CORREÇÃO: Adicionar userId para compatibilidade com as regras
-        userId: currentUser.uid,
-        dataPublicacao: firebase.firestore.FieldValue.serverTimestamp(),
-        ultimaEdicao: firebase.firestore.FieldValue.serverTimestamp(),
-        visualizacoes: 0
-    };
-    
-    if (!articleData.titulo || !articleData.resumo) {
-        showToast('Preencha pelo menos o título e o resumo da matéria!', true);
-        return;
-    }
-    
-    try {
-        if (currentEditArticleId) {
-            await db.collection('articlesdoc').doc(currentEditArticleId).update(articleData);
-            showToast('Matéria atualizada com sucesso!');
-        } else {
-            const docRef = await db.collection('articlesdoc').add(articleData);
-            showToast('Matéria publicada com sucesso!');
+    async function saveArticle() {
+        if (!currentUserIsAdmin) {
+            showToast('Apenas administradores podem publicar matérias!', true);
+            return;
         }
-        closeModals();
-        resetArticleForm();
-        loadArticles();
-    } catch (error) {
-        console.error('Erro ao salvar:', error);
-        showToast('Erro ao salvar: ' + error.message, true);
+        
+        const articleData = {
+            titulo: document.getElementById('articleTitle').value,
+            categoria: document.getElementById('articleCategory').value,
+            resumo: document.getElementById('articleExcerpt').value,
+            conteudo: document.getElementById('articleContent').value,
+            imagemUrl: document.getElementById('articleImage').value || null,
+            autorId: currentUser.uid,
+            autorNome: currentUser.displayName || currentUser.email?.split('@')[0] || 'Administrador',
+            autorEmail: currentUser.email,
+            dataPublicacao: firebase.firestore.FieldValue.serverTimestamp(),
+            ultimaEdicao: firebase.firestore.FieldValue.serverTimestamp(),
+            visualizacoes: 0
+        };
+        
+        if (!articleData.titulo || !articleData.resumo) {
+            showToast('Preencha pelo menos o título e o resumo da matéria!', true);
+            return;
+        }
+        
+        try {
+            if (currentEditArticleId) {
+                await db.collection('articlesdoc').doc(currentEditArticleId).update(articleData);
+                showToast('Matéria atualizada com sucesso!');
+            } else {
+                const docRef = await db.collection('articlesdoc').add(articleData);
+                showToast('Matéria publicada com sucesso!');
+            }
+            closeModals();
+            resetArticleForm();
+            loadArticles();
+        } catch (error) {
+            showToast('Erro ao salvar: ' + error.message, true);
+        }
     }
-}
 
     function resetArticleForm() {
         currentEditArticleId = null;
@@ -2106,9 +1863,12 @@ async function saveArticle() {
         document.getElementById('articleImage').value = '';
     }
 
-    // ============================================
-    // FILTROS E NAVEGAÇÃO
-    // ============================================
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 
     window.filterByCategory = function(category) {
         currentCategory = category;
@@ -2125,15 +1885,15 @@ async function saveArticle() {
         resetArticleForm();
         document.getElementById('articleModal').classList.add('show');
     };
-
+    
     window.closeModals = function() {
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
     };
-
+    
     window.onclick = (e) => {
         if (e.target.classList.contains('modal')) closeModals();
     };
-
+    
     window.onpopstate = (event) => {
         const params = getUrlParams();
         if (params.id) {
@@ -2152,268 +1912,7 @@ async function saveArticle() {
     // Expor funções globalmente
     window.logoutBanned = logoutBanned;
     window.logout = logout;
-    window.redirectToLogin = redirectToLogin;
-    window.navigateToHome = navigateToHome;
-
-    // ============================================
-// FUNÇÃO PARA VERIFICAR AUTENTICAÇÃO E TOKEN
-// ============================================
-
-function isAuthenticated() {
-    // Verifica se há um usuário autenticado
-    if (auth.currentUser) return true;
-    
-    // Verifica se há um token salvo no localStorage
-    const token = localStorage.getItem('jornal_auth_token');
-    const expiry = localStorage.getItem('jornal_auth_expiry');
-    
-    if (token && expiry && Date.now() < parseInt(expiry)) {
-        return true;
-    }
-    
-    return false;
-}
-
-// ============================================
-// FUNÇÃO PARA VERIFICAR SE O TOKEN AINDA É VÁLIDO
-// ============================================
-
-async function validateToken() {
-    try {
-        // Tenta fazer uma operação simples no Firestore para validar o token
-        await db.collection('articlesdoc').limit(1).get();
-        return true;
-    } catch (error) {
-        if (error.code === 'permission-denied' || error.code === 'unauthenticated') {
-            console.log('🔑 Token expirado ou inválido');
-            return false;
-        }
-        return true; // Outros erros podem ser ignorados
-    }
-}
-
-// ============================================
-// FUNÇÃO PARA RENOVAR A SESSÃO
-// ============================================
-
-async function renewSession() {
-    console.log('🔄 Tentando renovar sessão...');
-    
-    // Tenta restaurar do localStorage
-    const userData = localStorage.getItem('jornal_auth_user');
-    if (userData) {
-        try {
-            const user = JSON.parse(userData);
-            applyUserSession(user);
-            return true;
-        } catch (e) {
-            console.error('Erro ao restaurar sessão:', e);
-        }
-    }
-    
-    // Se não conseguir, redireciona para login
-    redirectToLogin();
-    return false;
-}
-
-// ============================================
-// FUNÇÃO PARA CARREGAR DADOS COM VERIFICAÇÃO DE PERMISSÃO
-// ============================================
-
-async function loadDataWithAuth(loadFunction) {
-    // Verifica se está autenticado
-    if (!isAuthenticated()) {
-        console.log('🔒 Usuário não autenticado, redirecionando para login...');
-        redirectToLogin();
-        return;
-    }
-    
-    // Verifica se o token ainda é válido
-    const isValid = await validateToken();
-    if (!isValid) {
-        console.log('🔑 Token inválido, tentando renovar...');
-        const renewed = await renewSession();
-        if (!renewed) {
-            redirectToLogin();
-            return;
-        }
-    }
-    
-    // Carrega os dados
-    try {
-        await loadFunction();
-    } catch (error) {
-        if (error.code === 'permission-denied' || error.code === 'unauthenticated') {
-            console.log('🔒 Permissão negada ao carregar dados:', error);
-            redirectToLogin();
-        } else {
-            console.error('Erro ao carregar dados:', error);
-            throw error;
-        }
-    }
-}
-
-// ============================================
-// FUNÇÃO PARA VERIFICAR USUÁRIO COM FALLBACK
-// ============================================
-
-async function checkUserWithFallback(user) {
-    if (!user) {
-        // Tenta restaurar do localStorage
-        const userData = localStorage.getItem('jornal_auth_user');
-        if (userData) {
-            try {
-                const parsed = JSON.parse(userData);
-                console.log('📂 Usuário restaurado do localStorage:', parsed.displayName);
-                return parsed;
-            } catch (e) {
-                console.error('Erro ao restaurar usuário:', e);
-            }
-        }
-        return null;
-    }
-    return user;
-}
-
-// ============================================
-// FUNÇÃO PARA VERIFICAR SE É ADMIN COM FALLBACK
-// ============================================
-
-async function checkAdminWithFallback(user) {
-    if (!user) return false;
-    
-    // Verifica se é admin específico
-    if (user.uid === SPECIFIC_ADMIN_UID) return true;
-    
-    try {
-        // Tenta buscar do Firestore
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        if (userDoc.exists && userDoc.data().isAdmin === true) {
-            return true;
-        }
-    } catch (error) {
-        console.log('Erro ao verificar admin, usando fallback:', error);
-        // Se não conseguir verificar, assume que não é admin
-    }
-    
-    return false;
-}
-
-// ============================================
-// INICIALIZAÇÃO CORRIGIDA
-// ============================================
-
-// Função principal de inicialização
-async function initApp() {
-    try {
-        // Verifica se há token na URL
-        const hasToken = checkAuthToken();
-        
-        if (hasToken) {
-            console.log('✅ Token processado com sucesso!');
-            // Já tem token, carrega conteúdo
-            await loadArticles();
-            return;
-        }
-        
-        // Verifica se há sessão salva
-        const hasSession = checkStoredSession();
-        
-        if (hasSession) {
-            console.log('✅ Sessão restaurada com sucesso!');
-            // Já tem sessão, carrega conteúdo
-            await loadArticles();
-            return;
-        }
-        
-        // Aguarda autenticação do Firebase
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                await loadFirebaseUser(user);
-            } else {
-                // Se não tem usuário, tenta restaurar do localStorage
-                const restoredUser = await checkUserWithFallback(null);
-                if (restoredUser) {
-                    await applyUserSession(restoredUser);
-                    await loadArticles();
-                } else {
-                    // Se não tem nada, carrega público
-                    await loadArticlesPublic();
-                }
-            }
-        });
-        
-    } catch (error) {
-        console.error('❌ Erro na inicialização:', error);
-        // Fallback: tenta carregar conteúdo público
-        await loadArticlesPublic();
-    }
-}
-
-// ============================================
-// FUNÇÃO PARA CARREGAR CONTEÚDO PÚBLICO (SEM LOGIN)
-// ============================================
-
-async function loadArticlesPublic() {
-    try {
-        const snapshot = await db.collection('articlesdoc')
-            .orderBy('dataPublicacao', 'desc')
-            .limit(10)
-            .get();
-        
-        const articles = [];
-        snapshot.forEach(doc => {
-            articles.push({ id: doc.id, ...doc.data() });
-        });
-        
-        if (articles.length > 0) {
-            renderArticles(articles);
-        } else {
-            document.getElementById('newspaperGrid').innerHTML = `
-                <div style="grid-column:1/-1; text-align:center; padding:40px;">
-                    <h3>📰 Bem-vindo ao Jornal WazzimaGiygg</h3>
-                    <p style="color:#666; margin-top:10px;">
-                        Faça login para ver todas as notícias e conteúdos exclusivos.
-                    </p>
-                    <button onclick="redirectToLogin()" style="margin-top:20px; padding:12px 30px; background:#c0392b; color:white; border:none; border-radius:8px; cursor:pointer; font-size:16px;">
-                        🔑 Entrar
-                    </button>
-                </div>
-            `;
-        }
-    } catch (error) {
-        console.error('Erro ao carregar conteúdo público:', error);
-        document.getElementById('newspaperGrid').innerHTML = `
-            <div style="grid-column:1/-1; text-align:center; padding:40px;">
-                <h3>📰 Jornal WazzimaGiygg</h3>
-                <p style="color:#666;">Erro ao carregar conteúdo. Tente recarregar a página.</p>
-            </div>
-        `;
-    }
-}
-
-// ============================================
-// INICIALIZAR A APLICAÇÃO
-// ============================================
-
-// Inicializa a aplicação
-initApp();
-
-// ============================================
-// VERIFICAR SESSÃO PERIODICAMENTE
-// ============================================
-
-// Verifica a cada 5 minutos se o token ainda é válido
-setInterval(async () => {
-    if (currentUser) {
-        const isValid = await validateToken();
-        if (!isValid) {
-            console.log('🔑 Token expirado, renovando sessão...');
-            await renewSession();
-        }
-    }
-}, 5 * 60 * 1000);
-    
+    window.loginWithGoogle = loginWithGoogle;
 </script>
 
 <!-- Iframe do verificador/logs -->
