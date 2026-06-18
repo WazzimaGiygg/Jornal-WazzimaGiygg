@@ -1066,79 +1066,122 @@
     }
 
     // ============================================
-    // SISTEMA DE AUTENTICAÇÃO ENTRE DOMÍNIOS
-    // ============================================
+// SISTEMA DE AUTENTICAÇÃO ENTRE DOMÍNIOS - CORRIGIDO
+// ============================================
 
-    // Verifica se há um token de autenticação na URL (retorno do login)
-    function checkAuthToken() {
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get('auth_token');
-        const userData = params.get('user_data');
-        
-        if (token && userData) {
-            try {
-                const user = JSON.parse(decodeURIComponent(userData));
-                console.log('🔑 Token de autenticação recebido:', user);
-                
-                // Salva no localStorage para persistência
-                localStorage.setItem('jornal_auth_user', JSON.stringify(user));
-                localStorage.setItem('jornal_auth_token', token);
-                localStorage.setItem('jornal_auth_expiry', (Date.now() + 3600000).toString());
-                
-                // Remove os parâmetros da URL
-                const newUrl = window.location.pathname + window.location.hash;
-                window.history.replaceState({}, document.title, newUrl);
-                
-                // Aplica o usuário
-                applyUserSession(user);
-                return true;
-            } catch (e) {
-                console.error('Erro ao processar token:', e);
-            }
-        }
-        return false;
-    }
-
-    // Verifica se há uma sessão salva no localStorage
-    function checkStoredSession() {
+// Verifica se há um token de autenticação na URL (retorno do login)
+function checkAuthToken() {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('auth_token');
+    const userData = params.get('user_data');
+    
+    if (token && userData) {
         try {
-            const token = localStorage.getItem('jornal_auth_token');
-            const userData = localStorage.getItem('jornal_auth_user');
-            const expiry = localStorage.getItem('jornal_auth_expiry');
+            const user = JSON.parse(decodeURIComponent(userData));
+            console.log('🔑 Token de autenticação recebido:', user);
             
-            if (token && userData && expiry && Date.now() < parseInt(expiry)) {
-                const user = JSON.parse(userData);
-                console.log('📂 Sessão restaurada do localStorage:', user);
-                applyUserSession(user);
-                return true;
-            }
+            // Salva no localStorage para persistência
+            localStorage.setItem('jornal_auth_user', JSON.stringify(user));
+            localStorage.setItem('jornal_auth_token', token);
+            localStorage.setItem('jornal_auth_expiry', (Date.now() + 3600000).toString());
+            
+            // Remove os parâmetros da URL
+            const newUrl = window.location.pathname + window.location.hash;
+            window.history.replaceState({}, document.title, newUrl);
+            
+            // 🔥 APLICA O USUÁRIO IMEDIATAMENTE
+            applyUserSession(user);
+            return true;
         } catch (e) {
-            console.error('Erro ao restaurar sessão:', e);
+            console.error('Erro ao processar token:', e);
         }
-        return false;
     }
+    return false;
+}
 
-    // ============================================
-    // FUNÇÃO PARA APLICAR SESSÃO DO USUÁRIO
-    // ============================================
-
-    function applyUserSession(user) {
-        if (!user || !user.uid) return;
+// Verifica se há uma sessão salva no localStorage
+function checkStoredSession() {
+    try {
+        const token = localStorage.getItem('jornal_auth_token');
+        const userData = localStorage.getItem('jornal_auth_user');
+        const expiry = localStorage.getItem('jornal_auth_expiry');
         
-        currentUser = {
-            uid: user.uid,
-            displayName: user.displayName || 'Usuário',
-            email: user.email || '',
-            photoURL: user.photoURL || '',
-            isGuest: user.isGuest || false
-        };
-        
-        // Verifica se é admin
-        currentUserIsAdmin = user.uid === SPECIFIC_ADMIN_UID;
-        
-        // Verifica banimento
-        checkUserBanned(user.uid);
+        if (token && userData && expiry && Date.now() < parseInt(expiry)) {
+            const user = JSON.parse(userData);
+            console.log('📂 Sessão restaurada do localStorage:', user);
+            applyUserSession(user);
+            return true;
+        }
+    } catch (e) {
+        console.error('Erro ao restaurar sessão:', e);
     }
+    return false;
+}
+
+// ============================================
+// FUNÇÃO PARA APLICAR SESSÃO DO USUÁRIO - CORRIGIDA
+// ============================================
+
+async function applyUserSession(user) {
+    if (!user || !user.uid) {
+        console.log('❌ Usuário inválido');
+        return;
+    }
+    
+    console.log('🔄 Aplicando sessão do usuário:', user.displayName);
+    
+    // Define o usuário atual
+    currentUser = {
+        uid: user.uid,
+        displayName: user.displayName || 'Usuário',
+        email: user.email || '',
+        photoURL: user.photoURL || '',
+        isGuest: user.isGuest || false
+    };
+    
+    // Verifica se é admin
+    currentUserIsAdmin = user.uid === SPECIFIC_ADMIN_UID;
+    
+    // 🔥 VERIFICA BANIMENTO E ATUALIZA UI
+    try {
+        const isBanned = await checkIfUserIsBanned(currentUser);
+        
+        if (isBanned) {
+            console.log('🚫 Usuário está banido!');
+            currentUserIsBanned = true;
+            showBannedScreen('Sua conta foi banida por violação das políticas de uso.');
+            document.querySelector('.newspaper-container').style.opacity = '0.5';
+            document.querySelector('.newspaper-container').style.pointerEvents = 'none';
+            return;
+        }
+        
+        currentUserIsBanned = false;
+        console.log('✅ Usuário não está banido');
+        
+        // 🔥 ATUALIZA A UI - MOSTRA O USUÁRIO LOGADO
+        updateUIAfterLogin();
+        
+        // Recarrega o conteúdo
+        const params = getUrlParams();
+        if (params.id) {
+            await loadArticleById(params.id);
+        } else {
+            currentCategory = params.categoria || 'todos';
+            highlightActiveCategory(currentCategory);
+            await loadArticles();
+        }
+        
+        if (!weatherLoaded) {
+            setTimeout(() => renderWeather(), 300);
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao verificar banimento:', error);
+        // Mesmo com erro, tenta mostrar o usuário
+        updateUIAfterLogin();
+    }
+}
+
 
     // ============================================
     // FUNÇÃO PARA VERIFICAR BANIMENTO
@@ -1193,100 +1236,107 @@
         });
     }
 
-    // ============================================
-    // FUNÇÃO PARA CARREGAR USUÁRIO DO FIREBASE
-    // ============================================
+   // ============================================
+// FUNÇÃO PARA CARREGAR USUÁRIO DO FIREBASE - CORRIGIDA
+// ============================================
 
-    async function loadFirebaseUser(user) {
-        if (!user) {
-            currentUser = null;
-            currentUserIsAdmin = false;
-            currentUserIsBanned = false;
-            document.getElementById('userName').textContent = 'Visitante';
-            document.getElementById('userAvatar').innerHTML = '👤';
-            document.getElementById('authButtons').style.display = 'flex';
-            document.getElementById('userButtons').style.display = 'none';
-            
-            document.getElementById('bannedOverlay').classList.remove('show');
-            document.querySelector('.newspaper-container').style.opacity = '1';
-            document.querySelector('.newspaper-container').style.pointerEvents = 'auto';
-            
-            const params = getUrlParams();
-            if (params.id) {
-                await loadArticleById(params.id);
-            } else {
-                currentCategory = params.categoria || 'todos';
-                highlightActiveCategory(currentCategory);
-                await loadArticles();
-            }
-            
-            if (!weatherLoaded) {
-                setTimeout(() => renderWeather(), 300);
-            }
+async function loadFirebaseUser(user) {
+    if (!user) {
+        console.log('❌ Usuário não logado no Firebase');
+        currentUser = null;
+        currentUserIsAdmin = false;
+        currentUserIsBanned = false;
+        document.getElementById('userName').textContent = 'Visitante';
+        document.getElementById('userAvatar').innerHTML = '👤';
+        document.getElementById('authButtons').style.display = 'flex';
+        document.getElementById('userButtons').style.display = 'none';
+        
+        document.getElementById('bannedOverlay').classList.remove('show');
+        document.querySelector('.newspaper-container').style.opacity = '1';
+        document.querySelector('.newspaper-container').style.pointerEvents = 'auto';
+        
+        const params = getUrlParams();
+        if (params.id) {
+            await loadArticleById(params.id);
+        } else {
+            currentCategory = params.categoria || 'todos';
+            highlightActiveCategory(currentCategory);
+            await loadArticles();
+        }
+        
+        if (!weatherLoaded) {
+            setTimeout(() => renderWeather(), 300);
+        }
+        return;
+    }
+    
+    try {
+        console.log('🔄 Carregando usuário do Firebase:', user.uid);
+        
+        currentUser = {
+            uid: user.uid,
+            displayName: user.displayName || 'Usuário',
+            email: user.email || '',
+            photoURL: user.photoURL || '',
+            isGuest: false
+        };
+        
+        // Registra/atualiza o usuário no Firestore
+        await registerUser(user);
+        
+        // VERIFICA BANIMENTO
+        const isBanned = await checkIfUserIsBanned(user);
+        
+        if (isBanned) {
+            console.log('🚫 Usuário banido!');
+            currentUserIsBanned = true;
+            showBannedScreen('Sua conta foi banida por violação das políticas de uso.');
+            document.querySelector('.newspaper-container').style.opacity = '0.5';
+            document.querySelector('.newspaper-container').style.pointerEvents = 'none';
             return;
         }
         
-        try {
-            currentUser = {
-                uid: user.uid,
-                displayName: user.displayName || 'Usuário',
-                email: user.email || '',
-                photoURL: user.photoURL || '',
-                isGuest: false
-            };
-            
-            // Registra/atualiza o usuário no Firestore
-            await registerUser(user);
-            
-            // VERIFICA BANIMENTO PRIMEIRO
-            currentUserIsBanned = await checkIfUserIsBanned(user);
-            
-            if (currentUserIsBanned) {
-                showBannedScreen('Sua conta foi banida por violação das políticas de uso.');
-                document.querySelector('.newspaper-container').style.opacity = '0.5';
-                document.querySelector('.newspaper-container').style.pointerEvents = 'none';
-                return;
-            }
-            
-            // Verifica se é admin
-            currentUserIsAdmin = await checkIfUserIsAdmin(user);
-            
-            // Salva no localStorage para futuras sessões
-            const userData = {
-                uid: user.uid,
-                displayName: user.displayName,
-                email: user.email,
-                photoURL: user.photoURL,
-                isGuest: false
-            };
-            localStorage.setItem('jornal_auth_user', JSON.stringify(userData));
-            localStorage.setItem('jornal_auth_token', 'firebase_' + Date.now());
-            localStorage.setItem('jornal_auth_expiry', (Date.now() + 3600000).toString());
-            
-            // Atualiza UI
-            updateUIAfterLogin();
-            
-            // Carrega conteúdo
-            const params = getUrlParams();
-            if (params.id) {
-                await loadArticleById(params.id);
-            } else {
-                currentCategory = params.categoria || 'todos';
-                highlightActiveCategory(currentCategory);
-                await loadArticles();
-            }
-            
-            if (!weatherLoaded) {
-                setTimeout(() => renderWeather(), 300);
-            }
-            
-        } catch (error) {
-            console.error('❌ Erro ao carregar usuário Firebase:', error);
-            currentUser = null;
-            currentUserIsAdmin = false;
-            currentUserIsBanned = false;
+        currentUserIsBanned = false;
+        
+        // Verifica se é admin
+        currentUserIsAdmin = await checkIfUserIsAdmin(user);
+        
+        // Salva no localStorage para futuras sessões
+        const userData = {
+            uid: user.uid,
+            displayName: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL,
+            isGuest: false
+        };
+        localStorage.setItem('jornal_auth_user', JSON.stringify(userData));
+        localStorage.setItem('jornal_auth_token', 'firebase_' + Date.now());
+        localStorage.setItem('jornal_auth_expiry', (Date.now() + 3600000).toString());
+        
+        // 🔥 ATUALIZA A UI
+        updateUIAfterLogin();
+        
+        // Carrega conteúdo
+        const params = getUrlParams();
+        if (params.id) {
+            await loadArticleById(params.id);
+        } else {
+            currentCategory = params.categoria || 'todos';
+            highlightActiveCategory(currentCategory);
+            await loadArticles();
         }
+        
+        if (!weatherLoaded) {
+            setTimeout(() => renderWeather(), 300);
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar usuário Firebase:', error);
+        currentUser = null;
+        currentUserIsAdmin = false;
+        currentUserIsBanned = false;
     }
+}
 
     // ============================================
     // FUNÇÃO PARA REGISTRAR USUÁRIO
@@ -1374,36 +1424,44 @@
         return false;
     }
 
-    // ============================================
-    // FUNÇÃO PARA ATUALIZAR UI APÓS LOGIN
-    // ============================================
+   // ============================================
+// FUNÇÃO PARA ATUALIZAR UI APÓS LOGIN - CORRIGIDA
+// ============================================
 
-    function updateUIAfterLogin() {
-        if (!currentUser) return;
-        
-        const displayName = currentUser.displayName || currentUser.email?.split('@')[0] || 'Usuário';
-        const photoURL = currentUser.photoURL;
-        
-        document.getElementById('userName').textContent = displayName;
-        
-        if (photoURL) {
-            document.getElementById('userAvatar').innerHTML = `<img src="${photoURL}" alt="Avatar">`;
-        } else {
-            document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
-        }
-        
-        document.getElementById('authButtons').style.display = 'none';
-        document.getElementById('userButtons').style.display = 'flex';
-        
-        const newArticleBtn = document.getElementById('adminNewArticleBtn');
-        if (currentUserIsAdmin) {
-            newArticleBtn.style.display = 'inline-block';
-            console.log('✅ Usuário é ADMIN');
-        } else {
-            newArticleBtn.style.display = 'none';
-            console.log('👤 Usuário comum');
-        }
+function updateUIAfterLogin() {
+    if (!currentUser) {
+        console.log('❌ updateUIAfterLogin: currentUser é null');
+        return;
     }
+    
+    console.log('🔄 Atualizando UI para:', currentUser.displayName);
+    
+    const displayName = currentUser.displayName || currentUser.email?.split('@')[0] || 'Usuário';
+    const photoURL = currentUser.photoURL;
+    
+    document.getElementById('userName').textContent = displayName;
+    
+    if (photoURL) {
+        document.getElementById('userAvatar').innerHTML = `<img src="${photoURL}" alt="Avatar">`;
+    } else {
+        document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
+    }
+    
+    document.getElementById('authButtons').style.display = 'none';
+    document.getElementById('userButtons').style.display = 'flex';
+    
+    const newArticleBtn = document.getElementById('adminNewArticleBtn');
+    if (currentUserIsAdmin) {
+        newArticleBtn.style.display = 'inline-block';
+        console.log('✅ Usuário é ADMIN');
+    } else {
+        newArticleBtn.style.display = 'none';
+        console.log('👤 Usuário comum');
+    }
+    
+    console.log('✅ UI atualizada com sucesso!');
+}
+
 
     // ============================================
     // FUNÇÃO DE LOGOUT
