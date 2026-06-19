@@ -30,7 +30,229 @@
             line-height: 1.5;
         }
 
-        /* Layout do Jornal */
+        /* ===== NOVO HEADER PADRONIZADO ===== */
+        .header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            padding: 12px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+        }
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .logo-area-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+        .logo-area-header img {
+            height: 36px;
+            border-radius: 8px;
+        }
+        .logo-area-header h1 {
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        .logo-area-header small {
+            font-size: 0.65em;
+            opacity: 0.7;
+            display: block;
+            font-weight: 300;
+        }
+        .user-info-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1em;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+            overflow: hidden;
+        }
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .user-avatar:hover { transform: scale(1.05); }
+        .user-name { font-weight: 500; font-size: 0.85em; }
+        .user-email { font-size: 0.7em; opacity: 0.7; }
+        .btn-logout {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.75em;
+            transition: all 0.2s;
+        }
+        .btn-logout:hover { background: rgba(255,255,255,0.2); }
+        .btn-login {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.75em;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-login:hover { background: rgba(255,255,255,0.25); }
+        .badge-admin {
+            background: #e94560;
+            color: white;
+            font-size: 0.55em;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-banned {
+            background: #dc3545;
+            color: white;
+            font-size: 0.55em;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* NOTIFICATION BELL */
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 30px;
+            transition: background 0.2s;
+        }
+        .notification-bell:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .notification-bell .material-icons {
+            font-size: 20px;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #e94560;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 9px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #1a1a2e;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 340px;
+            max-height: 350px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 200;
+        }
+        .notification-dropdown.show {
+            display: block;
+        }
+        .notification-dropdown-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .notification-dropdown-header h3 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+        .notification-dropdown-header button {
+            background: none;
+            border: none;
+            color: #4a6cf7;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .notification-item {
+            padding: 10px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .notification-item:hover {
+            background: #f8f9fa;
+        }
+        .notification-item.unread {
+            background: #eef2ff;
+            border-left: 3px solid #4a6cf7;
+        }
+        .notification-item .notif-title {
+            font-weight: 600;
+            font-size: 12px;
+            color: #1a1a2e;
+        }
+        .notification-item .notif-message {
+            font-size: 11px;
+            color: #666;
+            margin-top: 3px;
+        }
+        .notification-item .notif-time {
+            font-size: 10px;
+            color: #999;
+            margin-top: 3px;
+        }
+        .notification-empty {
+            padding: 20px;
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+        }
+        .notification-empty .material-icons {
+            font-size: 36px;
+            opacity: 0.4;
+        }
+
+        /* ===== FIM HEADER ===== */
+
         .newspaper-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -38,7 +260,7 @@
             box-shadow: 0 0 30px rgba(0,0,0,0.15);
         }
 
-        /* CABEÇALHO PADRONIZADO */
+        /* CABEÇALHO DO JORNAL */
         .newspaper-header {
             border-bottom: 4px solid #c0392b;
             background: white;
@@ -134,129 +356,6 @@
         }
 
         .nav-menu a:hover, .nav-menu a.active {
-            background: #c0392b;
-        }
-
-        /* Barra de usuário */
-        .user-bar {
-            background: #2c3e50;
-            padding: 8px 30px;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: white;
-            font-size: 13px;
-        }
-
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #c0392b;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        .user-avatar img {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .btn {
-            padding: 6px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .btn-google {
-            background: #4285F4;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-google:hover {
-            background: #357ae8;
-        }
-
-        .btn-primary {
-            background: #c0392b;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #a93226;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid white;
-            color: white;
-        }
-
-        .btn-outline:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        .btn-warning {
-            background: #e67e22;
-            color: white;
-        }
-
-        .btn-danger {
-            background: #c0392b;
-            color: white;
-        }
-
-        .btn-share {
-            background: #1a3c5e;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 8px 16px;
-            font-size: 12px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-share:hover {
-            background: #c0392b;
-        }
-
-        /* Botão de logout para usuários comuns */
-        .btn-logout-user {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 6px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .btn-logout-user:hover {
             background: #c0392b;
         }
 
@@ -474,51 +573,6 @@
             font-size: 12px;
         }
 
-        .google-login-btn {
-            background: #4285F4;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .google-login-btn:hover {
-            background: #357ae8;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-family: inherit;
-        }
-
-        .form-group textarea {
-            min-height: 200px;
-            resize: vertical;
-        }
-
         .btn-close {
             background: #666;
             color: white;
@@ -548,33 +602,6 @@
 
         @keyframes spin {
             to { transform: rotate(360deg); }
-        }
-
-        /* Footer */
-        .newspaper-footer {
-            background: #1a1a1a;
-            color: #aaa;
-            text-align: center;
-            padding: 25px;
-            font-size: 12px;
-            border-top: 3px solid #c0392b;
-        }
-
-        .newspaper-footer a {
-            color: #ddd;
-            text-decoration: none;
-        }
-
-        .newspaper-footer a:hover {
-            color: #c0392b;
-        }
-
-        .footer-links {
-            margin-top: 15px;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 20px;
         }
 
         /* ===== PREVISÃO DO TEMPO ===== */
@@ -705,53 +732,6 @@
             margin-bottom: 8px;
         }
 
-        /* Responsividade */
-        @media (max-width: 992px) {
-            .newspaper-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-                padding: 20px;
-            }
-            .newspaper-name {
-                font-size: 48px;
-            }
-            .main-article .article-title {
-                font-size: 28px;
-            }
-            .weather-details {
-                grid-template-columns: 1fr 1fr 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .issue-info {
-                flex-direction: column;
-                align-items: center;
-            }
-            .newspaper-name {
-                font-size: 36px;
-            }
-            .nav-menu a {
-                padding: 10px 15px;
-                font-size: 11px;
-            }
-            .user-bar {
-                padding: 8px 15px;
-            }
-            .btn {
-                font-size: 10px;
-                padding: 4px 10px;
-            }
-            .weather-main {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 10px;
-            }
-            .weather-main .weather-temp {
-                font-size: 28px;
-            }
-        }
-
         /* Toast */
         .toast {
             position: fixed;
@@ -772,6 +752,135 @@
             15% { opacity: 1; transform: translateX(-50%) translateY(0); }
             85% { opacity: 1; transform: translateX(-50%) translateY(0); }
             100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
+
+        /* ===== FOOTER PADRONIZADO ===== */
+        .site-footer {
+            background: #1a1a1a;
+            color: #aaa;
+            text-align: center;
+            padding: 25px 20px;
+            font-size: 12px;
+            border-top: 3px solid #c0392b;
+            margin-top: 30px;
+        }
+
+        .site-footer a {
+            color: #ddd;
+            text-decoration: none;
+        }
+
+        .site-footer a:hover {
+            color: #c0392b;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .footer-link {
+            color: #ddd !important;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-link:hover {
+            color: #c0392b !important;
+        }
+
+        .footer-link.highlight {
+            color: #ffb347 !important;
+        }
+
+        .footer-link.highlight:hover {
+            color: #ff9500 !important;
+        }
+
+        .footer-divider {
+            color: #444;
+            margin: 0 4px;
+        }
+
+        .footer-copyright {
+            color: #666;
+            font-size: 10px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #222;
+        }
+
+        /* Responsividade */
+        @media (max-width: 992px) {
+            .newspaper-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+            .newspaper-name {
+                font-size: 48px;
+            }
+            .main-article .article-title {
+                font-size: 28px;
+            }
+            .weather-details {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .user-info-header {
+                justify-content: space-between;
+            }
+            .notification-dropdown {
+                width: 300px;
+                right: -20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .issue-info {
+                flex-direction: column;
+                align-items: center;
+            }
+            .newspaper-name {
+                font-size: 36px;
+            }
+            .nav-menu a {
+                padding: 10px 15px;
+                font-size: 11px;
+            }
+            .weather-main {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+            .weather-main .weather-temp {
+                font-size: 28px;
+            }
+            .footer-links {
+                gap: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .user-name, .user-email { display: none; }
+            .notification-dropdown {
+                width: calc(100vw - 40px);
+                right: -10px;
+            }
+            .footer-links {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .footer-divider {
+                display: none;
+            }
         }
 
         /* BANNED OVERLAY */
@@ -863,36 +972,58 @@
     </div>
 </div>
 
+<!-- ===== NOVO HEADER PADRONIZADO ===== -->
+<header class="header">
+    <div class="header-content">
+        <div class="logo-area-header" onclick="navigateToHome()">
+            <img src="https://wazzimagiygg.com/favicom.png" alt="Logo">
+            <div>
+                <h1>WazzimaGiygg</h1>
+                <small>Jornal</small>
+            </div>
+        </div>
+        <div class="user-info-header" id="userInfo">
+            <div class="user-avatar" id="userAvatar">👤</div>
+            <div>
+                <div class="user-name" id="userName">Carregando...</div>
+                <div class="user-email" id="userEmail">aguarde</div>
+            </div>
+            <span id="userBadge"></span>
+            
+            <!-- NOTIFICATION BELL -->
+            <div class="notification-bell" id="notificationBell" onclick="toggleNotifications(event)">
+                <span class="material-icons">notifications</span>
+                <span class="notification-badge" id="notifBadge" style="display:none;">0</span>
+                <div class="notification-dropdown" id="notifDropdown">
+                    <div class="notification-dropdown-header">
+                        <h3>🔔 Notificações</h3>
+                        <button onclick="markAllAsRead(event)">Marcar todas como lidas</button>
+                    </div>
+                    <div id="notificationList">
+                        <div class="notification-empty">
+                            <span class="material-icons">notifications_off</span>
+                            <p>Nenhuma notificação</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="btn-logout" id="btnLogout" style="display:none;">Sair</button>
+            <button class="btn-login" id="btnLogin" onclick="showLoginModal()">
+                <span class="material-icons" style="font-size:16px;">person</span> Entrar
+            </button>
+        </div>
+    </div>
+</header>
+
 <div class="newspaper-container">
-    <!-- CABEÇALHO -->
+    <!-- CABEÇALHO DO JORNAL -->
     <div class="newspaper-header">
         <div class="newspaper-name" onclick="navigateToHome()">WAZZIMA<span>GIYGG</span></div>
         <div class="newspaper-motto">O JORNAL INEVITÁVEL!</div>
         <div class="issue-info">
             <span class="issue-date"><i class="far fa-calendar-alt"></i> <span id="currentDate"></span></span>
             <span><i class="fas fa-map-marker-alt"></i> Santa Fé do Sul - São Paulo - Brazil</span>
-        </div>
-    </div>
-
-    <!-- Barra de Usuário -->
-    <div class="user-bar">
-        <div class="user-info" id="userInfo">
-            <div class="user-avatar" id="userAvatar">👤</div>
-            <span id="userName">Visitante</span>
-        </div>
-        <div id="authButtons">
-            <button class="btn btn-google" onclick="loginWithGoogle()">
-                <i class="fab fa-google"></i> Entrar com Google
-            </button>
-        </div>
-        <!-- Botões para usuários logados (comuns e admin) -->
-        <div id="userButtons" style="display: none;">
-            <button class="btn btn-primary" onclick="showNewArticleModal()" id="adminNewArticleBtn" style="display: none;">
-                <i class="fas fa-plus"></i> Nova Matéria
-            </button>
-            <button class="btn btn-logout-user" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> Sair
-            </button>
         </div>
     </div>
 
@@ -919,27 +1050,36 @@
     <div class="newspaper-grid" id="newspaperGrid">
         <!-- O conteúdo será carregado pelo JavaScript -->
     </div>
-
-    <!-- Rodapé -->
-    <div class="newspaper-footer">
-        <p><strong>WAZZIMAGIYGG CORE</strong> — O Jornal da Verdade</p>
-        <div class="footer-links">
-            <a href="https://wazzimagiygg.com/LGPD/">Política de Privacidade (LGPD)</a>
-            <a href="https://wazzimagiygg.com/LGPD/">Marco Civil da Internet</a>
-            <a href="https://wazzimagiygg.com/averdade/">Relatório Completo sobre abusos da Wikipédia contra WazzimaGiygg</a>
-            <a href="https://support.wazzimagiygg.com/">🎫 Contato por Ticket</a>
-            <a href="https://wazzimagiygg.com/produtos/" style="color: #c0392b;">🛍️ Produtos WazzimaGiygg</a>
-        </div>
-        <p style="margin-top: 15px; font-size: 10px;">© 2026 WazzimaGiygg Core</p>
-    </div>
 </div>
 
-<!-- Modal Login com Google -->
+<!-- ===== FOOTER PADRONIZADO ===== -->
+<footer class="site-footer">
+    <div class="footer-links">
+        <a href="https://wazzimagiygg.com/donate/" class="footer-link" target="_blank">💝 Doação</a>
+        <span class="footer-divider">|</span>
+        <a href="https://wazzimagiygg.com/desktop.html" class="footer-link" target="_blank">🖥️ Desktop</a>
+        <span class="footer-divider">|</span>
+        <a href="https://wazzimagiygg.com/LGPD" class="footer-link" target="_blank">🔒 LGPD</a>
+        <span class="footer-divider">|</span>
+        <a href="https://wazzimagiygg.com/MarcoCivil" class="footer-link" target="_blank">📜 Marco Civil</a>
+        <span class="footer-divider">|</span>
+        <a href="https://support.wazzimagiygg.com/" class="footer-link" target="_blank">🎫 Ticket</a>
+        <span class="footer-divider">|</span>
+        <a href="https://wazzimagiygg.com/produtos/" class="footer-link highlight" target="_blank">🛍️ Produtos</a>
+        <span class="footer-divider">|</span>
+        <a href="https://painel.wazzimagiygg.com/" class="footer-link highlight" target="_blank">👤 Sua conta</a>
+    </div>
+    <div class="footer-copyright">
+        © 2026 WazzimaGiygg Core — O Jornal da Verdade
+    </div>
+</footer>
+
+<!-- Modal Login -->
 <div id="loginModal" class="modal">
     <div class="modal-content">
         <h2><i class="fab fa-google"></i> Entrar com Google</h2>
         <p>Faça login com sua conta Google para acessar recursos administrativos.</p>
-        <button class="google-login-btn" onclick="loginWithGoogle()">
+        <button class="btn btn-primary" onclick="loginWithGoogle()" style="width:100%;">
             <i class="fab fa-google"></i> Entrar com Google
         </button>
         <button class="btn-close" onclick="closeModals()">Fechar</button>
@@ -1054,6 +1194,9 @@
     let currentViewArticleId = null;
     let currentViewArticleData = null;
     let weatherLoaded = false;
+    let notifications = [];
+    let unreadCount = 0;
+    let notificationListener = null;
 
     // IDs dos administradores específicos
     const SPECIFIC_ADMIN_UID = "sZxfMuOBPbXdR8nttVPXIN8QOOl1";
@@ -1065,11 +1208,9 @@
         try {
             const uid = user.uid;
             
-            // Primeiro, verifica se o usuário já existe no Firestore
             const userDoc = await db.collection('users').doc(uid).get();
             const existingData = userDoc.exists ? userDoc.data() : {};
             
-            // Preserva o valor de isAdmin se já existir
             let isAdminValue = false;
             if (uid === SPECIFIC_ADMIN_UID) {
                 isAdminValue = true;
@@ -1077,7 +1218,6 @@
                 isAdminValue = true;
             }
             
-            // Preserva o valor de isBanned
             let isBannedValue = existingData.isBanned || false;
             
             const userData = {
@@ -1095,10 +1235,7 @@
                 lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            // Registra/atualiza na coleção 'users'
             await db.collection('users').doc(uid).set(userData, { merge: true });
-            
-            // Registra/atualiza na coleção 'usuários'
             await db.collection('usuários').doc(uid).set(userData, { merge: true });
 
             console.log(`Usuário ${uid} registrado/atualizado. isAdmin: ${isAdminValue}, isBanned: ${isBannedValue}`);
@@ -1109,19 +1246,301 @@
         }
     }
 
-    // Data atual
-    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('pt-BR', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    // ============================================
+    // NOTIFICAÇÕES
+    // ============================================
+
+    async function loadNotifications() {
+        if (!currentUser) return;
+        
+        try {
+            const snapshot = await db.collection('notifications')
+                .where('userId', '==', currentUser.uid)
+                .orderBy('timestamp', 'desc')
+                .limit(50)
+                .get();
+            
+            notifications = [];
+            snapshot.forEach(doc => {
+                notifications.push({ 
+                    id: doc.id, 
+                    ...doc.data(),
+                    timestamp: doc.data().timestamp || new Date()
+                });
+            });
+            
+            notifications.sort((a, b) => {
+                const dateA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+                const dateB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+                return dateB - dateA;
+            });
+            
+            unreadCount = notifications.filter(n => !n.lida).length;
+            updateNotificationBadge();
+            renderNotifications();
+            
+        } catch (error) {
+            console.error('Erro ao carregar notificações:', error);
+        }
+    }
+
+    function updateNotificationBadge() {
+        if (unreadCount > 0) {
+            notifBadge.style.display = 'flex';
+            notifBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+        } else {
+            notifBadge.style.display = 'none';
+        }
+    }
+
+    function renderNotifications() {
+        if (!notificationList) return;
+        
+        if (notifications.length === 0) {
+            notificationList.innerHTML = `
+                <div class="notification-empty">
+                    <span class="material-icons">notifications_off</span>
+                    <p>Nenhuma notificação</p>
+                </div>
+            `;
+            return;
+        }
+        
+        const recentNotifs = notifications.slice(0, 10);
+        
+        notificationList.innerHTML = recentNotifs.map(notif => `
+            <div class="notification-item ${notif.lida ? '' : 'unread'}" onclick="markAsRead('${notif.id}')">
+                <div class="notif-title">${escapeHtml(notif.titulo || 'Notificação')}</div>
+                <div class="notif-message">${escapeHtml(notif.mensagem || '')}</div>
+                <div class="notif-time">${getTimeAgo(notif.timestamp)}</div>
+            </div>
+        `).join('');
+    }
+
+    async function markAsRead(notificationId) {
+        if (!notificationId) return;
+        
+        try {
+            await db.collection('notifications').doc(notificationId).update({
+                lida: true
+            });
+            
+            const notif = notifications.find(n => n.id === notificationId);
+            if (notif && !notif.lida) {
+                notif.lida = true;
+                unreadCount--;
+                updateNotificationBadge();
+                renderNotifications();
+            }
+        } catch (error) {
+            console.error('❌ Erro ao marcar como lida:', error);
+        }
+    }
+
+    async function markAllAsRead(event) {
+        if (event) event.stopPropagation();
+        
+        if (unreadCount === 0) return;
+        
+        try {
+            const batch = db.batch();
+            const unreadNotifs = notifications.filter(n => !n.lida);
+            
+            unreadNotifs.forEach(notif => {
+                const ref = db.collection('notifications').doc(notif.id);
+                batch.update(ref, { lida: true });
+            });
+            
+            await batch.commit();
+            
+            notifications.forEach(n => n.lida = true);
+            unreadCount = 0;
+            updateNotificationBadge();
+            renderNotifications();
+        } catch (error) {
+            console.error('❌ Erro ao marcar todas como lidas:', error);
+        }
+    }
+
+    function toggleNotifications(event) {
+        if (event) event.stopPropagation();
+        if (notifDropdown) {
+            notifDropdown.classList.toggle('show');
+            if (notifDropdown.classList.contains('show')) {
+                loadNotifications();
+            }
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.notification-bell')) {
+            if (notifDropdown) {
+                notifDropdown.classList.remove('show');
+            }
+        }
     });
 
-    function showToast(message, isError = false) {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.style.background = isError ? '#c0392b' : '#27ae60';
-        toast.style.display = 'block';
-        setTimeout(() => {
-            toast.style.display = 'none';
-        }, 3000);
+    function listenNotifications() {
+        if (notificationListener) {
+            notificationListener();
+            notificationListener = null;
+        }
+        
+        if (!currentUser) return;
+        
+        notificationListener = db.collection('notifications')
+            .where('userId', '==', currentUser.uid)
+            .orderBy('timestamp', 'desc')
+            .limit(50)
+            .onSnapshot((snapshot) => {
+                notifications = [];
+                snapshot.forEach(doc => {
+                    notifications.push({ 
+                        id: doc.id, 
+                        ...doc.data(),
+                        timestamp: doc.data().timestamp || new Date()
+                    });
+                });
+                
+                notifications.sort((a, b) => {
+                    const dateA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+                    const dateB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+                    return dateB - dateA;
+                });
+                
+                unreadCount = notifications.filter(n => !n.lida).length;
+                updateNotificationBadge();
+                renderNotifications();
+            }, (error) => {
+                console.error('❌ Erro no listener de notificações:', error);
+            });
+    }
+
+    // ============================================
+    // UTILIDADES
+    // ============================================
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function getTimeAgo(date) {
+        if (!date) return '';
+        if (date.toDate) date = date.toDate();
+        const seconds = Math.floor((new Date() - date) / 1000);
+        if (seconds < 60) return 'agora';
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h`;
+        const days = Math.floor(hours / 24);
+        return `${days}d`;
+    }
+
+    function getInitials(name) {
+        if (!name) return '?';
+        const parts = name.trim().split(' ');
+        if (parts.length >= 2) return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+        return name.substring(0, 2).toUpperCase();
+    }
+
+    // ============================================
+    // AUTENTICAÇÃO
+    // ============================================
+
+    function updateUI() {
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
+        const userBadge = document.getElementById('userBadge');
+        const btnLogin = document.getElementById('btnLogin');
+        const btnLogout = document.getElementById('btnLogout');
+        
+        if (currentUser && !currentUserIsBanned) {
+            let name = currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Usuário');
+            
+            if (currentUser.photoURL) {
+                userAvatar.innerHTML = `<img src="${currentUser.photoURL}" alt="Avatar">`;
+            } else {
+                userAvatar.textContent = getInitials(name);
+            }
+            
+            userName.textContent = name.length > 20 ? name.substring(0,17)+'...' : name;
+            userEmail.textContent = currentUser.email || '';
+            
+            let badges = '';
+            if (currentUserIsBanned) badges += '<span class="badge-banned">🚫 Banido</span> ';
+            if (currentUserIsAdmin) badges += '<span class="badge-admin">Admin</span> ';
+            userBadge.innerHTML = badges;
+            
+            btnLogin.style.display = 'none';
+            btnLogout.style.display = 'inline-block';
+        } else {
+            userAvatar.innerHTML = '👤';
+            userName.textContent = 'Visitante';
+            userEmail.textContent = '';
+            userBadge.innerHTML = '';
+            btnLogin.style.display = 'inline-block';
+            btnLogout.style.display = 'none';
+        }
+    }
+
+    function showLoginModal() { document.getElementById('loginModal').classList.add('show'); }
+    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('show')); }
+
+    async function loginWithGoogle() {
+        try {
+            const result = await auth.signInWithPopup(googleProvider);
+            const user = result.user;
+            
+            await registerUser(user);
+            
+            // Verifica banimento
+            currentUserIsBanned = await checkIfUserIsBanned(user);
+            
+            if (currentUserIsBanned) {
+                showBannedScreen('Sua conta foi banida por violação das políticas de uso.');
+                await auth.signOut();
+                updateUI();
+                return;
+            }
+            
+            currentUserIsAdmin = await checkIfUserIsAdmin(user);
+            
+            updateUI();
+            closeModals();
+            await loadNotifications();
+            listenNotifications();
+            location.reload();
+        } catch (error) {
+            console.error("Erro no login com Google:", error);
+            showToast('Erro ao fazer login: ' + error.message, true);
+        }
+    }
+
+    async function logout() {
+        try {
+            await auth.signOut();
+            currentUser = null;
+            currentUserIsAdmin = false;
+            currentUserIsBanned = false;
+            if (notificationListener) {
+                notificationListener();
+                notificationListener = null;
+            }
+            notifications = [];
+            unreadCount = 0;
+            updateNotificationBadge();
+            updateUI();
+            showToast('Logout realizado com sucesso!');
+            setTimeout(() => navigateToHome(), 500);
+        } catch (error) {
+            console.error("Erro ao fazer logout:", error);
+            showToast('Erro ao sair: ' + error.message, true);
+        }
     }
 
     // ==================== VERIFICAÇÃO DE BANIMENTO ====================
@@ -1129,7 +1548,6 @@
         if (!user) return false;
         
         try {
-            // Tenta buscar da coleção 'users'
             const userDoc = await db.collection('users').doc(user.uid).get();
             if (userDoc.exists) {
                 const data = userDoc.data();
@@ -1142,22 +1560,39 @@
         return false;
     }
 
-    // ==================== FUNÇÃO PARA USUÁRIO BANIDO ====================
     function showBannedScreen(reason = 'Violação das políticas de uso') {
         const overlay = document.getElementById('bannedOverlay');
         const details = document.getElementById('banDetails');
         details.textContent = `Motivo: ${reason}`;
         overlay.classList.add('show');
-        
-        // Esconde o conteúdo principal
         document.querySelector('.newspaper-container').style.opacity = '0.5';
         document.querySelector('.newspaper-container').style.pointerEvents = 'none';
+        document.querySelector('.header').style.opacity = '0.3';
+        document.querySelector('.header').style.pointerEvents = 'none';
+        document.querySelector('.site-footer').style.opacity = '0.3';
+        document.querySelector('.site-footer').style.pointerEvents = 'none';
     }
 
     function logoutBanned() {
-        auth.signOut().then(() => {
-            location.reload();
-        });
+        auth.signOut().then(() => location.reload());
+    }
+
+    // ==================== VERIFICAÇÃO DE ADMIN ====================
+    async function checkIfUserIsAdmin(user) {
+        if (!user) return false;
+        
+        if (user.uid === SPECIFIC_ADMIN_UID) return true;
+        
+        try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists && userDoc.data().isAdmin === true) {
+                return true;
+            }
+        } catch (error) {
+            console.log("Erro ao verificar admin:", error);
+        }
+        
+        return false;
     }
 
     // ==================== NAVEGAÇÃO POR URL ====================
@@ -1192,60 +1627,10 @@
         window.location.href = window.location.pathname;
     }
 
-    // ==================== VERIFICAÇÃO DE ADMIN ====================
-    async function checkIfUserIsAdmin(user) {
-        if (!user) return false;
-        
-        if (user.uid === SPECIFIC_ADMIN_UID) return true;
-        
-        try {
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (userDoc.exists && userDoc.data().isAdmin === true) {
-                return true;
-            }
-        } catch (error) {
-            console.log("Erro ao verificar admin:", error);
-        }
-        
-        return false;
-    }
-
-    // ==================== AUTENTICAÇÃO COM GOOGLE ====================
-    async function loginWithGoogle() {
-        try {
-            const result = await auth.signInWithPopup(googleProvider);
-            const user = result.user;
-            
-            // Registra/atualiza o usuário no Firestore
-            await registerUser(user);
-            
-            showToast(`Bem-vindo, ${user.displayName || user.email}!`);
-            closeModals();
-            location.reload();
-        } catch (error) {
-            console.error("Erro no login com Google:", error);
-            showToast('Erro ao fazer login: ' + error.message, true);
-        }
-    }
-
-    async function logout() {
-        try {
-            await auth.signOut();
-            showToast('Logout realizado com sucesso!');
-            setTimeout(() => {
-                navigateToHome();
-            }, 500);
-        } catch (error) {
-            console.error("Erro ao fazer logout:", error);
-            showToast('Erro ao sair: ' + error.message, true);
-        }
-    }
-
     // ============================================
     // PREVISÃO DO TEMPO
     // ============================================
     async function fetchWeather() {
-        // Coordenadas de Santa Fé do Sul - SP
         const lat = -20.2345;
         const lon = -50.9253;
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=America/Sao_Paulo`;
@@ -1332,10 +1717,8 @@
     }
 
     async function renderWeather() {
-        // Verifica se já existe um widget para evitar duplicação
         const existingWidget = document.getElementById('weatherWidget');
         if (existingWidget) {
-            // Se já existe, apenas atualiza o conteúdo
             await updateWeatherContent(existingWidget);
             return;
         }
@@ -1355,7 +1738,6 @@
             </div>
         `;
         
-        // Insere o widget na sidebar direita
         const rightSidebar = document.querySelector('.sidebar-right');
         if (rightSidebar) {
             rightSidebar.insertBefore(weatherContainer, rightSidebar.firstChild);
@@ -1435,64 +1817,26 @@
         if (user) {
             currentUser = user;
             
-            // Registra/atualiza o usuário no Firestore
-            const userData = await registerUser(user);
+            await registerUser(user);
             
-            // VERIFICA BANIMENTO PRIMEIRO
             currentUserIsBanned = await checkIfUserIsBanned(user);
             
             if (currentUserIsBanned) {
-                // Usuário banido - mostra tela de bloqueio
                 showBannedScreen('Sua conta foi banida por violação das políticas de uso.');
-                // Não carrega o conteúdo
+                await auth.signOut();
+                updateUI();
                 return;
             }
             
-            // Verifica se é admin
             currentUserIsAdmin = await checkIfUserIsAdmin(user);
-            if (userData && userData.isAdmin === true) {
-                currentUserIsAdmin = true;
-            }
             
-            const displayName = user.displayName || user.email?.split('@')[0] || 'Usuário';
-            const photoURL = user.photoURL;
+            updateUI();
             
-            document.getElementById('userName').textContent = displayName;
+            // Carregar notificações
+            await loadNotifications();
+            listenNotifications();
             
-            if (photoURL) {
-                document.getElementById('userAvatar').innerHTML = `<img src="${photoURL}" alt="Avatar">`;
-            } else {
-                document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
-            }
-            
-            document.getElementById('authButtons').style.display = 'none';
-            document.getElementById('userButtons').style.display = 'flex';
-            
-            const newArticleBtn = document.getElementById('adminNewArticleBtn');
-            if (currentUserIsAdmin) {
-                newArticleBtn.style.display = 'inline-block';
-                console.log('✅ Usuário é ADMIN');
-            } else {
-                newArticleBtn.style.display = 'none';
-                console.log('👤 Usuário comum');
-            }
-        } else {
-            currentUser = null;
-            currentUserIsAdmin = false;
-            currentUserIsBanned = false;
-            document.getElementById('userName').textContent = 'Visitante';
-            document.getElementById('userAvatar').innerHTML = '👤';
-            document.getElementById('authButtons').style.display = 'flex';
-            document.getElementById('userButtons').style.display = 'none';
-            
-            // Remove overlay de banido se estiver ativo
-            document.getElementById('bannedOverlay').classList.remove('show');
-            document.querySelector('.newspaper-container').style.opacity = '1';
-            document.querySelector('.newspaper-container').style.pointerEvents = 'auto';
-        }
-        
-        // Carregar conteúdo (apenas se não estiver banido)
-        if (!currentUserIsBanned) {
+            // Carregar conteúdo
             const params = getUrlParams();
             if (params.id) {
                 await loadArticleById(params.id);
@@ -1506,12 +1850,46 @@
                 await loadArticles();
             }
             
-            // Carrega a previsão do tempo (apenas se ainda não foi carregada)
             if (!weatherLoaded) {
-                // Aguarda um pequeno delay para garantir que a sidebar foi renderizada
-                setTimeout(() => {
-                    renderWeather();
-                }, 300);
+                setTimeout(() => renderWeather(), 300);
+            }
+        } else {
+            currentUser = null;
+            currentUserIsAdmin = false;
+            currentUserIsBanned = false;
+            updateUI();
+            
+            document.getElementById('bannedOverlay').classList.remove('show');
+            document.querySelector('.newspaper-container').style.opacity = '1';
+            document.querySelector('.newspaper-container').style.pointerEvents = 'auto';
+            document.querySelector('.header').style.opacity = '1';
+            document.querySelector('.header').style.pointerEvents = 'auto';
+            document.querySelector('.site-footer').style.opacity = '1';
+            document.querySelector('.site-footer').style.pointerEvents = 'auto';
+            
+            if (notificationListener) {
+                notificationListener();
+                notificationListener = null;
+            }
+            notifications = [];
+            unreadCount = 0;
+            updateNotificationBadge();
+            
+            const params = getUrlParams();
+            if (params.id) {
+                await loadArticleById(params.id);
+            } else if (params.categoria) {
+                currentCategory = params.categoria;
+                highlightActiveCategory(currentCategory);
+                await loadArticles();
+            } else {
+                currentCategory = 'todos';
+                highlightActiveCategory('todos');
+                await loadArticles();
+            }
+            
+            if (!weatherLoaded) {
+                setTimeout(() => renderWeather(), 300);
             }
         }
     });
@@ -1523,7 +1901,9 @@
         });
     }
 
-    // ==================== CARREGAR MATÉRIA POR ID ====================
+    // ============================================
+    // CARREGAR MATÉRIA POR ID
+    // ============================================
     async function loadArticleById(articleId) {
         const grid = document.getElementById('newspaperGrid');
         grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando matéria...</p></div>';
@@ -1586,7 +1966,7 @@
                         <button class="btn-share" onclick="showShareModal()">
                             <i class="fas fa-share-alt"></i> Compartilhar esta matéria
                         </button>
-                        <button class="btn-outline" onclick="navigateToHome()" style="background: #1a3c5e; color: white; border: none;">
+                        <button class="btn-outline" onclick="navigateToHome()" style="background: #1a3c5e; color: white; border: none; padding: 8px 20px; border-radius: 30px;">
                             <i class="fas fa-home"></i> Voltar para página inicial
                         </button>
                     </div>
@@ -1594,13 +1974,12 @@
             </div>
         `;
         
-        // Renderiza a previsão do tempo na sidebar direita
-        setTimeout(() => {
-            renderWeather();
-        }, 300);
+        setTimeout(() => renderWeather(), 300);
     }
 
-    // ==================== ARTIGOS ====================
+    // ============================================
+    // ARTIGOS
+    // ============================================
     async function loadArticles() {
         const grid = document.getElementById('newspaperGrid');
         grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando notícias...</p></div>';
@@ -1707,10 +2086,7 @@
             <div class="sidebar-right">${rightHtml || '<div class="article-card"><p>📭 Aguardem novas publicações...</p></div>'}</div>
         `;
         
-        // Renderiza a previsão do tempo na sidebar direita
-        setTimeout(() => {
-            renderWeather();
-        }, 300);
+        setTimeout(() => renderWeather(), 300);
     }
 
     window.openArticleById = function(articleId) {
@@ -1718,7 +2094,9 @@
         loadArticleById(articleId);
     };
 
-    // ==================== COMPARTILHAMENTO ====================
+    // ============================================
+    // COMPARTILHAMENTO
+    // ============================================
     function getCurrentArticleUrl() {
         if (currentViewArticleId) {
             return `${window.location.origin}${window.location.pathname}?id=${currentViewArticleId}`;
@@ -1742,7 +2120,9 @@
         });
     };
 
-    // ==================== EDIÇÃO DE ARTIGOS ====================
+    // ============================================
+    // EDIÇÃO DE ARTIGOS
+    // ============================================
     window.editArticle = async function(articleId) {
         if (!currentUserIsAdmin) {
             showToast('Apenas administradores podem editar matérias!', true);
@@ -1800,16 +2180,12 @@
 
     window.editCurrentArticle = function() {
         closeModals();
-        setTimeout(() => {
-            editArticle(currentViewArticleId);
-        }, 300);
+        setTimeout(() => editArticle(currentViewArticleId), 300);
     };
 
     window.deleteCurrentArticle = function() {
         closeModals();
-        setTimeout(() => {
-            deleteArticle(currentViewArticleId);
-        }, 300);
+        setTimeout(() => deleteArticle(currentViewArticleId), 300);
     };
 
     async function saveArticle() {
@@ -1863,13 +2239,6 @@
         document.getElementById('articleImage').value = '';
     }
 
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
     window.filterByCategory = function(category) {
         currentCategory = category;
         updateUrl(category);
@@ -1909,10 +2278,24 @@
         }
     };
 
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.background = isError ? '#c0392b' : '#27ae60';
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 3000);
+    }
+
+    // Data atual
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('pt-BR', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
     // Expor funções globalmente
     window.logoutBanned = logoutBanned;
     window.logout = logout;
     window.loginWithGoogle = loginWithGoogle;
+    window.navigateToHome = navigateToHome;
 </script>
 
 <!-- Iframe do verificador/logs -->
