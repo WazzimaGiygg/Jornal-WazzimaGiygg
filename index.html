@@ -325,6 +325,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            overflow-x: auto;
         }
 
         .nav-menu ul {
@@ -335,6 +336,7 @@
             gap: 0;
             margin: 0;
             padding: 0;
+            min-width: max-content;
         }
 
         .nav-menu li {
@@ -356,10 +358,21 @@
             letter-spacing: 0.5px;
             transition: background 0.2s;
             cursor: pointer;
+            white-space: nowrap;
         }
 
         .nav-menu a:hover, .nav-menu a.active {
             background: #c0392b;
+        }
+
+        .nav-menu a.admin-btn {
+            background: #c0392b;
+            color: white;
+            font-weight: 700;
+        }
+
+        .nav-menu a.admin-btn:hover {
+            background: #e74c3c;
         }
 
         /* Layout de 3 colunas */
@@ -984,6 +997,9 @@
                 width: 300px;
                 right: -20px;
             }
+            .nav-menu ul {
+                justify-content: flex-start;
+            }
         }
 
         @media (max-width: 768px) {
@@ -1023,6 +1039,10 @@
             }
             .footer-divider {
                 display: none;
+            }
+            .nav-menu a {
+                padding: 8px 12px;
+                font-size: 10px;
             }
         }
 
@@ -1186,6 +1206,12 @@
             <li><a onclick="filterByCategory('redes-sociais')" data-cat="redes-sociais">📱 REDES SOCIAIS</a></li>
             <li><a onclick="filterByCategory('saúde')" data-cat="saúde">🏥 SAÚDE</a></li>
             <li><a onclick="filterByCategory('educação')" data-cat="educação">📚 EDUCAÇÃO</a></li>
+            <!-- Botão Nova Matéria - visível apenas para administradores -->
+            <li id="adminNewArticleBtn" style="display:none; border-left: 2px solid rgba(255,255,255,0.3);">
+                <a onclick="showNewArticleModal()" class="admin-btn" style="background: #c0392b; color: white; font-weight: 700; padding: 12px 24px;">
+                    ✏️ NOVA MATÉRIA
+                </a>
+            </li>
         </ul>
     </div>
 
@@ -1244,7 +1270,7 @@
 
 <!-- Modal Nova Matéria (apenas admin) -->
 <div id="articleModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 600px;">
         <h2><i class="fas fa-edit"></i> <span id="modalTitle">Nova Matéria</span></h2>
         <div class="form-group">
             <label>Título da Matéria</label>
@@ -1269,11 +1295,11 @@
         </div>
         <div class="form-group">
             <label>Resumo/Descrição</label>
-            <textarea id="articleExcerpt" placeholder="Breve resumo da matéria..."></textarea>
+            <textarea id="articleExcerpt" placeholder="Breve resumo da matéria..." rows="3"></textarea>
         </div>
         <div class="form-group">
             <label>Conteúdo Completo (HTML)</label>
-            <textarea id="articleContent" placeholder="Conteúdo completo da matéria com formatação HTML..."></textarea>
+            <textarea id="articleContent" placeholder="Conteúdo completo da matéria com formatação HTML..." rows="6"></textarea>
         </div>
         <div class="form-group">
             <label>URL da Imagem (opcional)</label>
@@ -1643,6 +1669,12 @@
         const userBadge = document.getElementById('userBadge');
         const btnLogin = document.getElementById('btnLogin');
         const btnLogout = document.getElementById('btnLogout');
+        
+        // Mostrar/ocultar botão Nova Matéria para admin
+        const adminBtn = document.getElementById('adminNewArticleBtn');
+        if (adminBtn) {
+            adminBtn.style.display = (currentUser && currentUserIsAdmin && !currentUserIsBanned) ? 'block' : 'none';
+        }
         
         if (currentUser && !currentUserIsBanned) {
             let name = currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Usuário');
