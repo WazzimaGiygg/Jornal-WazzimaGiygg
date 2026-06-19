@@ -9,6 +9,8 @@
     <title>Jornal WazzimaGiygg - Edição Digital</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- MATERIAL ICONS - ADICIONADO -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="icon" href="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/Favicom.png" type="image/x-icon">
     
     <!-- Firebase SDKs -->
@@ -17,6 +19,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     
     <style>
+        /* ===== TODOS OS ESTILOS EXISTENTES ===== */
         * {
             margin: 0;
             padding: 0;
@@ -157,7 +160,7 @@
             background: rgba(255,255,255,0.1);
         }
         .notification-bell .material-icons {
-            font-size: 20px;
+            font-size: 24px;
         }
         .notification-badge {
             position: absolute;
@@ -166,9 +169,9 @@
             background: #e94560;
             color: white;
             border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 9px;
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
             font-weight: 700;
             display: flex;
             align-items: center;
@@ -524,7 +527,7 @@
             background: #a93226;
         }
 
-        /* Modal */
+        /* ===== ESTILOS DO MODAL E FORMULÁRIO ===== */
         .modal {
             display: none;
             position: fixed;
@@ -563,6 +566,44 @@
             color: #666;
         }
 
+        /* ESTILOS DOS CAMPOS DO FORMULÁRIO */
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Lato', sans-serif;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #1a3c5e;
+            outline: none;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
         .share-url-container {
             background: #f0f0f0;
             padding: 12px;
@@ -582,6 +623,108 @@
             cursor: pointer;
             margin-top: 15px;
             width: 100%;
+        }
+
+        .btn-primary {
+            background: #1a3c5e;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            background: #2c5f7a;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+
+        .btn-danger {
+            background: #c0392b;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-danger:hover {
+            background: #a93226;
+        }
+
+        .btn-share {
+            background: #1a3c5e;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-share:hover {
+            background: #2c5f7a;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #1a3c5e;
+            color: #1a3c5e;
+            padding: 8px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            background: #1a3c5e;
+            color: white;
+        }
+
+        .btn-outline-light {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.75em;
+            transition: all 0.2s;
+        }
+
+        .btn-outline-light:hover {
+            background: rgba(255,255,255,0.1);
         }
 
         /* Loading */
@@ -1008,7 +1151,7 @@
                 </div>
             </div>
             
-            <button class="btn-logout" id="btnLogout" style="display:none;">Sair</button>
+            <button class="btn-logout" id="btnLogout" style="display:none;" onclick="logout()">Sair</button>
             <button class="btn-login" id="btnLogin" onclick="showLoginModal()">
                 <span class="material-icons" style="font-size:16px;">person</span> Entrar
             </button>
@@ -1079,7 +1222,7 @@
     <div class="modal-content">
         <h2><i class="fab fa-google"></i> Entrar com Google</h2>
         <p>Faça login com sua conta Google para acessar recursos administrativos.</p>
-        <button class="btn btn-primary" onclick="loginWithGoogle()" style="width:100%;">
+        <button class="btn-primary" onclick="loginWithGoogle()" style="width:100%;">
             <i class="fab fa-google"></i> Entrar com Google
         </button>
         <button class="btn-close" onclick="closeModals()">Fechar</button>
@@ -1092,7 +1235,7 @@
         <h2><i class="fas fa-share-alt"></i> Compartilhar Matéria</h2>
         <p>Copie o link abaixo para compartilhar esta matéria:</p>
         <div class="share-url-container" id="shareUrlContainer"></div>
-        <button class="btn btn-primary" onclick="copyShareUrl()" style="width: 100%; margin-bottom: 10px;">
+        <button class="btn-primary" onclick="copyShareUrl()" style="width: 100%; margin-bottom: 10px;">
             <i class="fas fa-copy"></i> Copiar Link
         </button>
         <button class="btn-close" onclick="closeModals()">Fechar</button>
@@ -1136,7 +1279,7 @@
             <label>URL da Imagem (opcional)</label>
             <input type="text" id="articleImage" placeholder="https://exemplo.com/imagem.jpg">
         </div>
-        <button class="btn btn-primary" onclick="saveArticle()" style="width: 100%;">Publicar Matéria</button>
+        <button class="btn-primary" onclick="saveArticle()" style="width: 100%;">Publicar Matéria</button>
         <button class="btn-close" onclick="closeModals()">Cancelar</button>
     </div>
 </div>
@@ -1152,8 +1295,8 @@
                     <i class="fas fa-share-alt"></i> Compartilhar
                 </button>
                 <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-warning" onclick="editCurrentArticle()">✏️ Editar</button>
-                    <button class="btn btn-danger" onclick="deleteCurrentArticle()">🗑️ Excluir</button>
+                    <button class="btn-warning" onclick="editCurrentArticle()">✏️ Editar</button>
+                    <button class="btn-danger" onclick="deleteCurrentArticle()">🗑️ Excluir</button>
                 </div>
             </div>
         </div>
@@ -1171,7 +1314,9 @@
 <div id="toast" class="toast"></div>
 
 <script>
-    // Configuração do Firebase
+    // ============================================
+    // CONFIGURAÇÃO DO FIREBASE
+    // ============================================
     const firebaseConfig = {
         apiKey: "AIzaSyB9GkSqTIZ0kbVsba_WOdQeVAETrF9qna0",
         authDomain: "wzzm-ce3fc.firebaseapp.com",
@@ -1186,6 +1331,9 @@
     const auth = firebase.auth();
     const googleProvider = new firebase.auth.GoogleAuthProvider();
 
+    // ============================================
+    // VARIÁVEIS GLOBAIS
+    // ============================================
     let currentUser = null;
     let currentUserIsAdmin = false;
     let currentUserIsBanned = false;
@@ -1198,16 +1346,68 @@
     let unreadCount = 0;
     let notificationListener = null;
 
-    // IDs dos administradores específicos
     const SPECIFIC_ADMIN_UID = "sZxfMuOBPbXdR8nttVPXIN8QOOl1";
 
     // ============================================
-    // FUNÇÃO PARA REGISTRAR/ATUALIZAR USUÁRIO
+    // FUNÇÕES AUXILIARES
+    // ============================================
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function getTimeAgo(date) {
+        if (!date) return '';
+        if (date.toDate) date = date.toDate();
+        const seconds = Math.floor((new Date() - date) / 1000);
+        if (seconds < 60) return 'agora';
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h`;
+        const days = Math.floor(hours / 24);
+        return `${days}d`;
+    }
+
+    function getInitials(name) {
+        if (!name) return '?';
+        const parts = name.trim().split(' ');
+        if (parts.length >= 2) return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+        return name.substring(0, 2).toUpperCase();
+    }
+
+    function getCategoryIcon(cat) {
+        const icons = {
+            'política': '🏛️', 'internacional': '🌍', 'economia': '📊',
+            'justiça': '⚖️', 'cultura': '🎭', 'investigação': '🔍', 
+            'opinião': '✍️', 'esporte': '⚽', 'tecnologia': '💻',
+            'redes-sociais': '📱', 'saúde': '🏥', 'educação': '📚'
+        };
+        return icons[cat] || '📰';
+    }
+
+    function formatDate(timestamp) {
+        if (!timestamp) return 'Data desconhecida';
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        return date.toLocaleDateString('pt-BR');
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.background = isError ? '#c0392b' : '#27ae60';
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 3000);
+    }
+
+    // ============================================
+    // REGISTRO DE USUÁRIO
     // ============================================
     async function registerUser(user) {
         try {
             const uid = user.uid;
-            
             const userDoc = await db.collection('users').doc(uid).get();
             const existingData = userDoc.exists ? userDoc.data() : {};
             
@@ -1247,12 +1447,41 @@
     }
 
     // ============================================
+    // VERIFICAÇÕES
+    // ============================================
+    async function checkIfUserIsBanned(user) {
+        if (!user) return false;
+        try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists) {
+                const data = userDoc.data();
+                return data.isBanned === true || data.isBan === true;
+            }
+        } catch (error) {
+            console.log("Erro ao verificar banimento:", error);
+        }
+        return false;
+    }
+
+    async function checkIfUserIsAdmin(user) {
+        if (!user) return false;
+        if (user.uid === SPECIFIC_ADMIN_UID) return true;
+        try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists && userDoc.data().isAdmin === true) {
+                return true;
+            }
+        } catch (error) {
+            console.log("Erro ao verificar admin:", error);
+        }
+        return false;
+    }
+
+    // ============================================
     // NOTIFICAÇÕES
     // ============================================
-
     async function loadNotifications() {
         if (!currentUser) return;
-        
         try {
             const snapshot = await db.collection('notifications')
                 .where('userId', '==', currentUser.uid)
@@ -1278,26 +1507,27 @@
             unreadCount = notifications.filter(n => !n.lida).length;
             updateNotificationBadge();
             renderNotifications();
-            
         } catch (error) {
             console.error('Erro ao carregar notificações:', error);
         }
     }
 
     function updateNotificationBadge() {
+        const badge = document.getElementById('notifBadge');
         if (unreadCount > 0) {
-            notifBadge.style.display = 'flex';
-            notifBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+            badge.style.display = 'flex';
+            badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
         } else {
-            notifBadge.style.display = 'none';
+            badge.style.display = 'none';
         }
     }
 
     function renderNotifications() {
-        if (!notificationList) return;
+        const list = document.getElementById('notificationList');
+        if (!list) return;
         
         if (notifications.length === 0) {
-            notificationList.innerHTML = `
+            list.innerHTML = `
                 <div class="notification-empty">
                     <span class="material-icons">notifications_off</span>
                     <p>Nenhuma notificação</p>
@@ -1307,8 +1537,7 @@
         }
         
         const recentNotifs = notifications.slice(0, 10);
-        
-        notificationList.innerHTML = recentNotifs.map(notif => `
+        list.innerHTML = recentNotifs.map(notif => `
             <div class="notification-item ${notif.lida ? '' : 'unread'}" onclick="markAsRead('${notif.id}')">
                 <div class="notif-title">${escapeHtml(notif.titulo || 'Notificação')}</div>
                 <div class="notif-message">${escapeHtml(notif.mensagem || '')}</div>
@@ -1319,12 +1548,8 @@
 
     async function markAsRead(notificationId) {
         if (!notificationId) return;
-        
         try {
-            await db.collection('notifications').doc(notificationId).update({
-                lida: true
-            });
-            
+            await db.collection('notifications').doc(notificationId).update({ lida: true });
             const notif = notifications.find(n => n.id === notificationId);
             if (notif && !notif.lida) {
                 notif.lida = true;
@@ -1339,20 +1564,15 @@
 
     async function markAllAsRead(event) {
         if (event) event.stopPropagation();
-        
         if (unreadCount === 0) return;
-        
         try {
             const batch = db.batch();
             const unreadNotifs = notifications.filter(n => !n.lida);
-            
             unreadNotifs.forEach(notif => {
                 const ref = db.collection('notifications').doc(notif.id);
                 batch.update(ref, { lida: true });
             });
-            
             await batch.commit();
-            
             notifications.forEach(n => n.lida = true);
             unreadCount = 0;
             updateNotificationBadge();
@@ -1364,9 +1584,10 @@
 
     function toggleNotifications(event) {
         if (event) event.stopPropagation();
-        if (notifDropdown) {
-            notifDropdown.classList.toggle('show');
-            if (notifDropdown.classList.contains('show')) {
+        const dropdown = document.getElementById('notifDropdown');
+        if (dropdown) {
+            dropdown.classList.toggle('show');
+            if (dropdown.classList.contains('show')) {
                 loadNotifications();
             }
         }
@@ -1374,9 +1595,8 @@
 
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.notification-bell')) {
-            if (notifDropdown) {
-                notifDropdown.classList.remove('show');
-            }
+            const dropdown = document.getElementById('notifDropdown');
+            if (dropdown) dropdown.classList.remove('show');
         }
     });
 
@@ -1385,7 +1605,6 @@
             notificationListener();
             notificationListener = null;
         }
-        
         if (!currentUser) return;
         
         notificationListener = db.collection('notifications')
@@ -1401,13 +1620,11 @@
                         timestamp: doc.data().timestamp || new Date()
                     });
                 });
-                
                 notifications.sort((a, b) => {
                     const dateA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
                     const dateB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
                     return dateB - dateA;
                 });
-                
                 unreadCount = notifications.filter(n => !n.lida).length;
                 updateNotificationBadge();
                 renderNotifications();
@@ -1417,40 +1634,8 @@
     }
 
     // ============================================
-    // UTILIDADES
+    // AUTENTICAÇÃO - UI
     // ============================================
-
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    function getTimeAgo(date) {
-        if (!date) return '';
-        if (date.toDate) date = date.toDate();
-        const seconds = Math.floor((new Date() - date) / 1000);
-        if (seconds < 60) return 'agora';
-        const minutes = Math.floor(seconds / 60);
-        if (minutes < 60) return `${minutes}m`;
-        const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `${hours}h`;
-        const days = Math.floor(hours / 24);
-        return `${days}d`;
-    }
-
-    function getInitials(name) {
-        if (!name) return '?';
-        const parts = name.trim().split(' ');
-        if (parts.length >= 2) return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
-        return name.substring(0, 2).toUpperCase();
-    }
-
-    // ============================================
-    // AUTENTICAÇÃO
-    // ============================================
-
     function updateUI() {
         const userAvatar = document.getElementById('userAvatar');
         const userName = document.getElementById('userName');
@@ -1488,19 +1673,24 @@
         }
     }
 
-    function showLoginModal() { document.getElementById('loginModal').classList.add('show'); }
-    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('show')); }
+    function showLoginModal() { 
+        document.getElementById('loginModal').classList.add('show'); 
+    }
 
+    function closeModals() { 
+        document.querySelectorAll('.modal').forEach(m => m.classList.remove('show')); 
+    }
+
+    // ============================================
+    // LOGIN / LOGOUT
+    // ============================================
     async function loginWithGoogle() {
         try {
             const result = await auth.signInWithPopup(googleProvider);
             const user = result.user;
-            
             await registerUser(user);
             
-            // Verifica banimento
             currentUserIsBanned = await checkIfUserIsBanned(user);
-            
             if (currentUserIsBanned) {
                 showBannedScreen('Sua conta foi banida por violação das políticas de uso.');
                 await auth.signOut();
@@ -1509,7 +1699,6 @@
             }
             
             currentUserIsAdmin = await checkIfUserIsAdmin(user);
-            
             updateUI();
             closeModals();
             await loadNotifications();
@@ -1521,9 +1710,9 @@
         }
     }
 
-    async function logout() {
+    function logout() {
         try {
-            await auth.signOut();
+            auth.signOut();
             currentUser = null;
             currentUserIsAdmin = false;
             currentUserIsBanned = false;
@@ -1543,23 +1732,9 @@
         }
     }
 
-    // ==================== VERIFICAÇÃO DE BANIMENTO ====================
-    async function checkIfUserIsBanned(user) {
-        if (!user) return false;
-        
-        try {
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (userDoc.exists) {
-                const data = userDoc.data();
-                return data.isBanned === true || data.isBan === true;
-            }
-        } catch (error) {
-            console.log("Erro ao verificar banimento:", error);
-        }
-        
-        return false;
-    }
-
+    // ============================================
+    // BANIDO
+    // ============================================
     function showBannedScreen(reason = 'Violação das políticas de uso') {
         const overlay = document.getElementById('bannedOverlay');
         const details = document.getElementById('banDetails');
@@ -1577,25 +1752,9 @@
         auth.signOut().then(() => location.reload());
     }
 
-    // ==================== VERIFICAÇÃO DE ADMIN ====================
-    async function checkIfUserIsAdmin(user) {
-        if (!user) return false;
-        
-        if (user.uid === SPECIFIC_ADMIN_UID) return true;
-        
-        try {
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (userDoc.exists && userDoc.data().isAdmin === true) {
-                return true;
-            }
-        } catch (error) {
-            console.log("Erro ao verificar admin:", error);
-        }
-        
-        return false;
-    }
-
-    // ==================== NAVEGAÇÃO POR URL ====================
+    // ============================================
+    // NAVEGAÇÃO POR URL
+    // ============================================
     function getUrlParams() {
         const params = new URLSearchParams(window.location.search);
         return {
@@ -1607,24 +1766,27 @@
     function updateUrl(categoria, id = null) {
         let url = window.location.pathname;
         const params = [];
-        
         if (categoria && categoria !== 'todos') {
             params.push(`categoria=${encodeURIComponent(categoria)}`);
         }
-        
         if (id) {
             params.push(`id=${encodeURIComponent(id)}`);
         }
-        
         if (params.length > 0) {
             url += '?' + params.join('&');
         }
-        
         window.history.pushState({ categoria, id }, '', url);
     }
 
     function navigateToHome() {
         window.location.href = window.location.pathname;
+    }
+
+    function highlightActiveCategory(category) {
+        document.querySelectorAll('.nav-menu a').forEach(a => {
+            const isActive = a.dataset.cat === category;
+            a.classList.toggle('active', isActive);
+        });
     }
 
     // ============================================
@@ -1634,12 +1796,10 @@
         const lat = -20.2345;
         const lon = -50.9253;
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=America/Sao_Paulo`;
-        
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error('Falha ao buscar dados');
-            const data = await response.json();
-            return data;
+            return await response.json();
         } catch (error) {
             console.error('Erro na previsão do tempo:', error);
             return null;
@@ -1747,7 +1907,6 @@
 
     async function updateWeatherContent(widget) {
         const data = await fetchWeather();
-        
         if (!data || !data.current) {
             widget.innerHTML = `
                 <div class="weather-header">
@@ -1808,173 +1967,7 @@
                 <i class="far fa-clock"></i> Atualizado agora • Santa Fé do Sul - SP
             </div>
         `;
-        
         weatherLoaded = true;
-    }
-
-    // ==================== ESTADO DE AUTENTICAÇÃO ====================
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            currentUser = user;
-            
-            await registerUser(user);
-            
-            currentUserIsBanned = await checkIfUserIsBanned(user);
-            
-            if (currentUserIsBanned) {
-                showBannedScreen('Sua conta foi banida por violação das políticas de uso.');
-                await auth.signOut();
-                updateUI();
-                return;
-            }
-            
-            currentUserIsAdmin = await checkIfUserIsAdmin(user);
-            
-            updateUI();
-            
-            // Carregar notificações
-            await loadNotifications();
-            listenNotifications();
-            
-            // Carregar conteúdo
-            const params = getUrlParams();
-            if (params.id) {
-                await loadArticleById(params.id);
-            } else if (params.categoria) {
-                currentCategory = params.categoria;
-                highlightActiveCategory(currentCategory);
-                await loadArticles();
-            } else {
-                currentCategory = 'todos';
-                highlightActiveCategory('todos');
-                await loadArticles();
-            }
-            
-            if (!weatherLoaded) {
-                setTimeout(() => renderWeather(), 300);
-            }
-        } else {
-            currentUser = null;
-            currentUserIsAdmin = false;
-            currentUserIsBanned = false;
-            updateUI();
-            
-            document.getElementById('bannedOverlay').classList.remove('show');
-            document.querySelector('.newspaper-container').style.opacity = '1';
-            document.querySelector('.newspaper-container').style.pointerEvents = 'auto';
-            document.querySelector('.header').style.opacity = '1';
-            document.querySelector('.header').style.pointerEvents = 'auto';
-            document.querySelector('.site-footer').style.opacity = '1';
-            document.querySelector('.site-footer').style.pointerEvents = 'auto';
-            
-            if (notificationListener) {
-                notificationListener();
-                notificationListener = null;
-            }
-            notifications = [];
-            unreadCount = 0;
-            updateNotificationBadge();
-            
-            const params = getUrlParams();
-            if (params.id) {
-                await loadArticleById(params.id);
-            } else if (params.categoria) {
-                currentCategory = params.categoria;
-                highlightActiveCategory(currentCategory);
-                await loadArticles();
-            } else {
-                currentCategory = 'todos';
-                highlightActiveCategory('todos');
-                await loadArticles();
-            }
-            
-            if (!weatherLoaded) {
-                setTimeout(() => renderWeather(), 300);
-            }
-        }
-    });
-
-    function highlightActiveCategory(category) {
-        document.querySelectorAll('.nav-menu a').forEach(a => {
-            const isActive = a.dataset.cat === category;
-            a.classList.toggle('active', isActive);
-        });
-    }
-
-    // ============================================
-    // CARREGAR MATÉRIA POR ID
-    // ============================================
-    async function loadArticleById(articleId) {
-        const grid = document.getElementById('newspaperGrid');
-        grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando matéria...</p></div>';
-        
-        try {
-            const doc = await db.collection('articlesdoc').doc(articleId).get();
-            
-            if (!doc.exists) {
-                grid.innerHTML = '<div class="loading"><p>📭 Matéria não encontrada. <a onclick="navigateToHome()" style="color:#c0392b; cursor:pointer;">Voltar para página inicial</a></p></div>';
-                return;
-            }
-            
-            const article = { id: doc.id, ...doc.data() };
-            currentViewArticleId = articleId;
-            currentViewArticleData = article;
-            
-            if (!currentUserIsAdmin) {
-                try {
-                    const novasViews = (article.visualizacoes || 0) + 1;
-                    await db.collection('articlesdoc').doc(articleId).update({ visualizacoes: novasViews });
-                } catch (e) {
-                    console.log("Não foi possível incrementar visualizações:", e);
-                }
-            }
-            
-            renderSingleArticle(article);
-        } catch (error) {
-            grid.innerHTML = `<div class="loading"><p>❌ Erro ao carregar: ${error.message}</p></div>`;
-        }
-    }
-
-    function renderSingleArticle(article) {
-        const date = article.dataPublicacao?.toDate?.() ? article.dataPublicacao.toDate().toLocaleDateString('pt-BR') : 'Data desconhecida';
-        const categoryIcon = getCategoryIcon(article.categoria);
-        
-        const adminButtonsHtml = currentUserIsAdmin ? `
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 20px;">
-                <button class="admin-btn" onclick="editArticle('${article.id}')">✏️ Editar</button>
-                <button class="admin-btn delete" onclick="deleteArticle('${article.id}')">🗑️ Excluir</button>
-            </div>
-        ` : '';
-        
-        document.getElementById('newspaperGrid').innerHTML = `
-            <div style="grid-column: 1 / -1; max-width: 900px; margin: 0 auto;">
-                ${adminButtonsHtml}
-                <div class="main-article">
-                    <div class="article-tag">${categoryIcon} ${article.categoria?.toUpperCase() || 'GERAL'}</div>
-                    <div class="article-title">${escapeHtml(article.titulo)}</div>
-                    <div class="article-meta">
-                        <span><i class="far fa-user"></i> Por ${escapeHtml(article.autorNome || 'Redação')}</span>
-                        <span><i class="far fa-calendar"></i> ${date}</span>
-                        <span><i class="fas fa-eye"></i> ${article.visualizacoes || 0} visualizações</span>
-                    </div>
-                    ${article.imagemUrl ? `<div class="article-image"><img src="${article.imagemUrl}" alt="${escapeHtml(article.titulo)}"><div class="image-caption">Foto: Divulgação</div></div>` : ''}
-                    <div class="article-content" style="font-size: 16px; line-height: 1.8;">
-                        ${article.conteudo || article.resumo || 'Conteúdo não disponível.'}
-                    </div>
-                    <hr style="margin: 30px 0 20px 0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                        <button class="btn-share" onclick="showShareModal()">
-                            <i class="fas fa-share-alt"></i> Compartilhar esta matéria
-                        </button>
-                        <button class="btn-outline" onclick="navigateToHome()" style="background: #1a3c5e; color: white; border: none; padding: 8px 20px; border-radius: 30px;">
-                            <i class="fas fa-home"></i> Voltar para página inicial
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        setTimeout(() => renderWeather(), 300);
     }
 
     // ============================================
@@ -1986,7 +1979,6 @@
         
         try {
             let query = db.collection('articlesdoc').orderBy('dataPublicacao', 'desc');
-            
             if (currentCategory !== 'todos') {
                 query = db.collection('articlesdoc').where('categoria', '==', currentCategory).orderBy('dataPublicacao', 'desc');
             }
@@ -2007,22 +1999,6 @@
         } catch (error) {
             grid.innerHTML = `<div class="loading"><p>❌ Erro ao carregar: ${error.message}</p></div>`;
         }
-    }
-
-    function getCategoryIcon(cat) {
-        const icons = {
-            'política': '🏛️', 'internacional': '🌍', 'economia': '📊',
-            'justiça': '⚖️', 'cultura': '🎭', 'investigação': '🔍', 
-            'opinião': '✍️', 'esporte': '⚽', 'tecnologia': '💻',
-            'redes-sociais': '📱', 'saúde': '🏥', 'educação': '📚'
-        };
-        return icons[cat] || '📰';
-    }
-
-    function formatDate(timestamp) {
-        if (!timestamp) return 'Data desconhecida';
-        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        return date.toLocaleDateString('pt-BR');
     }
 
     function renderArticles(articles) {
@@ -2095,30 +2071,79 @@
     };
 
     // ============================================
-    // COMPARTILHAMENTO
+    // CARREGAR MATÉRIA POR ID
     // ============================================
-    function getCurrentArticleUrl() {
-        if (currentViewArticleId) {
-            return `${window.location.origin}${window.location.pathname}?id=${currentViewArticleId}`;
+    async function loadArticleById(articleId) {
+        const grid = document.getElementById('newspaperGrid');
+        grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Carregando matéria...</p></div>';
+        
+        try {
+            const doc = await db.collection('articlesdoc').doc(articleId).get();
+            if (!doc.exists) {
+                grid.innerHTML = '<div class="loading"><p>📭 Matéria não encontrada. <a onclick="navigateToHome()" style="color:#c0392b; cursor:pointer;">Voltar para página inicial</a></p></div>';
+                return;
+            }
+            
+            const article = { id: doc.id, ...doc.data() };
+            currentViewArticleId = articleId;
+            currentViewArticleData = article;
+            
+            if (!currentUserIsAdmin) {
+                try {
+                    const novasViews = (article.visualizacoes || 0) + 1;
+                    await db.collection('articlesdoc').doc(articleId).update({ visualizacoes: novasViews });
+                } catch (e) {
+                    console.log("Não foi possível incrementar visualizações:", e);
+                }
+            }
+            
+            renderSingleArticle(article);
+        } catch (error) {
+            grid.innerHTML = `<div class="loading"><p>❌ Erro ao carregar: ${error.message}</p></div>`;
         }
-        return window.location.href;
     }
 
-    window.showShareModal = function() {
-        const url = getCurrentArticleUrl();
-        document.getElementById('shareUrlContainer').innerHTML = url;
-        document.getElementById('shareModal').classList.add('show');
-    };
-
-    window.copyShareUrl = function() {
-        const url = document.getElementById('shareUrlContainer').textContent;
-        navigator.clipboard.writeText(url).then(() => {
-            showToast('Link copiado para compartilhar!');
-            closeModals();
-        }).catch(() => {
-            showToast('Erro ao copiar link', true);
-        });
-    };
+    function renderSingleArticle(article) {
+        const date = article.dataPublicacao?.toDate?.() ? article.dataPublicacao.toDate().toLocaleDateString('pt-BR') : 'Data desconhecida';
+        const categoryIcon = getCategoryIcon(article.categoria);
+        
+        const adminButtonsHtml = currentUserIsAdmin ? `
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 20px;">
+                <button class="btn-warning" onclick="editArticle('${article.id}')">✏️ Editar</button>
+                <button class="btn-danger" onclick="deleteArticle('${article.id}')">🗑️ Excluir</button>
+            </div>
+        ` : '';
+        
+        document.getElementById('newspaperGrid').innerHTML = `
+            <div style="grid-column: 1 / -1; max-width: 900px; margin: 0 auto;">
+                ${adminButtonsHtml}
+                <div class="main-article">
+                    <div class="article-tag">${categoryIcon} ${article.categoria?.toUpperCase() || 'GERAL'}</div>
+                    <div class="article-title">${escapeHtml(article.titulo)}</div>
+                    <div class="article-meta">
+                        <span><i class="far fa-user"></i> Por ${escapeHtml(article.autorNome || 'Redação')}</span>
+                        <span><i class="far fa-calendar"></i> ${date}</span>
+                        <span><i class="fas fa-eye"></i> ${article.visualizacoes || 0} visualizações</span>
+                    </div>
+                    ${article.imagemUrl ? `<div class="article-image"><img src="${article.imagemUrl}" alt="${escapeHtml(article.titulo)}"><div class="image-caption">Foto: Divulgação</div></div>` : ''}
+                    <div class="article-content" style="font-size: 16px; line-height: 1.8;">
+                        ${article.conteudo || article.resumo || 'Conteúdo não disponível.'}
+                    </div>
+                    <hr style="margin: 30px 0 20px 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                        <button class="btn-share" onclick="showShareModal()">
+                            <i class="fas fa-share-alt"></i> Compartilhar esta matéria
+                        </button>
+                        <button class="btn-outline" onclick="navigateToHome()">
+                            <i class="fas fa-home"></i> Voltar para página inicial
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        setTimeout(() => renderWeather(), 300);
+    }
 
     // ============================================
     // EDIÇÃO DE ARTIGOS
@@ -2239,6 +2264,9 @@
         document.getElementById('articleImage').value = '';
     }
 
+    // ============================================
+    // FILTROS E COMPARTILHAMENTO
+    // ============================================
     window.filterByCategory = function(category) {
         currentCategory = category;
         updateUrl(category);
@@ -2254,15 +2282,37 @@
         resetArticleForm();
         document.getElementById('articleModal').classList.add('show');
     };
-    
-    window.closeModals = function() {
-        document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
+
+    function getCurrentArticleUrl() {
+        if (currentViewArticleId) {
+            return `${window.location.origin}${window.location.pathname}?id=${currentViewArticleId}`;
+        }
+        return window.location.href;
+    }
+
+    window.showShareModal = function() {
+        const url = getCurrentArticleUrl();
+        document.getElementById('shareUrlContainer').innerHTML = url;
+        document.getElementById('shareModal').classList.add('show');
     };
-    
+
+    window.copyShareUrl = function() {
+        const url = document.getElementById('shareUrlContainer').textContent;
+        navigator.clipboard.writeText(url).then(() => {
+            showToast('Link copiado para compartilhar!');
+            closeModals();
+        }).catch(() => {
+            showToast('Erro ao copiar link', true);
+        });
+    };
+
+    // ============================================
+    // EVENTOS DE NAVEGAÇÃO
+    // ============================================
     window.onclick = (e) => {
         if (e.target.classList.contains('modal')) closeModals();
     };
-    
+
     window.onpopstate = (event) => {
         const params = getUrlParams();
         if (params.id) {
@@ -2278,24 +2328,103 @@
         }
     };
 
-    function showToast(message, isError = false) {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.style.background = isError ? '#c0392b' : '#27ae60';
-        toast.style.display = 'block';
-        setTimeout(() => toast.style.display = 'none', 3000);
-    }
-
-    // Data atual
+    // ============================================
+    // INICIALIZAÇÃO
+    // ============================================
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('pt-BR', {
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
 
+    // ============================================
+    // OUVINTE DE AUTENTICAÇÃO
+    // ============================================
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            currentUser = user;
+            await registerUser(user);
+            
+            currentUserIsBanned = await checkIfUserIsBanned(user);
+            if (currentUserIsBanned) {
+                showBannedScreen('Sua conta foi banida por violação das políticas de uso.');
+                await auth.signOut();
+                updateUI();
+                return;
+            }
+            
+            currentUserIsAdmin = await checkIfUserIsAdmin(user);
+            updateUI();
+            
+            await loadNotifications();
+            listenNotifications();
+            
+            const params = getUrlParams();
+            if (params.id) {
+                await loadArticleById(params.id);
+            } else if (params.categoria) {
+                currentCategory = params.categoria;
+                highlightActiveCategory(currentCategory);
+                await loadArticles();
+            } else {
+                currentCategory = 'todos';
+                highlightActiveCategory('todos');
+                await loadArticles();
+            }
+            
+            if (!weatherLoaded) {
+                setTimeout(() => renderWeather(), 300);
+            }
+        } else {
+            currentUser = null;
+            currentUserIsAdmin = false;
+            currentUserIsBanned = false;
+            updateUI();
+            
+            document.getElementById('bannedOverlay').classList.remove('show');
+            document.querySelector('.newspaper-container').style.opacity = '1';
+            document.querySelector('.newspaper-container').style.pointerEvents = 'auto';
+            document.querySelector('.header').style.opacity = '1';
+            document.querySelector('.header').style.pointerEvents = 'auto';
+            document.querySelector('.site-footer').style.opacity = '1';
+            document.querySelector('.site-footer').style.pointerEvents = 'auto';
+            
+            if (notificationListener) {
+                notificationListener();
+                notificationListener = null;
+            }
+            notifications = [];
+            unreadCount = 0;
+            updateNotificationBadge();
+            
+            const params = getUrlParams();
+            if (params.id) {
+                await loadArticleById(params.id);
+            } else if (params.categoria) {
+                currentCategory = params.categoria;
+                highlightActiveCategory(currentCategory);
+                await loadArticles();
+            } else {
+                currentCategory = 'todos';
+                highlightActiveCategory('todos');
+                await loadArticles();
+            }
+            
+            if (!weatherLoaded) {
+                setTimeout(() => renderWeather(), 300);
+            }
+        }
+    });
+
     // Expor funções globalmente
-    window.logoutBanned = logoutBanned;
     window.logout = logout;
+    window.logoutBanned = logoutBanned;
     window.loginWithGoogle = loginWithGoogle;
     window.navigateToHome = navigateToHome;
+    window.closeModals = closeModals;
+    window.showLoginModal = showLoginModal;
+    window.toggleNotifications = toggleNotifications;
+    window.markAllAsRead = markAllAsRead;
+    window.saveArticle = saveArticle;
+    window.getCurrentArticleUrl = getCurrentArticleUrl;
 </script>
 
 <!-- Iframe do verificador/logs -->
