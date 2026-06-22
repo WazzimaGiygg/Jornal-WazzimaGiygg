@@ -15,42 +15,42 @@
   
   <!-- Seções do Jornal -->
   <url>
-    <loc>https://jornal.wazzimagiygg.com/politica</loc>
+    <loc>https://jornal.wazzimagiygg.com/?categoria=pol%C3%ADtica</loc>
     <lastmod>2026-06-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
-    <loc>https://jornal.wazzimagiygg.com/economia</loc>
+    <loc>https://jornal.wazzimagiygg.com/?categoria=economia</loc>
     <lastmod>2026-06-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
-    <loc>https://jornal.wazzimagiygg.com/internacional</loc>
+    <loc>https://jornal.wazzimagiygg.com/?categoria=internacional</loc>
     <lastmod>2026-06-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
-    <loc>https://jornal.wazzimagiygg.com/cultura</loc>
+    <loc>https://jornal.wazzimagiygg.com/?categoria=cultura</loc>
     <lastmod>2026-06-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   
   <url>
-    <loc>https://jornal.wazzimagiygg.com/tecnologia</loc>
+    <loc>https://jornal.wazzimagiygg.com/?categoria=tecnologia</loc>
     <lastmod>2026-06-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   
   <url>
-    <loc>https://jornal.wazzimagiygg.com/justica</loc>
+    <loc>https://jornal.wazzimagiygg.com/?categoria=justi%C3%A7a</loc>
     <lastmod>2026-06-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -58,7 +58,7 @@
   
   <!-- Notícias (exemplos com tag news) -->
   <url>
-    <loc>https://jornal.wazzimagiygg.com/noticia/ultimas-noticias</loc>
+    <loc>https://jornal.wazzimagiygg.com</loc>
     <lastmod>2026-06-22</lastmod>
     <changefreq>hourly</changefreq>
     <priority>1.0</priority>
