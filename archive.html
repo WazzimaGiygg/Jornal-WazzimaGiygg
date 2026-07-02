@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="description" content="Arquivo de notícias antigas - Jornal WazzimaGiygg">
+    <meta name="keywords" content="arquivo, notícias antigas, WazzimaGiygg, política, economia">
+    <meta name="author" content="WazzimaGiygg Core">
+    <title>Arquivo - Jornal WazzimaGiygg</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" href="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/Favicom.png" type="image/x-icon">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    
+    <link rel="stylesheet" href="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/style.css">
+    <style>
+        /* Estilos específicos para a página de arquivo */
+        .archive-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #fffcf8;
+            box-shadow: 0 0 30px rgba(0,0,0,0.15);
+            min-height: 80vh;
+            padding: 30px;
+        }
+
+        .archive-header {
+            text-align: center;
+            border-bottom: 4px solid #c0392b;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .archive-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 48px;
+            font-weight: 900;
+            color: #1a3c5e;
+        }
+
+        .archive-header h1 span {
+            color: #c0392b;
+        }
+
+        .archive-header p {
+            color: #666;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        /* Filtros */
+        .archive-filters {
+            background: #f8f6f2;
+            border-radius: 12px;
+            padding: 20px 25px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+            margin-right: 4px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 14px;
+            border: 2px solid #e0dcd5;
+            border-radius: 8px;
+            font-size: 13px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            font-family: 'Lato', sans-serif;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            border-color: #1a3c5e;
+            outline: none;
+        }
+
+        .filter-group select {
+            min-width: 120px;
+        }
+
+        .filter-group input[type="text"] {
+            min-width: 180px;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-actions button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-filter {
+            background: #1a3c5e;
+            color: white;
+        }
+
+        .btn-filter:hover {
+            background: #2c5f7a;
+            transform: translateY(-2px);
+        }
+
+        .btn-reset {
+            background: #e8e5df;
+            color: #333;
+        }
+
+        .btn-reset:hover {
+            background: #ddd;
+        }
+
+        /* Resultados */
+        .archive-results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0dcd5;
+        }
+
+        .archive-results-header .count {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .archive-results-header .count strong {
+            color: #1a3c5e;
+        }
+
+        .archive-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .archive-card {
+            background: white;
+            border: 1px solid #e8e5df;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .archive-card:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+
+        .archive-card .article-tag {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #c0392b;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .archive-card .article-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 10px;
+            color: #1a3c5e;
+        }
+
+        .archive-card .article-title a {
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .archive-card .article-title a:hover {
+            color: #c0392b;
+        }
+
+        .archive-card .article-meta {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .archive-card .article-excerpt {
+            font-family: 'Merriweather', serif;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #3a3a3a;
+        }
+
+        .archive-card .read-more {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #c0392b;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .archive-card .read-more:hover {
+            text-decoration: underline;
+        }
+
+        .archive-card .article-year-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #1a3c5e;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Paginação */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0dcd5;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            padding: 8px 16px;
+            border: 2px solid #e0dcd5;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s;
+            color: #333;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            border-color: #1a3c5e;
+            background: #f0f4f8;
+        }
+
+        .pagination button.active {
+            background: #1a3c5e;
+            border-color: #1a3c5e;
+            color: white;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-info {
+            font-size: 14px;
+            color: #666;
+            padding: 0 10px;
+        }
+
+        /* Load More */
+        .load-more-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn-load-more {
+            background: transparent;
+            border: 2px solid #1a3c5e;
+            color: #1a3c5e;
+            padding: 12px 40px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-load-more:hover {
+            background: #1a3c5e;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Nenhum resultado */
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .no-results .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .no-results h3 {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        /* Loading */
+        .archive-loading {
+            text-align: center;
+            padding: 60px;
+        }
+
+        .archive-loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #eee;
+            border-top-color: #c0392b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsividade */
+        @media (max-width: 992px) {
+            .archive-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .archive-container {
+                padding: 15px;
+            }
+            .archive-header h1 {
+                font-size: 32px;
+            }
+            .archive-filters {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .filter-group {
+                flex-wrap: wrap;
+            }
+            .filter-group select,
+            .filter-group input {
+                min-width: 100%;
+                width: 100%;
+            }
+            .filter-actions {
+                flex-direction: column;
+            }
+            .filter-actions button {
+                width: 100%;
+            }
+            .archive-card .article-year-badge {
+                position: static;
+                display: inline-block;
+                margin-bottom: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .archive-header h1 {
+                font-size: 24px;
+            }
+            .archive-results-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== HEADER PADRONIZADO ===== -->
+<header class="header">
+    <div class="header-content">
+        <div class="logo-area-header" onclick="navigateToHome()">
+            <img src="https://wazzimagiygg.com/favicom.png" alt="Logo">
+            <div>
+                <h1>WazzimaGiygg</h1>
+                <small>Jornal</small>
+            </div>
+        </div>
+        <div class="user-info-header" id="userInfo">
+            <div class="user-avatar" id="userAvatar">👤</div>
+            <div>
+                <div class="user-name" id="userName">Carregando...</div>
+                <div class="user-email" id="userEmail">aguarde</div>
+            </div>
+            <span id="userBadge"></span>
+            
+            <button class="btn-logout" id="btnLogout" style="display:none;" onclick="logout()">Sair</button>
+            <button class="btn-login" id="btnLogin" onclick="showLoginModal()">
+                <span class="material-icons" style="font-size:16px;">person</span> Entrar
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- ===== ARQUIVO ===== -->
+<div class="archive-container">
+    <div class="archive-header">
+        <h1>📰 Arquivo <span>WazzimaGiygg</span></h1>
+        <p>Explore todas as notícias publicadas, filtradas por categoria, data e ano</p>
+        <a href="index.html" style="display: inline-block; margin-top: 10px; color: #1a3c5e; font-weight: 600; text-decoration: none;">
+            <i class="fas fa-home"></i> Voltar para página inicial
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="archive-filters">
+        <div class="filter-group">
+            <label for="filterCategory"><i class="fas fa-tag"></i> Categoria:</label>
+            <select id="filterCategory">
+                <option value="">Todas</option>
+                <option value="política">🏛️ Política</option>
+                <option value="internacional">🌍 Internacional</option>
+                <option value="economia">📊 Economia</option>
+                <option value="justiça">⚖️ Justiça</option>
+                <option value="cultura">🎭 Cultura</option>
+                <option value="investigação">🔍 Investigação</option>
+                <option value="opinião">✍️ Opinião</option>
+                <option value="esporte">⚽ Esporte</option>
+                <option value="tecnologia">💻 Tecnologia</option>
+                <option value="redes-sociais">📱 Redes Sociais</option>
+                <option value="saúde">🏥 Saúde</option>
+                <option value="educação">📚 Educação</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="filterYear"><i class="fas fa-calendar"></i> Ano:</label>
+            <select id="filterYear">
+                <option value="">Todos</option>
+                <!-- Os anos serão preenchidos via JavaScript -->
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="filterMonth"><i class="fas fa-calendar-alt"></i> Mês:</label>
+            <select id="filterMonth">
+                <option value="">Todos</option>
+                <option value="1">Janeiro</option>
+                <option value="2">Fevereiro</option>
+                <option value="3">Março</option>
+                <option value="4">Abril</option>
+                <option value="5">Maio</option>
+                <option value="6">Junho</option>
+                <option value="7">Julho</option>
+                <option value="8">Agosto</option>
+                <option value="9">Setembro</option>
+                <option value="10">Outubro</option>
+                <option value="11">Novembro</option>
+                <option value="12">Dezembro</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="filterSearch"><i class="fas fa-search"></i> Buscar:</label>
+            <input type="text" id="filterSearch" placeholder="Palavra-chave...">
+        </div>
+
+        <div class="filter-actions">
+            <button class="btn-filter" onclick="applyFilters()"><i class="fas fa-filter"></i> Filtrar</button>
+            <button class="btn-reset" onclick="resetFilters()"><i class="fas fa-undo"></i> Limpar</button>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="archive-results-header">
+        <div class="count">📄 <strong id="totalCount">0</strong> matérias encontradas</div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <label style="font-size: 13px; color: #666;">Ordenar:</label>
+            <select id="sortOrder" onchange="applyFilters()" style="padding: 6px 12px; border: 2px solid #e0dcd5; border-radius: 6px; font-size: 13px; background: white;">
+                <option value="desc">Mais recentes primeiro</option>
+                <option value="asc">Mais antigas primeiro</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="archiveGrid" class="archive-grid">
+        <!-- Os artigos serão carregados aqui -->
+    </div>
+
+    <div id="loadMoreContainer" class="load-more-container" style="display: none;">
+        <button class="btn-load-more" onclick="loadMore()"><i class="fas fa-chevron-down"></i> Carregar mais matérias</button>
+    </div>
+</div>
+
+<!-- ===== FOOTER PADRONIZADO ===== -->
+<footer class="site-footer">
+    <div class="footer-links">
+        <a href="https://wazzimagiygg.com/donate/" class="footer-link" target="_blank">💝 Doação</a>
+        <span class="footer-divider">|</span>
+        <a href="https://wazzimagiygg.com/desktop.html" class="footer-link" target="_blank">🖥️ Desktop</a>
+        <span class="footer-divider">|</span>
+        <a href="https://wazzimagiygg.com/LGPD" class="footer-link" target="_blank">🔒 LGPD</a>
+        <span class="footer-divider">|</span>
+        <a href="https://wazzimagiygg.com/MarcoCivil" class="footer-link" target="_blank">📜 Marco Civil</a>
+        <span class="footer-divider">|</span>
+        <a href="https://support.wazzimagiygg.com/" class="footer-link" target="_blank">🎫 Ticket</a>
+        <span class="footer-divider">|</span>
+        <a href="https://wazzimagiygg.com/produtos/" class="footer-link highlight" target="_blank">🛍️ Produtos</a>
+        <span class="footer-divider">|</span>
+        <a href="https://painel.wazzimagiygg.com/" class="footer-link highlight" target="_blank">👤 Sua conta</a>
+    </div>
+    <div class="footer-copyright">
+        © 2026 WazzimaGiygg Core — O Jornal da Verdade
+    </div>
+</footer>
+
+<!-- Modal Login -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <h2><i class="fab fa-google"></i> Entrar com Google</h2>
+        <p>Faça login com sua conta Google para acessar recursos administrativos.</p>
+        <button class="btn-primary" onclick="loginWithGoogle()" style="width:100%;">
+            <i class="fab fa-google"></i> Entrar com Google
+        </button>
+        <button class="btn-close" onclick="closeModals()">Fechar</button>
+    </div>
+</div>
+
+<!-- Modal Visualizar Matéria -->
+<div id="viewArticleModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <div id="viewArticleContent"></div>
+        <button class="btn-close" onclick="closeModals()">Fechar</button>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/script.js"></script>
+
+<script>
+    // ============================================
+    // VARIÁVEIS DO ARQUIVO
+    // ============================================
+    let allArticles = [];
+    let filteredArticles = [];
+    let currentPage = 1;
+    const ARTICLES_PER_PAGE = 10;
+    let isLoading = false;
+    let hasMore = true;
+
+    // ============================================
+    // FUNÇÕES DO ARQUIVO
+    // ============================================
+
+    function getCategoryIcon(cat) {
+        const icons = {
+            'política': '🏛️', 'internacional': '🌍', 'economia': '📊',
+            'justiça': '⚖️', 'cultura': '🎭', 'investigação': '🔍', 
+            'opinião': '✍️', 'esporte': '⚽', 'tecnologia': '💻',
+            'redes-sociais': '📱', 'saúde': '🏥', 'educação': '📚'
+        };
+        return icons[cat] || '📰';
+    }
+
+    function formatDate(timestamp) {
+        if (!timestamp) return 'Data desconhecida';
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        return date.toLocaleDateString('pt-BR', {
+            day: '2-digit', month: '2-digit', year: 'numeric'
+        });
+    }
+
+    function formatDateFull(timestamp) {
+        if (!timestamp) return 'Data desconhecida';
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        return date.toLocaleDateString('pt-BR', {
+            day: '2-digit', month: 'long', year: 'numeric'
+        });
+    }
+
+    function getYear(timestamp) {
+        if (!timestamp) return null;
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        return date.getFullYear();
+    }
+
+    function getMonth(timestamp) {
+        if (!timestamp) return null;
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        return date.getMonth() + 1;
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ============================================
+    // CARREGAR ARTIGOS
+    // ============================================
+    async function loadArchiveArticles() {
+        const grid = document.getElementById('archiveGrid');
+        grid.innerHTML = `
+            <div class="archive-loading" style="grid-column: 1 / -1;">
+                <div class="spinner"></div>
+                <p>Carregando arquivo...</p>
+            </div>
+        `;
+
+        try {
+            const snapshot = await db.collection('articlesdoc')
+                .orderBy('dataPublicacao', 'desc')
+                .get();
+
+            allArticles = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                allArticles.push({
+                    id: doc.id,
+                    ...data,
+                    dataPublicacao: data.dataPublicacao || null
+                });
+            });
+
+            // Preencher anos disponíveis
+            populateYears();
+
+            // Aplicar filtros iniciais
+            applyFilters();
+
+        } catch (error) {
+            grid.innerHTML = `
+                <div class="no-results" style="grid-column: 1 / -1;">
+                    <div class="icon">❌</div>
+                    <h3>Erro ao carregar arquivo</h3>
+                    <p>${error.message}</p>
+                </div>
+            `;
+        }
+    }
+
+    // ============================================
+    // POPULAR ANOS
+    // ============================================
+    function populateYears() {
+        const yearsSet = new Set();
+        allArticles.forEach(article => {
+            const year = getYear(article.dataPublicacao);
+            if (year) yearsSet.add(year);
+        });
+
+        const yearSelect = document.getElementById('filterYear');
+        const currentValue = yearSelect.value;
+
+        yearSelect.innerHTML = '<option value="">Todos</option>';
+        const sortedYears = Array.from(yearsSet).sort((a, b) => b - a);
+        sortedYears.forEach(year => {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSelect.appendChild(option);
+        });
+
+        if (currentValue && sortedYears.includes(Number(currentValue))) {
+            yearSelect.value = currentValue;
+        }
+    }
+
+    // ============================================
+    // FILTRAR ARTIGOS
+    // ============================================
+    function applyFilters() {
+        const category = document.getElementById('filterCategory').value;
+        const year = document.getElementById('filterYear').value;
+        const month = document.getElementById('filterMonth').value;
+        const search = document.getElementById('filterSearch').value.toLowerCase().trim();
+        const sortOrder = document.getElementById('sortOrder').value;
+
+        filteredArticles = allArticles.filter(article => {
+            // Filtro por categoria
+            if (category && article.categoria !== category) return false;
+
+            // Filtro por ano
+            if (year) {
+                const articleYear = getYear(article.dataPublicacao);
+                if (articleYear !== Number(year)) return false;
+            }
+
+            // Filtro por mês
+            if (month) {
+                const articleMonth = getMonth(article.dataPublicacao);
+                if (articleMonth !== Number(month)) return false;
+            }
+
+            // Filtro por busca
+            if (search) {
+                const title = (article.titulo || '').toLowerCase();
+                const excerpt = (article.resumo || '').toLowerCase();
+                const content = (article.conteudo || '').toLowerCase();
+                if (!title.includes(search) && !excerpt.includes(search) && !content.includes(search)) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        // Ordenar
+        filteredArticles.sort((a, b) => {
+            const dateA = a.dataPublicacao?.toDate ? a.dataPublicacao.toDate() : new Date(a.dataPublicacao);
+            const dateB = b.dataPublicacao?.toDate ? b.dataPublicacao.toDate() : new Date(b.dataPublicacao);
+            return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+        });
+
+        // Resetar paginação
+        currentPage = 1;
+        hasMore = filteredArticles.length > ARTICLES_PER_PAGE;
+        
+        // Atualizar total
+        document.getElementById('totalCount').textContent = filteredArticles.length;
+        
+        // Renderizar
+        renderArchivePage();
+    }
+
+    // ============================================
+    // RESETAR FILTROS
+    // ============================================
+    function resetFilters() {
+        document.getElementById('filterCategory').value = '';
+        document.getElementById('filterYear').value = '';
+        document.getElementById('filterMonth').value = '';
+        document.getElementById('filterSearch').value = '';
+        document.getElementById('sortOrder').value = 'desc';
+        applyFilters();
+    }
+
+    // ============================================
+    // RENDERIZAR PÁGINA
+    // ============================================
+    function renderArchivePage() {
+        const grid = document.getElementById('archiveGrid');
+        const loadMoreContainer = document.getElementById('loadMoreContainer');
+        
+        const start = 0;
+        const end = currentPage * ARTICLES_PER_PAGE;
+        const pageArticles = filteredArticles.slice(start, end);
+
+        if (pageArticles.length === 0) {
+            grid.innerHTML = `
+                <div class="no-results" style="grid-column: 1 / -1;">
+                    <div class="icon">📭</div>
+                    <h3>Nenhuma matéria encontrada</h3>
+                    <p>Tente ajustar os filtros de busca ou voltar para a página inicial.</p>
+                    <a href="index.html" style="display: inline-block; margin-top: 15px; color: #c0392b; font-weight: 600; text-decoration: none;">
+                        <i class="fas fa-home"></i> Voltar para página inicial
+                    </a>
+                </div>
+            `;
+            loadMoreContainer.style.display = 'none';
+            return;
+        }
+
+        let html = '';
+        pageArticles.forEach(article => {
+            const tag = getCategoryIcon(article.categoria) + ' ' + (article.categoria || 'geral').toUpperCase();
+            const date = formatDateFull(article.dataPublicacao);
+            const year = getYear(article.dataPublicacao);
+            const excerpt = (article.resumo || article.conteudo || '').substring(0, 200) + 
+                           ((article.resumo || article.conteudo || '').length > 200 ? '...' : '');
+
+            html += `
+                <div class="archive-card">
+                    ${year ? `<div class="article-year-badge">📅 ${year}</div>` : ''}
+                    <div class="article-tag">${tag}</div>
+                    <div class="article-title">
+                        <a onclick="openArticle('${article.id}')">${escapeHtml(article.titulo || 'Sem título')}</a>
+                    </div>
+                    <div class="article-meta">
+                        <span><i class="far fa-user"></i> ${escapeHtml(article.autorNome || 'Redação')}</span>
+                        <span><i class="far fa-calendar"></i> ${date}</span>
+                        <span><i class="fas fa-eye"></i> ${article.visualizacoes || 0} visualizações</span>
+                    </div>
+                    <div class="article-excerpt">${escapeHtml(excerpt)}</div>
+                    <a class="read-more" onclick="openArticle('${article.id}')">Continue lendo →</a>
+                </div>
+            `;
+        });
+
+        grid.innerHTML = html;
+
+        // Controle do botão "Carregar mais"
+        hasMore = filteredArticles.length > end;
+        if (hasMore && filteredArticles.length > ARTICLES_PER_PAGE) {
+            loadMoreContainer.style.display = 'block';
+        } else {
+            loadMoreContainer.style.display = 'none';
+        }
+    }
+
+    // ============================================
+    // CARREGAR MAIS
+    // ============================================
+    function loadMore() {
+        if (isLoading || !hasMore) return;
+        isLoading = true;
+        currentPage++;
+        renderArchivePage();
+        isLoading = false;
+    }
+
+    // ============================================
+    // ABRIR ARTIGO
+    // ============================================
+    function openArticle(articleId) {
+        // Buscar o artigo completo
+        const article = allArticles.find(a => a.id === articleId);
+        if (!article) {
+            showToast('Matéria não encontrada', true);
+            return;
+        }
+
+        // Incrementar visualizações (apenas se não for admin)
+        if (!currentUserIsAdmin) {
+            db.collection('articlesdoc').doc(articleId).update({
+                visualizacoes: firebase.firestore.FieldValue.increment(1)
+            }).catch(() => {});
+        }
+
+        const date = formatDateFull(article.dataPublicacao);
+        const categoryIcon = getCategoryIcon(article.categoria);
+        
+        const content = `
+            <div class="main-article" style="text-align: left;">
+                <div class="article-tag">${categoryIcon} ${article.categoria?.toUpperCase() || 'GERAL'}</div>
+                <div class="article-title" style="font-size: 28px;">${escapeHtml(article.titulo || 'Sem título')}</div>
+                <div class="article-meta">
+                    <span><i class="far fa-user"></i> Por ${escapeHtml(article.autorNome || 'Redação')}</span>
+                    <span><i class="far fa-calendar"></i> ${date}</span>
+                    <span><i class="fas fa-eye"></i> ${(article.visualizacoes || 0) + (currentUserIsAdmin ? 0 : 1)} visualizações</span>
+                </div>
+                ${article.imagemUrl ? `<div class="article-image"><img src="${article.imagemUrl}" alt="${escapeHtml(article.titulo)}" style="max-width: 100%; border-radius: 8px;"><div class="image-caption">Foto: Divulgação</div></div>` : ''}
+                <div class="article-content" style="font-size: 16px; line-height: 1.8; margin-top: 15px;">
+                    ${article.conteudo || article.resumo || 'Conteúdo não disponível.'}
+                </div>
+                <hr style="margin: 30px 0 20px 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <button class="btn-share" onclick="shareArticle('${articleId}')">
+                        <i class="fas fa-share-alt"></i> Compartilhar
+                    </button>
+                    <button class="btn-close" onclick="closeModals()" style="width: auto; padding: 10px 24px; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('viewArticleContent').innerHTML = content;
+        document.getElementById('viewArticleModal').classList.add('show');
+    }
+
+    // ============================================
+    // COMPARTILHAR
+    // ============================================
+    function shareArticle(articleId) {
+        const url = `${window.location.origin}${window.location.pathname}?id=${articleId}`;
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('Link copiado para compartilhar!');
+            }).catch(() => {
+                showToast('Erro ao copiar link', true);
+            });
+        } else {
+            // Fallback
+            prompt('Copie o link:', url);
+        }
+    }
+
+    // ============================================
+    // SHOW TOAST (sobrescreve do script.js)
+    // ============================================
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.background = isError ? '#c0392b' : '#27ae60';
+        toast.style.display = 'block';
+        clearTimeout(toast._timeout);
+        toast._timeout = setTimeout(() => toast.style.display = 'none', 3000);
+    }
+
+    // ============================================
+    // NAVEGAR PARA HOME
+    // ============================================
+    function navigateToHome() {
+        window.location.href = 'index.html';
+    }
+
+    // ============================================
+    // MODALS
+    // ============================================
+    function closeModals() {
+        document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
+    }
+
+    // ============================================
+    // LOGIN
+    // ============================================
+    function showLoginModal() {
+        document.getElementById('loginModal').classList.add('show');
+    }
+
+    // ============================================
+    // LOGOUT
+    // ============================================
+    function logout() {
+        auth.signOut().then(() => {
+            location.reload();
+        });
+    }
+
+    // ============================================
+    // ATUALIZAR UI DO USUÁRIO
+    // ============================================
+    function updateUserUI(user) {
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
+        const userBadge = document.getElementById('userBadge');
+        const btnLogin = document.getElementById('btnLogin');
+        const btnLogout = document.getElementById('btnLogout');
+
+        if (user) {
+            let name = user.displayName || (user.email ? user.email.split('@')[0] : 'Usuário');
+            
+            if (user.photoURL) {
+                userAvatar.innerHTML = `<img src="${user.photoURL}" alt="Avatar">`;
+            } else {
+                userAvatar.textContent = getInitials(name);
+            }
+            
+            userName.textContent = name.length > 20 ? name.substring(0,17)+'...' : name;
+            userEmail.textContent = user.email || '';
+            
+            btnLogin.style.display = 'none';
+            btnLogout.style.display = 'inline-block';
+        } else {
+            userAvatar.innerHTML = '👤';
+            userName.textContent = 'Visitante';
+            userEmail.textContent = '';
+            userBadge.innerHTML = '';
+            btnLogin.style.display = 'inline-block';
+            btnLogout.style.display = 'none';
+        }
+    }
+
+    function getInitials(name) {
+        if (!name) return '?';
+        const parts = name.trim().split(' ');
+        if (parts.length >= 2) return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+        return name.substring(0, 2).toUpperCase();
+    }
+
+    // ============================================
+    // INICIALIZAÇÃO
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Carregar arquivo
+        loadArchiveArticles();
+
+        // Enter key para busca
+        document.getElementById('filterSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                applyFilters();
+            }
+        });
+
+        // Clique fora dos modais
+        window.onclick = function(e) {
+            if (e.target.classList.contains('modal')) {
+                closeModals();
+            }
+        };
+    });
+
+    // ============================================
+    // AUTH LISTENER
+    // ============================================
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            currentUser = user;
+            currentUserIsAdmin = await checkIfUserIsAdmin(user);
+            currentUserIsBanned = await checkIfUserIsBanned(user);
+            updateUserUI(user);
+            
+            if (currentUserIsBanned) {
+                document.querySelector('.archive-container').style.opacity = '0.5';
+                document.querySelector('.archive-container').style.pointerEvents = 'none';
+                document.querySelector('.header').style.opacity = '0.3';
+                document.querySelector('.header').style.pointerEvents = 'none';
+                document.querySelector('.site-footer').style.opacity = '0.3';
+                document.querySelector('.site-footer').style.pointerEvents = 'none';
+                showToast('Sua conta foi banida!', true);
+            }
+        } else {
+            currentUser = null;
+            currentUserIsAdmin = false;
+            currentUserIsBanned = false;
+            updateUserUI(null);
+        }
+    });
+
+    // ============================================
+    // FUNÇÕES FIREBASE AUXILIARES
+    // ============================================
+    async function checkIfUserIsAdmin(user) {
+        if (!user) return false;
+        try {
+            const doc = await db.collection('users').doc(user.uid).get();
+            return doc.exists && doc.data().isAdmin === true;
+        } catch {
+            return false;
+        }
+    }
+
+    async function checkIfUserIsBanned(user) {
+        if (!user) return false;
+        try {
+            const doc = await db.collection('users').doc(user.uid).get();
+            return doc.exists && (doc.data().isBanned === true || doc.data().isBan === true);
+        } catch {
+            return false;
+        }
+    }
+
+    // Expor funções globalmente
+    window.applyFilters = applyFilters;
+    window.resetFilters = resetFilters;
+    window.loadMore = loadMore;
+    window.openArticle = openArticle;
+    window.shareArticle = shareArticle;
+    window.navigateToHome = navigateToHome;
+    window.closeModals = closeModals;
+    window.showLoginModal = showLoginModal;
+    window.logout = logout;
+    window.loginWithGoogle = loginWithGoogle;
+
+    // Função de login com Google (reutilizada do script.js)
+    async function loginWithGoogle() {
+        try {
+            const result = await auth.signInWithPopup(googleProvider);
+            showToast('Login realizado com sucesso!');
+            closeModals();
+            location.reload();
+        } catch (error) {
+            showToast('Erro ao fazer login: ' + error.message, true);
+        }
+    }
+</script>
+
+</body>
+</html>
