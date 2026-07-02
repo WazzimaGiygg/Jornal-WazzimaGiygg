@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -7,528 +7,22 @@
     <meta name="keywords" content="jornal, notícias, WazzimaGiygg, política, economia, internacional">
     <meta name="author" content="WazzimaGiygg Core">
     <title>Jornal WazzimaGiygg - Edição Digital</title>
-    
-    <!-- SCRIPT DE DETECÇÃO DE ERROS COM UID (VERSÃO CORRIGIDA) -->
-    <script>
-        // ================================================================
-        // SISTEMA DE DETECÇÃO DE ERROS COM UID E REDIRECIONAMENTO
-        // VERSÃO CORRIGIDA - SEM INTERFERÊNCIA NO LOGIN
-        // ================================================================
-        (function() {
-            'use strict';
-            
-            // ===== CONFIGURAÇÕES =====
-            const ERROR_URL = 'https://wazzimagiygg.com/generalerror/';
-            const TIMEOUT_MS = 10000; // Aumentado para 10 segundos
-            const CHECK_INTERVAL = 500;
-            
-            // ===== GERADOR DE UID =====
-            function generateUID() {
-                const timestamp = Date.now().toString(36);
-                const random = Math.random().toString(36).substring(2, 10);
-                const navInfo = navigator.userAgent
-                    .substring(0, 30)
-                    .replace(/[^a-zA-Z0-9]/g, '')
-                    .toLowerCase()
-                    .substring(0, 10);
-                const screenInfo = `${window.screen.width}x${window.screen.height}`;
-                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-                    .replace(/[^a-zA-Z0-9]/g, '')
-                    .substring(0, 8);
-                
-                return `${timestamp}-${random}-${navInfo}-${screenInfo}-${timezone}`.substring(0, 64);
-            }
-
-            // ===== GERADOR DE UID CURTO PARA URL =====
-            function generateShortUID() {
-                const timestamp = Date.now().toString(36);
-                const random = Math.random().toString(36).substring(2, 6);
-                return `${timestamp}${random}`;
-            }
-
-            // ===== COLETOR DE INFORMAÇÕES DO SISTEMA =====
-            function collectErrorInfo() {
-                const info = {
-                    uid: generateUID(),
-                    shortUid: generateShortUID(),
-                    timestamp: Date.now(),
-                    datetime: new Date().toISOString(),
-                    url: window.location.href,
-                    referrer: document.referrer || 'direct',
-                    userAgent: navigator.userAgent,
-                    platform: navigator.platform,
-                    language: navigator.language,
-                    screenWidth: window.screen.width,
-                    screenHeight: window.screen.height,
-                    windowWidth: window.innerWidth,
-                    windowHeight: window.innerHeight,
-                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                    resources: {
-                        css: { loaded: false, error: null },
-                        js: { loaded: false, error: null },
-                        firebase: { loaded: false, error: null },
-                        fonts: { loaded: false, error: null }
-                    },
-                    errors: [],
-                    failedResources: []
-                };
-                return info;
-            }
-
-            // ===== GERAR URL DE ERRO COM PARÂMETROS =====
-            function generateErrorURL(errorInfo) {
-                const baseURL = ERROR_URL;
-                const params = new URLSearchParams();
-                
-                params.set('uid', errorInfo.uid);
-                params.set('sid', errorInfo.shortUid);
-                params.set('ts', errorInfo.timestamp);
-                params.set('page', 'jornal');
-                
-                if (errorInfo.failedResources.length > 0) {
-                    params.set('failed', errorInfo.failedResources.join(','));
-                }
-                
-                const resourceStatus = {};
-                for (const [key, value] of Object.entries(errorInfo.resources)) {
-                    resourceStatus[key] = value.loaded;
-                }
-                params.set('resources', JSON.stringify(resourceStatus));
-                
-                if (errorInfo.errors.length > 0) {
-                    const errorSummary = errorInfo.errors
-                        .slice(0, 5)
-                        .map(e => e.substring(0, 100))
-                        .join('|');
-                    params.set('errors', encodeURIComponent(errorSummary));
-                }
-                
-                const systemInfo = {
-                    ua: navigator.userAgent.substring(0, 80),
-                    scr: `${window.screen.width}x${window.screen.height}`,
-                    tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                    lang: navigator.language
-                };
-                params.set('system', JSON.stringify(systemInfo));
-                
-                params.set('origin', encodeURIComponent(window.location.href));
-                
-                return `${baseURL}?${params.toString()}`;
-            }
-
-            // ===== ESTADO =====
-            const errorInfo = collectErrorInfo();
-            let resourcesLoaded = {
-                css: false,
-                js: false
-            };
-            let checkCount = 0;
-            let maxChecks = Math.ceil(TIMEOUT_MS / CHECK_INTERVAL);
-            let redirectExecuted = false;
-            let intervalId = null;
-            let timeoutId = null;
-            let cssCheckDone = false;
-            let jsCheckDone = false;
-            
-            // ===== FUNÇÃO PARA REDIRECIONAR COM UID =====
-            function redirectToError() {
-                if (redirectExecuted) return;
-                redirectExecuted = true;
-                
-                if (intervalId) clearInterval(intervalId);
-                if (timeoutId) clearTimeout(timeoutId);
-                
-                if (!resourcesLoaded.css) {
-                    if (!errorInfo.failedResources.includes('style.css')) {
-                        errorInfo.failedResources.push('style.css');
-                    }
-                    errorInfo.resources.css.loaded = false;
-                    errorInfo.resources.css.error = 'Falha ao carregar CSS';
-                }
-                if (!resourcesLoaded.js) {
-                    if (!errorInfo.failedResources.includes('script.js')) {
-                        errorInfo.failedResources.push('script.js');
-                    }
-                    errorInfo.resources.js.loaded = false;
-                    errorInfo.resources.js.error = 'Falha ao carregar JavaScript';
-                }
-                
-                const errorURL = generateErrorURL(errorInfo);
-                
-                console.warn('🔴 Recursos críticos não carregaram.');
-                console.log('🆔 UID:', errorInfo.uid);
-                console.log('🔗 Redirecionando para:', errorURL);
-                
-                window.location.href = errorURL;
-            }
-            
-            // ===== FUNÇÃO PARA MARCAR RECURSO COMO CARREGADO =====
-            function markResourceLoaded(type) {
-                if (type === 'css') {
-                    resourcesLoaded.css = true;
-                    errorInfo.resources.css.loaded = true;
-                    cssCheckDone = true;
-                    console.log('✅ CSS carregado com sucesso');
-                } else if (type === 'js') {
-                    resourcesLoaded.js = true;
-                    errorInfo.resources.js.loaded = true;
-                    jsCheckDone = true;
-                    console.log('✅ JavaScript carregado com sucesso');
-                }
-                
-                if (resourcesLoaded.css && resourcesLoaded.js) {
-                    console.log('✅ Todos os recursos carregados com sucesso!');
-                    if (intervalId) clearInterval(intervalId);
-                    if (timeoutId) clearTimeout(timeoutId);
-                }
-            }
-            
-            // ===== VERIFICAÇÃO DE CSS - SEM CROSS-ORIGIN =====
-            function checkCSS() {
-                if (cssCheckDone) return true;
-                
-                try {
-                    const hasHeader = document.querySelector('.header') !== null;
-                    const hasNewspaperContainer = document.querySelector('.newspaper-container') !== null;
-                    const hasNavMenu = document.querySelector('.nav-menu') !== null;
-                    
-                    const cssLinks = document.querySelectorAll('link[rel="stylesheet"]');
-                    let styleLinkFound = false;
-                    for (let link of cssLinks) {
-                        if (link.href && link.href.includes('style.css')) {
-                            styleLinkFound = true;
-                            break;
-                        }
-                    }
-                    
-                    const testElement = document.createElement('div');
-                    testElement.style.display = 'none';
-                    document.body.appendChild(testElement);
-                    const computedStyle = window.getComputedStyle(testElement);
-                    const hasComputedStyles = computedStyle && computedStyle.length > 0;
-                    document.body.removeChild(testElement);
-                    
-                    const bodyStyle = window.getComputedStyle(document.body);
-                    const bodyHasStyles = bodyStyle && bodyStyle.backgroundColor !== '';
-                    
-                    if (hasHeader || hasNewspaperContainer || hasNavMenu || styleLinkFound || hasComputedStyles || bodyHasStyles) {
-                        markResourceLoaded('css');
-                        return true;
-                    }
-                    return false;
-                } catch(e) {
-                    console.warn('⚠️ Erro ao verificar CSS:', e.message);
-                    const hasHeader = document.querySelector('.header') !== null;
-                    if (hasHeader) {
-                        markResourceLoaded('css');
-                        return true;
-                    }
-                    return false;
-                }
-            }
-            
-            // ===== VERIFICAÇÃO DE JS - AGUARDA FIREBASE =====
-            function checkJS() {
-                if (jsCheckDone) return true;
-                
-                try {
-                    // Verifica se o script principal foi carregado
-                    const scripts = document.querySelectorAll('script[src]');
-                    let scriptFound = false;
-                    for (let script of scripts) {
-                        if (script.src && script.src.includes('script.js')) {
-                            scriptFound = true;
-                            break;
-                        }
-                    }
-                    
-                    // Verifica se o Firebase está disponível
-                    const hasFirebase = typeof firebase !== 'undefined' && 
-                                        typeof firebase.auth !== 'undefined';
-                    
-                    // Verifica funções do Jornal
-                    const hasFilterByCategory = typeof filterByCategory === 'function';
-                    const hasNavigateToHome = typeof navigateToHome === 'function';
-                    const hasShowLoginModal = typeof showLoginModal === 'function';
-                    const hasLoginWithGoogle = typeof loginWithGoogle === 'function';
-                    
-                    // Só considera JS carregado se TODAS as condições forem atendidas:
-                    // 1. O script foi encontrado no DOM
-                    // 2. O Firebase está disponível
-                    // 3. As funções principais existem
-                    if (scriptFound && hasFirebase && hasFilterByCategory && hasNavigateToHome && hasShowLoginModal && hasLoginWithGoogle) {
-                        markResourceLoaded('js');
-                        return true;
-                    }
-                    
-                    // Se o script foi encontrado mas Firebase ainda não carregou, aguarda
-                    if (scriptFound && hasFilterByCategory && hasNavigateToHome) {
-                        // Verifica se Firebase já carregou (pode estar atrasado)
-                        if (hasFirebase && hasLoginWithGoogle) {
-                            markResourceLoaded('js');
-                            return true;
-                        }
-                    }
-                    
-                    return false;
-                } catch(e) {
-                    console.warn('⚠️ Erro ao verificar JS:', e.message);
-                    errorInfo.errors.push(`JS Check Error: ${e.message}`);
-                    return false;
-                }
-            }
-            
-            // ===== VERIFICAÇÃO DE FIREBASE =====
-            function checkFirebase() {
-                try {
-                    const hasFirebase = typeof firebase !== 'undefined' && 
-                                        typeof firebase.firestore !== 'undefined' &&
-                                        typeof firebase.auth !== 'undefined';
-                    
-                    if (hasFirebase) {
-                        errorInfo.resources.firebase.loaded = true;
-                        console.log('✅ Firebase carregado com sucesso');
-                        return true;
-                    } else {
-                        errorInfo.resources.firebase.loaded = false;
-                        errorInfo.resources.firebase.error = 'Firebase SDK não carregado';
-                        console.warn('⚠️ Firebase não carregado - aguardando...');
-                        return false;
-                    }
-                } catch(e) {
-                    errorInfo.resources.firebase.loaded = false;
-                    errorInfo.resources.firebase.error = e.message;
-                    console.warn('⚠️ Erro ao verificar Firebase:', e.message);
-                    return false;
-                }
-            }
-            
-            // ===== VERIFICAÇÃO DE FONTS =====
-            function checkFonts() {
-                try {
-                    const fontCheck = document.createElement('span');
-                    fontCheck.style.fontFamily = 'Playfair Display, serif';
-                    fontCheck.style.position = 'absolute';
-                    fontCheck.style.left = '-9999px';
-                    document.body.appendChild(fontCheck);
-                    
-                    const computed = window.getComputedStyle(fontCheck);
-                    const fontFamily = computed.fontFamily || '';
-                    document.body.removeChild(fontCheck);
-                    
-                    const hasPlayfair = fontFamily.includes('Playfair') || fontFamily.includes('serif');
-                    const links = document.querySelectorAll('link[href*="fonts.googleapis.com"]');
-                    const hasFontLink = links.length > 0;
-                    
-                    if (hasPlayfair || hasFontLink) {
-                        errorInfo.resources.fonts.loaded = true;
-                        console.log('✅ Google Fonts carregado com sucesso');
-                        return true;
-                    } else {
-                        errorInfo.resources.fonts.loaded = false;
-                        errorInfo.resources.fonts.error = 'Google Fonts não carregado';
-                        return false;
-                    }
-                } catch(e) {
-                    errorInfo.resources.fonts.loaded = false;
-                    errorInfo.resources.fonts.error = e.message;
-                    return false;
-                }
-            }
-            
-            // ===== CAPTURA ERROS DE CARREGAMENTO =====
-            function captureLoadErrors() {
-                window.addEventListener('error', function(e) {
-                    const target = e.target;
-                    
-                    if (target && target.tagName === 'LINK' && target.rel === 'stylesheet') {
-                        const resourceName = target.href || 'style.css';
-                        console.error('❌ Erro ao carregar CSS:', resourceName);
-                        errorInfo.errors.push(`CSS Load Error: ${resourceName}`);
-                        if (!errorInfo.failedResources.includes('style.css')) {
-                            errorInfo.failedResources.push('style.css');
-                        }
-                        redirectToError();
-                    }
-                    
-                    if (target && target.tagName === 'SCRIPT' && target.src) {
-                        const resourceName = target.src || 'script.js';
-                        console.error('❌ Erro ao carregar JavaScript:', resourceName);
-                        errorInfo.errors.push(`JS Load Error: ${resourceName}`);
-                        if (!errorInfo.failedResources.includes('script.js')) {
-                            errorInfo.failedResources.push('script.js');
-                        }
-                        redirectToError();
-                    }
-                }, true);
-            }
-
-            // ===== CAPTURA ERROS NÃO TRATADOS =====
-            function captureUnhandledErrors() {
-                window.addEventListener('unhandledrejection', function(e) {
-                    const errorMsg = e.reason ? String(e.reason) : 'Unknown promise rejection';
-                    console.error('❌ Erro não tratado (Promise):', errorMsg);
-                    errorInfo.errors.push(`Unhandled Rejection: ${errorMsg.substring(0, 100)}`);
-                });
-            }
-            
-            // ===== VERIFICAÇÃO PERIÓDICA =====
-            function checkResources() {
-                checkCount++;
-                
-                console.log(`🔄 Verificação ${checkCount}/${maxChecks}`);
-                
-                if (!resourcesLoaded.css) {
-                    checkCSS();
-                }
-                
-                if (!resourcesLoaded.js) {
-                    checkJS();
-                }
-                
-                if (!errorInfo.resources.firebase.loaded) {
-                    checkFirebase();
-                }
-                
-                if (!errorInfo.resources.fonts.loaded) {
-                    checkFonts();
-                }
-                
-                if (checkCount >= maxChecks) {
-                    if (!resourcesLoaded.css || !resourcesLoaded.js) {
-                        console.error('❌ Tempo limite excedido. Recursos não carregaram completamente.');
-                        redirectToError();
-                    }
-                }
-            }
-            
-            // ===== INICIALIZAÇÃO =====
-            function startResourceCheck() {
-                captureLoadErrors();
-                captureUnhandledErrors();
-                
-                console.log('🔍 Sistema de verificação de recursos iniciado (Jornal)');
-                console.log('🆔 UID:', errorInfo.uid);
-                
-                setTimeout(checkResources, 100);
-                intervalId = setInterval(checkResources, CHECK_INTERVAL);
-                
-                timeoutId = setTimeout(function() {
-                    if (!resourcesLoaded.css || !resourcesLoaded.js) {
-                        console.error('❌ Timeout final. Recursos não carregaram.');
-                        redirectToError();
-                    }
-                }, TIMEOUT_MS + 1000);
-            }
-            
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', startResourceCheck);
-            } else {
-                startResourceCheck();
-            }
-            
-            window.addEventListener('load', function() {
-                setTimeout(function() {
-                    if (!resourcesLoaded.css || !resourcesLoaded.js) {
-                        console.error('❌ Recursos não carregaram após o load da página.');
-                        redirectToError();
-                    }
-                }, 1000);
-            });
-            
-            window.__errorSystem = {
-                getUID: function() { return errorInfo.uid; },
-                getShortUID: function() { return errorInfo.shortUid; },
-                getStatus: function() {
-                    return {
-                        css: resourcesLoaded.css,
-                        js: resourcesLoaded.js,
-                        firebase: errorInfo.resources.firebase.loaded,
-                        fonts: errorInfo.resources.fonts.loaded,
-                        all: resourcesLoaded.css && resourcesLoaded.js,
-                        failed: errorInfo.failedResources,
-                        errors: errorInfo.errors,
-                        uid: errorInfo.uid
-                    };
-                },
-                getErrorURL: function() {
-                    return generateErrorURL(errorInfo);
-                }
-            };
-        })();
-    </script>
-    
-    <!-- FONTS E OUTROS RECURSOS -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="icon" href="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/Favicom.png" type="image/x-icon">
     
-    <!-- FIREBASE SDKS -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     
-    <!-- CSS PRINCIPAL COM ONERROR -->
-    <link rel="stylesheet" 
-          href="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/style.css" 
-          onerror="window.location.href=window.__errorSystem ? window.__errorSystem.getErrorURL() : 'https://wazzimagiygg.com/generalerror/'">
-    
-    <style>
-        /* CSS de fallback */
-        .newspaper-container {
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .newspaper-container.loaded {
-            opacity: 1;
-        }
-        
-        #loadingIndicator {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: #f5f5f5;
-            z-index: 9999;
-            font-family: Arial, sans-serif;
-        }
-        #loadingIndicator .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #ddd;
-            border-top-color: #c0392b;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        #loadingIndicator p {
-            margin-top: 20px;
-            color: #333;
-            font-size: 16px;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        #loadingIndicator.hidden {
-            display: none;
-        }
-    </style>
+    <link rel="stylesheet" href="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/style.css">
 </head>
 <body>
 
-<!-- INDICADOR DE CARREGAMENTO -->
-<div id="loadingIndicator">
-    <div class="spinner"></div>
-    <p>Carregando o Jornal WazzimaGiygg...</p>
-</div>
-
-<!-- ===== BANNED OVERLAY ===== -->
-<div id="bannedOverlay" class="banned-overlay" style="display:none;">
+<!-- BANNED OVERLAY -->
+<div id="bannedOverlay" class="banned-overlay">
     <div class="banned-box">
         <div class="icon">🚫</div>
         <h2>⚠️ Conta Banida</h2>
@@ -540,7 +34,7 @@
 </div>
 
 <!-- ===== COOKIE CONSENT BANNER ===== -->
-<div id="cookieConsent" class="cookie-consent" style="display:none;">
+<div id="cookieConsent" class="cookie-consent">
     <div class="cookie-content">
         <div class="cookie-text">
             <h3>🍪 Nós usamos cookies</h3>
@@ -592,7 +86,7 @@
             <div class="notification-bell" id="notificationBell" onclick="toggleNotifications(event)">
                 <span class="material-icons">notifications</span>
                 <span class="notification-badge" id="notifBadge" style="display:none;">0</span>
-                <div class="notification-dropdown" id="notifDropdown" style="display:none; position:absolute; right:0; top:100%; background:#1a1a1a; border:1px solid #333; border-radius:8px; min-width:280px; max-width:320px; padding:12px; z-index:100;">
+                <div class="notification-dropdown" id="notifDropdown">
                     <div class="notification-dropdown-header">
                         <h3>🔔 Notificações</h3>
                         <button onclick="markAllAsRead(event)">Marcar todas como lidas</button>
@@ -680,9 +174,8 @@
     </div>
 </footer>
 
-<!-- ===== MODAIS ===== -->
 <!-- Modal Login -->
-<div id="loginModal" class="modal" style="display:none;">
+<div id="loginModal" class="modal">
     <div class="modal-content">
         <h2><i class="fab fa-google"></i> Entrar com Google</h2>
         <p>Faça login com sua conta Google para acessar recursos administrativos.</p>
@@ -694,7 +187,7 @@
 </div>
 
 <!-- Modal Compartilhar -->
-<div id="shareModal" class="modal" style="display:none;">
+<div id="shareModal" class="modal">
     <div class="modal-content">
         <h2><i class="fas fa-share-alt"></i> Compartilhar Matéria</h2>
         <p>Copie o link abaixo para compartilhar esta matéria:</p>
@@ -706,8 +199,8 @@
     </div>
 </div>
 
-<!-- Modal Nova Matéria -->
-<div id="articleModal" class="modal" style="display:none;">
+<!-- Modal Nova Matéria (apenas admin) -->
+<div id="articleModal" class="modal">
     <div class="modal-content" style="max-width: 600px;">
         <h2><i class="fas fa-edit"></i> <span id="modalTitle">Nova Matéria</span></h2>
         <div class="form-group">
@@ -749,7 +242,7 @@
 </div>
 
 <!-- Modal Visualizar Matéria -->
-<div id="viewArticleModal" class="modal" style="display:none;">
+<div id="viewArticleModal" class="modal">
     <div class="modal-content" style="max-width: 800px;">
         <div id="viewArticleContent"></div>
         <div id="viewAdminActions" style="margin-top: 20px; display: none;">
@@ -775,79 +268,12 @@
 </div>
 
 <!-- Toast -->
-<div id="toast" class="toast" style="display:none;"></div>
+<div id="toast" class="toast"></div>
 
-<!-- ===== JAVASCRIPT PRINCIPAL COM ONERROR ===== -->
-<script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/script.js" 
-        onerror="window.location.href=window.__errorSystem ? window.__errorSystem.getErrorURL() : 'https://wazzimagiygg.com/generalerror/'">
-</script>
+<script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/script.js"></script>
 
-<!-- ===== SCRIPT DE VERIFICAÇÃO ADICIONAL ===== -->
-<script>
-    (function() {
-        'use strict';
-        
-        function hideLoadingIndicator() {
-            const indicator = document.getElementById('loadingIndicator');
-            if (indicator) {
-                indicator.classList.add('hidden');
-                setTimeout(function() {
-                    indicator.style.display = 'none';
-                }, 500);
-            }
-        }
-        
-        function markAsLoaded() {
-            const container = document.querySelector('.newspaper-container');
-            if (container) {
-                container.classList.add('loaded');
-            }
-        }
-        
-        function checkContentLoaded() {
-            const grid = document.getElementById('newspaperGrid');
-            if (grid && grid.children.length > 0) {
-                hideLoadingIndicator();
-                markAsLoaded();
-                return true;
-            }
-            
-            setTimeout(function() {
-                if (grid && grid.children.length > 0) {
-                    hideLoadingIndicator();
-                    markAsLoaded();
-                } else {
-                    if (typeof filterByCategory === 'function') {
-                        hideLoadingIndicator();
-                        markAsLoaded();
-                    }
-                }
-            }, 3000);
-            
-            return false;
-        }
-        
-        if (document.readyState === 'complete') {
-            checkContentLoaded();
-        } else {
-            window.addEventListener('load', function() {
-                setTimeout(checkContentLoaded, 1000);
-            });
-        }
-        
-        console.log('🟢 Sistema de verificação de recursos - OK (Jornal)');
-        
-        if (window.__errorSystem) {
-            console.log('🆔 UID atual:', window.__errorSystem.getUID());
-            console.log('📊 Status:', window.__errorSystem.getStatus());
-        }
-    })();
-</script>
-
-<!-- ===== SCRIPT DO VERIFICADOR/LOGS ===== -->
-<script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/D6FefD0De/EfdFeF1ExcE0C/De0Var6H6f/QXdv0/dddcefb.js" 
-        onerror="window.location.href=window.__errorSystem ? window.__errorSystem.getErrorURL() : 'https://wazzimagiygg.com/generalerror/'">
-</script>
-
+<!-- Iframe do verificador/logs -->
+<script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/D6FefD0De/EfdFeF1ExcE0C/De0Var6H6f/QXdv0/dddcefb.js"></script>
+    
 </body>
 </html>
