@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Criador de Postagens - WazzimaGiygg</title>
+
+    <!-- Google Fonts e Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;800;900&family=Lato:wght@300;400;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js">
+    </script>
+
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <!-- ===== BANNED OVERLAY ===== -->
+    <div id="bannedOverlay" class="banned-overlay">
+        <div class="banned-box">
+            <div class="icon">🚫</div>
+            <h2>⚠️ Conta Banida</h2>
+            <p>Sua conta foi banida permanentemente do sistema.</p>
+            <div id="banDetails" class="ban-details">Motivo: Violação das políticas de uso</div>
+            <p style="font-size:14px; color:#666;">Se você acredita que isso é um erro, entre em contato com o suporte.</p>
+            <button class="btn-logout-banned" onclick="logoutBanned()">🚪 Sair da conta</button>
+        </div>
+    </div>
+
+    <!-- ===== COOKIE CONSENT BANNER ===== -->
+    <div id="cookieConsent" class="cookie-consent">
+        <div class="cookie-content">
+            <div class="cookie-text">
+                <h3>🍪 Nós usamos cookies</h3>
+                <p>Este site utiliza cookies para melhorar sua experiência, analisar tráfego e exibir anúncios personalizados.
+                    Ao continuar navegando, você concorda com nossa
+                    <a href="https://wazzimagiygg.com/LGPD" target="_blank" style="color:#4a9eff; text-decoration:underline;">Política de Privacidade</a>.</p>
+                <div class="cookie-options">
+                    <label><input type="checkbox" id="cookieEssential" checked disabled /> <span>🔒 Essenciais (obrigatórios)</span></label>
+                    <label><input type="checkbox" id="cookieAnalytics" checked /> <span>📊 Análise de dados</span></label>
+                    <label><input type="checkbox" id="cookieAdvertising" checked /> <span>🎯 Publicidade personalizada</span></label>
+                </div>
+            </div>
+            <div class="cookie-buttons">
+                <button id="cookieAcceptAll" class="cookie-btn accept">✅ Aceitar Todos</button>
+                <button id="cookieRejectAll" class="cookie-btn reject">❌ Recusar Todos</button>
+                <button id="cookieCustomize" class="cookie-btn customize">⚙️ Personalizar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HEADER PADRONIZADO ===== -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-area-header" onclick="navigateToHome()">
+                <img src="https://wazzimagiygg.com/favicom.png" alt="Logo" />
+                <div>
+                    <h1>WazzimaGiygg</h1>
+                    <small>Jornal</small>
+                </div>
+            </div>
+            <div class="user-info-header" id="userInfo">
+                <div class="user-avatar" id="userAvatar">👤</div>
+                <div>
+                    <div class="user-name" id="userName">Carregando...</div>
+                    <div class="user-email" id="userEmail">aguarde</div>
+                </div>
+                <span id="userBadge"></span>
+
+                <!-- NOTIFICATION BELL -->
+                <div class="notification-bell" id="notificationBell" onclick="toggleNotifications(event)">
+                    <span class="material-icons">notifications</span>
+                    <span class="notification-badge" id="notifBadge" style="display:none;">0</span>
+                    <div class="notification-dropdown" id="notifDropdown">
+                        <div class="notification-dropdown-header">
+                            <h3>🔔 Notificações</h3>
+                            <button onclick="markAllAsRead(event)">Marcar todas como lidas</button>
+                        </div>
+                        <div id="notificationList">
+                            <div class="notification-empty">
+                                <span class="material-icons">notifications_off</span>
+                                <p>Nenhuma notificação</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-logout" id="btnLogout" style="display:none;" onclick="logout()">Sair</button>
+                <button class="btn-login" id="btnLogin" onclick="showLoginModal()">
+                    <span class="material-icons" style="font-size:16px;">person</span> Entrar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="newspaper-container">
+        <!-- CABEÇALHO DO JORNAL -->
+        <div class="newspaper-header">
+            <div class="newspaper-name" onclick="navigateToHome()">WAZZIMA<span>GIYGG</span></div>
+            <div class="newspaper-motto">O JORNAL INEVITÁVEL!</div>
+            <div class="issue-info">
+                <span class="issue-date"><i class="far fa-calendar-alt"></i> <span id="currentDate"></span></span>
+                <span><i class="fas fa-map-marker-alt"></i> Santa Fé do Sul - São Paulo - Brazil</span>
+            </div>
+        </div>
+
+        <!-- Menu de Navegação -->
+        <div class="nav-menu">
+            <ul>
+                <li><a onclick="filterByCategory('todos')" class="active" data-cat="todos"><span class="cat-icon">📰</span>TODOS</a></li>
+                <li><a onclick="filterByCategory('política')" data-cat="política"><span class="cat-icon">🏛️</span>POLÍTICA</a></li>
+                <li><a onclick="filterByCategory('internacional')" data-cat="internacional"><span class="cat-icon">🌍</span>INTERNACIONAL</a></li>
+                <li><a onclick="filterByCategory('economia')" data-cat="economia"><span class="cat-icon">📊</span>ECONOMIA</a></li>
+                <li><a onclick="filterByCategory('justiça')" data-cat="justiça"><span class="cat-icon">⚖️</span>JUSTIÇA</a></li>
+                <li><a onclick="filterByCategory('cultura')" data-cat="cultura"><span class="cat-icon">🎭</span>CULTURA</a></li>
+                <li><a onclick="filterByCategory('investigação')" data-cat="investigação"><span class="cat-icon">🔍</span>INVESTIGAÇÃO</a></li>
+                <li><a onclick="filterByCategory('opinião')" data-cat="opinião"><span class="cat-icon">✍️</span>OPINIÃO</a></li>
+                <li><a onclick="filterByCategory('esporte')" data-cat="esporte"><span class="cat-icon">⚽</span>ESPORTE</a></li>
+                <li><a onclick="filterByCategory('tecnologia')" data-cat="tecnologia"><span class="cat-icon">💻</span>TECNOLOGIA</a></li>
+                <li><a onclick="filterByCategory('redes-sociais')" data-cat="redes-sociais"><span class="cat-icon">📱</span>REDES SOCIAIS</a></li>
+                <li><a onclick="filterByCategory('saúde')" data-cat="saúde"><span class="cat-icon">🏥</span>SAÚDE</a></li>
+                <li><a onclick="filterByCategory('educação')" data-cat="educação"><span class="cat-icon">📚</span>EDUCAÇÃO</a></li>
+                <li><a href="archive.html" style="background:rgba(255,255,255,0.1); border-left:2px solid rgba(255,255,255,0.2);">
+                        <span class="cat-icon">📚</span>ARQUIVO
+                    </a></li>
+                <li id="adminNewArticleBtn" style="display:none; border-left:2px solid rgba(255,255,255,0.3);">
+                    <a onclick="showNewArticleModal()" class="admin-btn" style="background:#c0392b; color:white; font-weight:700; padding:12px 24px;">
+                        ✏️ NOVA MATÉRIA
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Grid Principal -->
+        <div class="newspaper-grid" id="newspaperGrid">
+            <!-- O conteúdo será carregado pelo JavaScript -->
+        </div>
+    </div>
+
+    <!-- ===== FOOTER PADRONIZADO ===== -->
+    <footer class="site-footer">
+        <div class="footer-links">
+            <a href="https://wazzimagiygg.com/donate/" class="footer-link" target="_blank">💝 Doação</a>
+            <span class="footer-divider">|</span>
+            <a href="https://wazzimagiygg.com/desktop.html" class="footer-link" target="_blank">🖥️ Desktop</a>
+            <span class="footer-divider">|</span>
+            <a href="https://wazzimagiygg.com/LGPD" class="footer-link" target="_blank">🔒 LGPD</a>
+            <span class="footer-divider">|</span>
+            <a href="https://wazzimagiygg.com/MarcoCivil" class="footer-link" target="_blank">📜 Marco Civil</a>
+            <span class="footer-divider">|</span>
+            <a href="https://support.wazzimagiygg.com/" class="footer-link" target="_blank">🎫 Ticket</a>
+            <span class="footer-divider">|</span>
+            <a href="https://wazzimagiygg.com/produtos/" class="footer-link highlight" target="_blank">🛍️ Produtos</a>
+            <span class="footer-divider">|</span>
+            <a href="https://painel.wazzimagiygg.com/" class="footer-link highlight" target="_blank">👤 Sua conta</a>
+        </div>
+        <div class="footer-copyright">
+            © 2026 WazzimaGiygg Core — O Jornal da Verdade
+        </div>
+    </footer>
+
+    <!-- Modal Login -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fab fa-google"></i> Entrar com Google</h2>
+            <p>Faça login com sua conta Google para acessar recursos administrativos.</p>
+            <button class="btn-primary" onclick="loginWithGoogle()" style="width:100%;">
+                <i class="fab fa-google"></i> Entrar com Google
+            </button>
+            <button class="btn-close" onclick="closeModals()">Fechar</button>
+        </div>
+    </div>
+
+    <!-- Modal Compartilhar -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-share-alt"></i> Compartilhar Matéria</h2>
+            <p>Copie o link abaixo para compartilhar esta matéria:</p>
+            <div class="share-url-container" id="shareUrlContainer"></div>
+            <button class="btn-primary" onclick="copyShareUrl()" style="width:100%; margin-bottom:10px;">
+                <i class="fas fa-copy"></i> Copiar Link
+            </button>
+            <button class="btn-close" onclick="closeModals()">Fechar</button>
+        </div>
+    </div>
+
+    <!-- Modal Nova Matéria (apenas admin) -->
+    <div id="articleModal" class="modal">
+        <div class="modal-content" style="max-width:600px;">
+            <h2><i class="fas fa-edit"></i> <span id="modalTitle">Nova Matéria</span></h2>
+            <div class="form-group">
+                <label>Título da Matéria</label>
+                <input type="text" id="articleTitle" placeholder="Título principal" />
+            </div>
+            <div class="form-group">
+                <label>Tipo de Matéria</label>
+                <select id="articleCategory">
+                    <option value="política">🏛️ Política</option>
+                    <option value="internacional">🌍 Internacional</option>
+                    <option value="economia">📊 Economia</option>
+                    <option value="justiça">⚖️ Justiça</option>
+                    <option value="cultura">🎭 Cultura</option>
+                    <option value="investigação">🔍 Investigação</option>
+                    <option value="opinião">✍️ Opinião</option>
+                    <option value="esporte">⚽ Esporte</option>
+                    <option value="tecnologia">💻 Tecnologia</option>
+                    <option value="redes-sociais">📱 Redes Sociais</option>
+                    <option value="saúde">🏥 Saúde</option>
+                    <option value="educação">📚 Educação</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Resumo/Descrição</label>
+                <textarea id="articleExcerpt" placeholder="Breve resumo da matéria..." rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Conteúdo Completo (HTML)</label>
+                <textarea id="articleContent" placeholder="Conteúdo completo da matéria com formatação HTML..." rows="6"></textarea>
+            </div>
+            <div class="form-group">
+                <label>URL da Imagem (opcional)</label>
+                <input type="text" id="articleImage" placeholder="https://exemplo.com/imagem.jpg" />
+            </div>
+            <button class="btn-primary" onclick="saveArticle()" style="width:100%;">Publicar Matéria</button>
+            <button class="btn-close" onclick="closeModals()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal Visualizar Matéria -->
+    <div id="viewArticleModal" class="modal">
+        <div class="modal-content" style="max-width:800px;">
+            <div id="viewArticleContent"></div>
+            <div id="viewAdminActions" style="margin-top:20px; display:none;">
+                <hr />
+                <div style="display:flex; gap:10px; justify-content:space-between; flex-wrap:wrap;">
+                    <button class="btn-share" onclick="showShareModal()">
+                        <i class="fas fa-share-alt"></i> Compartilhar
+                    </button>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn-warning" onclick="editCurrentArticle()">✏️ Editar</button>
+                        <button class="btn-danger" onclick="deleteCurrentArticle()">🗑️ Excluir</button>
+                    </div>
+                </div>
+            </div>
+            <div id="viewUserActions" style="margin-top:20px; display:none;">
+                <hr />
+                <button class="btn-share" onclick="showShareModal()" style="width:100%;">
+                    <i class="fas fa-share-alt"></i> Compartilhar esta matéria
+                </button>
+            </div>
+            <button class="btn-close" onclick="closeModals()">Fechar</button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Script principal -->
+    <script src="script.js"></script>
+
+    <!-- Iframe do verificador/logs (opcional, mantido por compatibilidade) -->
+    <script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/D6FefD0De/EfdFeF1ExcE0C/De0Var6H6f/QXdv0/dddcefb.js">
+    </script>
+
+</body>
+</html>
