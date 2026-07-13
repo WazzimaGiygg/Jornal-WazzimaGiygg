@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Criador de Postagens - WazzimaGiygg</title>
+    <title>Dashboard de Postagens - WazzimaGiygg</title>
 
-    <!-- Google Fonts e Font Awesome -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;800;900&family=Lato:wght@300;400;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js">
@@ -18,10 +17,22 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js">
     </script>
 
-    <link rel="stylesheet" href="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/novapostagem/style.css" />
+    <link rel="stylesheet" href="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/novapostagem/admin-style.css" />
 </head>
-
 <body>
+
+    <!-- ===== VERIFICAÇÃO DE ACESSO ===== -->
+    <div id="accessDenied" style="display:none;">
+        <div class="access-denied-box">
+            <i class="fas fa-lock" style="font-size:64px; color:#e74c3c;"></i>
+            <h2>Acesso Negado</h2>
+            <p>Esta página é restrita a administradores.</p>
+            <p style="font-size:14px; color:#888; margin-top:10px;">Faça login com uma conta administrativa para continuar.</p>
+            <button onclick="window.location.href='index.html'" class="btn-primary" style="margin-top:20px;">
+                <i class="fas fa-arrow-left"></i> Voltar para o Jornal
+            </button>
+        </div>
+    </div>
 
     <!-- ===== BANNED OVERLAY ===== -->
     <div id="bannedOverlay" class="banned-overlay">
@@ -30,245 +41,301 @@
             <h2>⚠️ Conta Banida</h2>
             <p>Sua conta foi banida permanentemente do sistema.</p>
             <div id="banDetails" class="ban-details">Motivo: Violação das políticas de uso</div>
-            <p style="font-size:14px; color:#666;">Se você acredita que isso é um erro, entre em contato com o suporte.</p>
             <button class="btn-logout-banned" onclick="logoutBanned()">🚪 Sair da conta</button>
         </div>
     </div>
 
-    <!-- ===== COOKIE CONSENT BANNER ===== -->
-    <div id="cookieConsent" class="cookie-consent">
-        <div class="cookie-content">
-            <div class="cookie-text">
-                <h3>🍪 Nós usamos cookies</h3>
-                <p>Este site utiliza cookies para melhorar sua experiência, analisar tráfego e exibir anúncios personalizados.
-                    Ao continuar navegando, você concorda com nossa
-                    <a href="https://wazzimagiygg.com/LGPD" target="_blank" style="color:#4a9eff; text-decoration:underline;">Política de Privacidade</a>.</p>
-                <div class="cookie-options">
-                    <label><input type="checkbox" id="cookieEssential" checked disabled /> <span>🔒 Essenciais (obrigatórios)</span></label>
-                    <label><input type="checkbox" id="cookieAnalytics" checked /> <span>📊 Análise de dados</span></label>
-                    <label><input type="checkbox" id="cookieAdvertising" checked /> <span>🎯 Publicidade personalizada</span></label>
-                </div>
-            </div>
-            <div class="cookie-buttons">
-                <button id="cookieAcceptAll" class="cookie-btn accept">✅ Aceitar Todos</button>
-                <button id="cookieRejectAll" class="cookie-btn reject">❌ Recusar Todos</button>
-                <button id="cookieCustomize" class="cookie-btn customize">⚙️ Personalizar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== HEADER PADRONIZADO ===== -->
-    <header class="header">
+    <!-- ===== HEADER DO DASHBOARD ===== -->
+    <header class="dashboard-header">
         <div class="header-content">
-            <div class="logo-area-header" onclick="navigateToHome()">
+            <div class="logo-area" onclick="window.location.href='index.html'">
                 <img src="https://wazzimagiygg.com/favicom.png" alt="Logo" />
                 <div>
                     <h1>WazzimaGiygg</h1>
-                    <small>Jornal</small>
+                    <small>Dashboard de Postagens</small>
                 </div>
             </div>
-            <div class="user-info-header" id="userInfo">
-                <div class="user-avatar" id="userAvatar">👤</div>
-                <div>
-                    <div class="user-name" id="userName">Carregando...</div>
-                    <div class="user-email" id="userEmail">aguarde</div>
-                </div>
-                <span id="userBadge"></span>
-
-                <!-- NOTIFICATION BELL -->
-                <div class="notification-bell" id="notificationBell" onclick="toggleNotifications(event)">
-                    <span class="material-icons">notifications</span>
-                    <span class="notification-badge" id="notifBadge" style="display:none;">0</span>
-                    <div class="notification-dropdown" id="notifDropdown">
-                        <div class="notification-dropdown-header">
-                            <h3>🔔 Notificações</h3>
-                            <button onclick="markAllAsRead(event)">Marcar todas como lidas</button>
-                        </div>
-                        <div id="notificationList">
-                            <div class="notification-empty">
-                                <span class="material-icons">notifications_off</span>
-                                <p>Nenhuma notificação</p>
-                            </div>
-                        </div>
+            <div class="user-area">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">👤</div>
+                    <div>
+                        <div class="user-name" id="userName">Carregando...</div>
+                        <div class="user-email" id="userEmail">aguarde</div>
                     </div>
                 </div>
-
-                <button class="btn-logout" id="btnLogout" style="display:none;" onclick="logout()">Sair</button>
-                <button class="btn-login" id="btnLogin" onclick="showLoginModal()">
-                    <span class="material-icons" style="font-size:16px;">person</span> Entrar
+                <span id="userBadge" class="badge-admin">Admin</span>
+                <button class="btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Sair
                 </button>
             </div>
         </div>
     </header>
 
-    <div class="newspaper-container">
-        <!-- CABEÇALHO DO JORNAL -->
-        <div class="newspaper-header">
-            <div class="newspaper-name" onclick="navigateToHome()">WAZZIMA<span>GIYGG</span></div>
-            <div class="newspaper-motto">O JORNAL INEVITÁVEL!</div>
-            <div class="issue-info">
-                <span class="issue-date"><i class="far fa-calendar-alt"></i> <span id="currentDate"></span></span>
-                <span><i class="fas fa-map-marker-alt"></i> Santa Fé do Sul - São Paulo - Brazil</span>
-            </div>
-        </div>
+    <!-- ===== CONTEÚDO PRINCIPAL ===== -->
+    <div class="dashboard-container">
 
-        <!-- Menu de Navegação -->
-        <div class="nav-menu">
-            <ul>
-                <li><a onclick="filterByCategory('todos')" class="active" data-cat="todos"><span class="cat-icon">📰</span>TODOS</a></li>
-                <li><a onclick="filterByCategory('política')" data-cat="política"><span class="cat-icon">🏛️</span>POLÍTICA</a></li>
-                <li><a onclick="filterByCategory('internacional')" data-cat="internacional"><span class="cat-icon">🌍</span>INTERNACIONAL</a></li>
-                <li><a onclick="filterByCategory('economia')" data-cat="economia"><span class="cat-icon">📊</span>ECONOMIA</a></li>
-                <li><a onclick="filterByCategory('justiça')" data-cat="justiça"><span class="cat-icon">⚖️</span>JUSTIÇA</a></li>
-                <li><a onclick="filterByCategory('cultura')" data-cat="cultura"><span class="cat-icon">🎭</span>CULTURA</a></li>
-                <li><a onclick="filterByCategory('investigação')" data-cat="investigação"><span class="cat-icon">🔍</span>INVESTIGAÇÃO</a></li>
-                <li><a onclick="filterByCategory('opinião')" data-cat="opinião"><span class="cat-icon">✍️</span>OPINIÃO</a></li>
-                <li><a onclick="filterByCategory('esporte')" data-cat="esporte"><span class="cat-icon">⚽</span>ESPORTE</a></li>
-                <li><a onclick="filterByCategory('tecnologia')" data-cat="tecnologia"><span class="cat-icon">💻</span>TECNOLOGIA</a></li>
-                <li><a onclick="filterByCategory('redes-sociais')" data-cat="redes-sociais"><span class="cat-icon">📱</span>REDES SOCIAIS</a></li>
-                <li><a onclick="filterByCategory('saúde')" data-cat="saúde"><span class="cat-icon">🏥</span>SAÚDE</a></li>
-                <li><a onclick="filterByCategory('educação')" data-cat="educação"><span class="cat-icon">📚</span>EDUCAÇÃO</a></li>
-                <li><a href="archive.html" style="background:rgba(255,255,255,0.1); border-left:2px solid rgba(255,255,255,0.2);">
-                        <span class="cat-icon">📚</span>ARQUIVO
-                    </a></li>
-                <li id="adminNewArticleBtn" style="display:none; border-left:2px solid rgba(255,255,255,0.3);">
-                    <a onclick="showNewArticleModal()" class="admin-btn" style="background:#c0392b; color:white; font-weight:700; padding:12px 24px;">
-                        ✏️ NOVA MATÉRIA
-                    </a>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Grid Principal -->
-        <div class="newspaper-grid" id="newspaperGrid">
-            <!-- O conteúdo será carregado pelo JavaScript -->
-        </div>
-    </div>
-
-    <!-- ===== FOOTER PADRONIZADO ===== -->
-    <footer class="site-footer">
-        <div class="footer-links">
-            <a href="https://wazzimagiygg.com/donate/" class="footer-link" target="_blank">💝 Doação</a>
-            <span class="footer-divider">|</span>
-            <a href="https://wazzimagiygg.com/desktop.html" class="footer-link" target="_blank">🖥️ Desktop</a>
-            <span class="footer-divider">|</span>
-            <a href="https://wazzimagiygg.com/LGPD" class="footer-link" target="_blank">🔒 LGPD</a>
-            <span class="footer-divider">|</span>
-            <a href="https://wazzimagiygg.com/MarcoCivil" class="footer-link" target="_blank">📜 Marco Civil</a>
-            <span class="footer-divider">|</span>
-            <a href="https://support.wazzimagiygg.com/" class="footer-link" target="_blank">🎫 Ticket</a>
-            <span class="footer-divider">|</span>
-            <a href="https://wazzimagiygg.com/produtos/" class="footer-link highlight" target="_blank">🛍️ Produtos</a>
-            <span class="footer-divider">|</span>
-            <a href="https://painel.wazzimagiygg.com/" class="footer-link highlight" target="_blank">👤 Sua conta</a>
-        </div>
-        <div class="footer-copyright">
-            © 2026 WazzimaGiygg Core — O Jornal da Verdade
-        </div>
-    </footer>
-
-    <!-- Modal Login -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <h2><i class="fab fa-google"></i> Entrar com Google</h2>
-            <p>Faça login com sua conta Google para acessar recursos administrativos.</p>
-            <button class="btn-primary" onclick="loginWithGoogle()" style="width:100%;">
-                <i class="fab fa-google"></i> Entrar com Google
-            </button>
-            <button class="btn-close" onclick="closeModals()">Fechar</button>
-        </div>
-    </div>
-
-    <!-- Modal Compartilhar -->
-    <div id="shareModal" class="modal">
-        <div class="modal-content">
-            <h2><i class="fas fa-share-alt"></i> Compartilhar Matéria</h2>
-            <p>Copie o link abaixo para compartilhar esta matéria:</p>
-            <div class="share-url-container" id="shareUrlContainer"></div>
-            <button class="btn-primary" onclick="copyShareUrl()" style="width:100%; margin-bottom:10px;">
-                <i class="fas fa-copy"></i> Copiar Link
-            </button>
-            <button class="btn-close" onclick="closeModals()">Fechar</button>
-        </div>
-    </div>
-
-    <!-- Modal Nova Matéria (apenas admin) -->
-    <div id="articleModal" class="modal">
-        <div class="modal-content" style="max-width:600px;">
-            <h2><i class="fas fa-edit"></i> <span id="modalTitle">Nova Matéria</span></h2>
-            <div class="form-group">
-                <label>Título da Matéria</label>
-                <input type="text" id="articleTitle" placeholder="Título principal" />
-            </div>
-            <div class="form-group">
-                <label>Tipo de Matéria</label>
-                <select id="articleCategory">
-                    <option value="política">🏛️ Política</option>
-                    <option value="internacional">🌍 Internacional</option>
-                    <option value="economia">📊 Economia</option>
-                    <option value="justiça">⚖️ Justiça</option>
-                    <option value="cultura">🎭 Cultura</option>
-                    <option value="investigação">🔍 Investigação</option>
-                    <option value="opinião">✍️ Opinião</option>
-                    <option value="esporte">⚽ Esporte</option>
-                    <option value="tecnologia">💻 Tecnologia</option>
-                    <option value="redes-sociais">📱 Redes Sociais</option>
-                    <option value="saúde">🏥 Saúde</option>
-                    <option value="educação">📚 Educação</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Resumo/Descrição</label>
-                <textarea id="articleExcerpt" placeholder="Breve resumo da matéria..." rows="3"></textarea>
-            </div>
-            <div class="form-group">
-                <label>Conteúdo Completo (HTML)</label>
-                <textarea id="articleContent" placeholder="Conteúdo completo da matéria com formatação HTML..." rows="6"></textarea>
-            </div>
-            <div class="form-group">
-                <label>URL da Imagem (opcional)</label>
-                <input type="text" id="articleImage" placeholder="https://exemplo.com/imagem.jpg" />
-            </div>
-            <button class="btn-primary" onclick="saveArticle()" style="width:100%;">Publicar Matéria</button>
-            <button class="btn-close" onclick="closeModals()">Cancelar</button>
-        </div>
-    </div>
-
-    <!-- Modal Visualizar Matéria -->
-    <div id="viewArticleModal" class="modal">
-        <div class="modal-content" style="max-width:800px;">
-            <div id="viewArticleContent"></div>
-            <div id="viewAdminActions" style="margin-top:20px; display:none;">
-                <hr />
-                <div style="display:flex; gap:10px; justify-content:space-between; flex-wrap:wrap;">
-                    <button class="btn-share" onclick="showShareModal()">
-                        <i class="fas fa-share-alt"></i> Compartilhar
-                    </button>
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn-warning" onclick="editCurrentArticle()">✏️ Editar</button>
-                        <button class="btn-danger" onclick="deleteCurrentArticle()">🗑️ Excluir</button>
-                    </div>
+        <!-- ===== SIDEBAR ===== -->
+        <aside class="sidebar">
+            <div class="sidebar-menu">
+                <div class="menu-item active" onclick="switchTab('posts')">
+                    <i class="fas fa-newspaper"></i>
+                    <span>Minhas Postagens</span>
+                    <span class="badge" id="postCount">0</span>
+                </div>
+                <div class="menu-item" onclick="switchTab('create')">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Nova Postagem</span>
+                </div>
+                <div class="menu-item" onclick="switchTab('categories')">
+                    <i class="fas fa-tags"></i>
+                    <span>Categorias</span>
+                </div>
+                <div class="menu-item" onclick="window.location.href='index.html'">
+                    <i class="fas fa-globe"></i>
+                    <span>Ver Jornal</span>
                 </div>
             </div>
-            <div id="viewUserActions" style="margin-top:20px; display:none;">
-                <hr />
-                <button class="btn-share" onclick="showShareModal()" style="width:100%;">
-                    <i class="fas fa-share-alt"></i> Compartilhar esta matéria
-                </button>
+            <div class="sidebar-footer">
+                <div class="version">v2.0 • Admin</div>
             </div>
-            <button class="btn-close" onclick="closeModals()">Fechar</button>
+        </aside>
+
+        <!-- ===== CONTEÚDO ===== -->
+        <main class="main-content">
+
+            <!-- ===== TAB: MINHAS POSTAGENS ===== -->
+            <section id="tabPosts" class="tab-content active">
+                <div class="page-header">
+                    <h2><i class="fas fa-newspaper"></i> Minhas Postagens</h2>
+                    <button class="btn-primary" onclick="switchTab('create')">
+                        <i class="fas fa-plus"></i> Nova Postagem
+                    </button>
+                </div>
+
+                <!-- Filtros -->
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <label>Categoria:</label>
+                        <select id="filterCategory" onchange="filterPosts()">
+                            <option value="all">Todas</option>
+                            <option value="política">🏛️ Política</option>
+                            <option value="internacional">🌍 Internacional</option>
+                            <option value="economia">📊 Economia</option>
+                            <option value="justiça">⚖️ Justiça</option>
+                            <option value="cultura">🎭 Cultura</option>
+                            <option value="investigação">🔍 Investigação</option>
+                            <option value="opinião">✍️ Opinião</option>
+                            <option value="esporte">⚽ Esporte</option>
+                            <option value="tecnologia">💻 Tecnologia</option>
+                            <option value="redes-sociais">📱 Redes Sociais</option>
+                            <option value="saúde">🏥 Saúde</option>
+                            <option value="educação">📚 Educação</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Status:</label>
+                        <select id="filterStatus" onchange="filterPosts()">
+                            <option value="all">Todos</option>
+                            <option value="published">Publicados</option>
+                            <option value="draft">Rascunhos</option>
+                        </select>
+                    </div>
+                    <div class="filter-group search-group">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchPosts" placeholder="Buscar postagens..." oninput="filterPosts()" />
+                    </div>
+                </div>
+
+                <!-- Lista de Posts -->
+                <div id="postsList" class="posts-list">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Carregando postagens...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== TAB: NOVA POSTAGEM ===== -->
+            <section id="tabCreate" class="tab-content">
+                <div class="page-header">
+                    <h2 id="createTitle"><i class="fas fa-plus-circle"></i> Nova Postagem</h2>
+                    <button class="btn-outline" onclick="resetForm()">
+                        <i class="fas fa-undo"></i> Limpar
+                    </button>
+                </div>
+
+                <form id="postForm" class="post-form" onsubmit="return false;">
+                    <div class="form-row">
+                        <div class="form-group" style="flex:2;">
+                            <label for="postTitle">Título da Matéria <span class="required">*</span></label>
+                            <input type="text" id="postTitle" placeholder="Ex: Nova descoberta científica revoluciona a medicina" required />
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label for="postCategory">Categoria <span class="required">*</span></label>
+                            <select id="postCategory" required>
+                                <option value="">Selecione...</option>
+                                <option value="política">🏛️ Política</option>
+                                <option value="internacional">🌍 Internacional</option>
+                                <option value="economia">📊 Economia</option>
+                                <option value="justiça">⚖️ Justiça</option>
+                                <option value="cultura">🎭 Cultura</option>
+                                <option value="investigação">🔍 Investigação</option>
+                                <option value="opinião">✍️ Opinião</option>
+                                <option value="esporte">⚽ Esporte</option>
+                                <option value="tecnologia">💻 Tecnologia</option>
+                                <option value="redes-sociais">📱 Redes Sociais</option>
+                                <option value="saúde">🏥 Saúde</option>
+                                <option value="educação">📚 Educação</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="postImage">URL da Imagem (opcional)</label>
+                        <div class="image-input-wrapper">
+                            <input type="text" id="postImage" placeholder="https://exemplo.com/imagem.jpg" />
+                            <button type="button" class="btn-preview-image" onclick="previewImage()">
+                                <i class="fas fa-eye"></i> Pré-visualizar
+                            </button>
+                        </div>
+                        <div id="imagePreview" class="image-preview" style="display:none;">
+                            <img id="imagePreviewImg" src="" alt="Pré-visualização" />
+                            <button type="button" class="btn-remove-image" onclick="removeImagePreview()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="postExcerpt">Resumo/Descrição <span class="required">*</span></label>
+                        <textarea id="postExcerpt" placeholder="Breve resumo da matéria (máx. 300 caracteres)" rows="3" maxlength="300" required></textarea>
+                        <div class="char-counter" id="excerptCounter">0/300</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="postContent">Conteúdo Completo <span class="required">*</span></label>
+                        <div class="editor-toolbar">
+                            <button type="button" onclick="insertTag('b')"><b>B</b></button>
+                            <button type="button" onclick="insertTag('i')"><i>I</i></button>
+                            <button type="button" onclick="insertTag('u')"><u>U</u></button>
+                            <button type="button" onclick="insertTag('h2')">H2</button>
+                            <button type="button" onclick="insertTag('h3')">H3</button>
+                            <button type="button" onclick="insertTag('p')">P</button>
+                            <button type="button" onclick="insertTag('ul')">• Lista</button>
+                            <button type="button" onclick="insertTag('blockquote')">" Citação</button>
+                            <button type="button" onclick="insertTag('a')">🔗 Link</button>
+                            <button type="button" onclick="insertImageTag()">🖼️ Imagem</button>
+                        </div>
+                        <textarea id="postContent" placeholder="Conteúdo completo da matéria com formatação HTML..." rows="10" required></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-success" onclick="savePost()">
+                            <i class="fas fa-check"></i> <span id="saveButtonText">Publicar</span>
+                        </button>
+                        <button type="button" class="btn-secondary" onclick="saveAsDraft()">
+                            <i class="fas fa-save"></i> Salvar como Rascunho
+                        </button>
+                        <button type="button" class="btn-danger" onclick="cancelEdit()" id="cancelEditBtn" style="display:none;">
+                            <i class="fas fa-times"></i> Cancelar Edição
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- ===== TAB: CATEGORIAS ===== -->
+            <section id="tabCategories" class="tab-content">
+                <div class="page-header">
+                    <h2><i class="fas fa-tags"></i> Gerenciar Categorias</h2>
+                </div>
+                <div class="categories-grid">
+                    <div class="category-card" style="background: linear-gradient(135deg, #2c3e50, #34495e);">
+                        <i class="fas fa-newspaper"></i>
+                        <h3>Todas</h3>
+                        <p>Ver todas as postagens</p>
+                    </div>
+                    <div class="category-card" style="background: linear-gradient(135deg, #c0392b, #e74c3c);">
+                        <i class="fas fa-landmark"></i>
+                        <h3>Política</h3>
+                        <p>Notícias políticas</p>
+                    </div>
+                    <div class="category-card" style="background: linear-gradient(135deg, #2980b9, #3498db);">
+                        <i class="fas fa-globe-americas"></i>
+                        <h3>Internacional</h3>
+                        <p>Mundo</p>
+                    </div>
+                    <div class="category-card" style="background: linear-gradient(135deg, #27ae60, #2ecc71);">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>Economia</h3>
+                        <p>Finanças e negócios</p>
+                    </div>
+                    <div class="category-card" style="background: linear-gradient(135deg, #8e44ad, #9b59b6);">
+                        <i class="fas fa-gavel"></i>
+                        <h3>Justiça</h3>
+                        <p>Direito e legislação</p>
+                    </div>
+                    <div class="category-card" style="background: linear-gradient(135deg, #e67e22, #f39c12);">
+                        <i class="fas fa-palette"></i>
+                        <h3>Cultura</h3>
+                        <p>Arte e entretenimento</p>
+                    </div>
+                    <div class="category-card" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
+                        <i class="fas fa-search"></i>
+                        <h3>Investigação</h3>
+                        <p>Reportagens especiais</p>
+                    </div>
+                    <div class="category-card" style="background: linear-gradient(135deg, #d35400, #e67e22);">
+                        <i class="fas fa-pen-fancy"></i>
+                        <h3>Opinião</h3>
+                        <p>Artigos de opinião</p>
+                    </div>
+                    <div class="category-card" style="background: linear-gradient(135deg, #2c3e50, #4a6cf7);">
+                        <i class="fas fa-futbol"></i>
+                        <h3>Esporte</h3>
+                        <p>Esportes em geral</p>
+                    </div>
+                    <div class="category-card" style="background: linear-gradient(135deg, #0f3460, #16213e);">
+                        <i class="fas fa-microchip"></i>
+                        <h3>Tecnologia</h3>
+                        <p>Inovação e tech</p>
+                    </div>
+                    <div class="category-card" style="background: linear-gradient(135deg, #e84393, #fd79a8);">
+                        <i class="fas fa-share-alt"></i>
+                        <h3>Redes Sociais</h3>
+                        <p>Digital e social media</p>
+                    </div>
+                    <div class="category-card" style="background: linear-gradient(135deg, #00b894, #00cec9);">
+                        <i class="fas fa-heartbeat"></i>
+                        <h3>Saúde</h3>
+                        <p>Bem-estar e medicina</p>
+                    </div>
+                    <div class="category-card" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe);">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h3>Educação</h3>
+                        <p>Ensino e conhecimento</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ===== MODAL DE CONFIRMAÇÃO ===== -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content" style="max-width:400px;">
+            <h3 id="confirmTitle">Confirmar</h3>
+            <p id="confirmMessage">Tem certeza que deseja realizar esta ação?</p>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+                <button class="btn-secondary" onclick="closeConfirmModal()">Cancelar</button>
+                <button class="btn-danger" id="confirmActionBtn">Confirmar</button>
+            </div>
         </div>
     </div>
 
-    <!-- Toast -->
+    <!-- ===== TOAST ===== -->
     <div id="toast" class="toast"></div>
 
-    <!-- Script principal -->
-    <script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/novapostagem/script.js"></script>
-
-    <!-- Iframe do verificador/logs (opcional, mantido por compatibilidade) -->
-    <script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/D6FefD0De/EfdFeF1ExcE0C/De0Var6H6f/QXdv0/dddcefb.js">
-    </script>
+    <script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/novapostagem/admin-script.js"></script>
 
 </body>
 </html>
