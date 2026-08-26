@@ -163,3 +163,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Disponibiliza globalmente
 window.MultiLanguageArticles = MultiLanguageArticles;
+
+//end of script
