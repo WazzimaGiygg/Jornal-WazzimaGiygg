@@ -1,5 +1,5 @@
 // languages/ja.js
-const translations = {
+const translationsJa = {
     // Header
     'jornal': '新聞',
     'entrar': 'ログイン',
@@ -27,7 +27,7 @@ const translations = {
     'saude': '健康',
     'educacao': '教育',
     'arquivo': 'アーカイブ',
-    'nova_materia': '✏️ 新着記事',
+    'nova_materia': '新着記事',
     
     // Categories icons
     'cat_todos': '📰',
@@ -56,6 +56,14 @@ const translations = {
     'voltar_inicio': 'ホームに戻る',
     'compartilhar_materia': 'この記事を共有',
     'compilado_por': '編纂者',
+    'data_desconhecida': '不明な日付',
+    'idiomas_materia': 'この記事の言語',
+    'selecione_idiomas': 'Ctrl/Cmdを押しながら複数の言語を選択',
+    'traducoes': '🌐 翻訳',
+    'gerenciar_traducoes': '🌐 翻訳を管理',
+    'salvar_traducoes': '💾 翻訳を保存',
+    'adicionar_idioma': '➕ 言語を追加',
+    'novo_idioma': '(新規)',
     
     // Footer
     'doacao': '💝 寄付',
@@ -86,9 +94,33 @@ const translations = {
     'publicar_materia': '記事を公開',
     'cancelar': 'キャンセル',
     'editar': '✏️ 編集',
-    'excluir': '🗑️ 削除'
+    'excluir': '🗑️ 削除',
+    
+    // Toast messages
+    'cookie_aceitos': '✅ すべてのクッキーが受け入れられました！',
+    'cookie_recusados': 'ℹ️ 必須でないクッキーは拒否されました。',
+    'cookie_preferencias': '✅ 設定が保存されました！',
+    'logout_sucesso': 'ログアウトしました！',
+    'materia_publicada': '記事が公開されました！',
+    'materia_atualizada': '記事が更新されました！',
+    'materia_excluida': '記事が削除されました！',
+    'link_copiado': '共有リンクをコピーしました！',
+    'erro_copiar_link': 'リンクのコピーに失敗しました',
+    'sem_materias': '📭 このカテゴリには記事がありません。',
+    'aguardem_publicacoes': '📭 新しい公開をお待ちください...',
+    'materias_breve': '📭 近日公開予定...',
+    'materia_nao_encontrada': '📭 記事が見つかりません。',
+    'carregando_noticias': 'ニュースを読み込み中...',
+    'carregando_materia': '記事を読み込み中...',
+    'erro_carregar': '❌ 読み込みエラー:',
+    'traducoes_salvas': '翻訳が保存されました！',
+    'erro_salvar_traducoes': '翻訳の保存に失敗しました:',
+    'apenas_admin': '管理者のみが翻訳を管理できます！'
 };
 
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = translations;
+// Registra no LanguageManager
+if (typeof LanguageManager !== 'undefined') {
+    LanguageManager.registerLanguage('ja', translationsJa);
 }
+
+//end
