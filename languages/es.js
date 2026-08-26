@@ -27,7 +27,7 @@ const translations = {
     'saude': 'SALUD',
     'educacao': 'EDUCACIÓN',
     'arquivo': 'ARCHIVO',
-    'nova_materia': '✏️ NUEVO ARTÍCULO',
+    'nova_materia': 'NUEVO ARTÍCULO',
     
     // Categories icons
     'cat_todos': '📰',
@@ -56,6 +56,14 @@ const translations = {
     'voltar_inicio': 'Volver al inicio',
     'compartilhar_materia': 'Compartir este artículo',
     'compilado_por': 'Compilado por',
+    'data_desconhecida': 'Fecha desconocida',
+    'idiomas_materia': 'Idiomas de este artículo',
+    'selecione_idiomas': 'Mantén Ctrl/Cmd para seleccionar múltiples idiomas',
+    'traducoes': '🌐 Traducciones',
+    'gerenciar_traducoes': '🌐 Gestionar Traducciones',
+    'salvar_traducoes': '💾 Guardar Traducciones',
+    'adicionar_idioma': '➕ Agregar Idioma',
+    'novo_idioma': '(nuevo)',
     
     // Footer
     'doacao': '💝 Donación',
@@ -88,31 +96,70 @@ const translations = {
     'editar': '✏️ Editar',
     'excluir': '🗑️ Eliminar',
     
-    // Toast messages (similar to above but in Spanish)
-    // ... (continue with all translations)
+    // Toast messages
+    'cookie_aceitos': '✅ ¡Todos los cookies han sido aceptados!',
+    'cookie_recusados': 'ℹ️ Los cookies no esenciales han sido rechazados.',
+    'cookie_preferencias': '✅ ¡Tus preferencias han sido guardadas!',
+    'logout_sucesso': '¡Sesión cerrada exitosamente!',
+    'materia_publicada': '¡Artículo publicado exitosamente!',
+    'materia_atualizada': '¡Artículo actualizado exitosamente!',
+    'materia_excluida': '¡Artículo eliminado exitosamente!',
+    'link_copiado': '¡Enlace copiado para compartir!',
+    'erro_copiar_link': 'Error al copiar enlace',
+    'sem_materias': '📭 No se encontraron artículos en esta categoría.',
+    'aguardem_publicacoes': '📭 Esperen nuevas publicaciones...',
+    'materias_breve': '📭 Más artículos próximamente...',
+    'materia_nao_encontrada': '📭 Artículo no encontrado.',
+    'carregando_noticias': 'Cargando noticias...',
+    'carregando_materia': 'Cargando artículo...',
+    'erro_carregar': '❌ Error al cargar:',
+    'traducoes_salvas': '¡Traducciones guardadas exitosamente!',
+    'erro_salvar_traducoes': 'Error al guardar traducciones:',
+    'apenas_admin': '¡Solo los administradores pueden gestionar traducciones!',
     
-    // Months
-    'janeiro': 'enero',
-    'fevereiro': 'febrero',
-    'marco': 'marzo',
-    'abril': 'abril',
-    'maio': 'mayo',
-    'junho': 'junio',
-    'julho': 'julio',
-    'agosto': 'agosto',
-    'setembro': 'septiembre',
-    'outubro': 'octubre',
-    'novembro': 'noviembre',
-    'dezembro': 'diciembre',
+    // Cookie
+    'usamos_cookies': '🍪 Usamos cookies',
+    'cookie_texto': 'Este sitio utiliza cookies para mejorar tu experiencia, analizar tráfico y mostrar anuncios personalizados. Al continuar navegando, aceptas nuestra',
+    'politica_privacidade': 'Política de Privacidad',
+    'cookies_essenciais': '🔒 Esenciales (obligatorios)',
+    'analise_dados': '📊 Análisis de datos',
+    'publicidade_personalizada': '🎯 Publicidad personalizada',
+    'aceitar_todos': '✅ Aceptar Todos',
+    'recusar_todos': '❌ Rechazar Todos',
+    'personalizar': '⚙️ Personalizar',
     
-    // Weekdays
-    'domingo': 'domingo',
-    'segunda': 'lunes',
-    'terca': 'martes',
-    'quarta': 'miércoles',
-    'quinta': 'jueves',
-    'sexta': 'viernes',
-    'sabado': 'sábado'
+    // Notifications
+    'notificacoes': '🔔 Notificaciones',
+    'marcar_todas_lidas': 'Marcar todas como leídas',
+    'nenhuma_notificacao': 'Sin notificaciones',
+    'notificacao': 'Notificación',
+    
+    // Banned
+    'conta_banida': '⚠️ Cuenta Baneada',
+    'conta_banida_texto': 'Tu cuenta ha sido baneada permanentemente del sistema.',
+    'motivo': 'Motivo:',
+    'erro_banimento': 'Si crees que esto es un error, contacta al soporte.',
+    'sair_conta': '🚪 Cerrar sesión',
+    
+    // Weather
+    'previsao_tempo': 'Pronóstico del Tiempo',
+    'carregando_previsao': 'Cargando pronóstico...',
+    'erro_previsao': 'No se pudo cargar el pronóstico del tiempo.',
+    'umidade': 'Humedad',
+    'vento': 'Viento',
+    'condicao': 'Condición',
+    'atualizado_agora': 'Actualizado ahora',
+    
+    // Language selector
+    'idioma': 'Idioma',
+    'portugues': 'Portugués',
+    'ingles': 'Inglés',
+    'espanhol': 'Español',
+    'frances': 'Francés',
+    'alemao': 'Alemán',
+    'italiano': 'Italiano',
+    'japones': 'Japonés',
+    'chines': 'Chino'
 };
 
 if (typeof module !== 'undefined' && module.exports) {
