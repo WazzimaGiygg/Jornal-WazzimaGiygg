@@ -27,7 +27,7 @@ const translations = {
     'saude': 'SAÚDE',
     'educacao': 'EDUCAÇÃO',
     'arquivo': 'ARQUIVO',
-    'nova_materia': '✏️ NOVA MATÉRIA',
+    'nova_materia': 'NOVA MATÉRIA',
     
     // Categories icons
     'cat_todos': '📰',
@@ -56,6 +56,14 @@ const translations = {
     'voltar_inicio': 'Voltar para página inicial',
     'compartilhar_materia': 'Compartilhar esta matéria',
     'compilado_por': 'Compilado por',
+    'data_desconhecida': 'Data desconhecida',
+    'idiomas_materia': 'Idiomas desta matéria',
+    'selecione_idiomas': 'Segure Ctrl/Cmd para selecionar múltiplos idiomas',
+    'traducoes': '🌐 Traduções',
+    'gerenciar_traducoes': '🌐 Gerenciar Traduções',
+    'salvar_traducoes': '💾 Salvar Traduções',
+    'adicionar_idioma': '➕ Adicionar Idioma',
+    'novo_idioma': '(novo)',
     
     // Footer
     'doacao': '💝 Doação',
@@ -105,6 +113,9 @@ const translations = {
     'carregando_noticias': 'Carregando notícias...',
     'carregando_materia': 'Carregando matéria...',
     'erro_carregar': '❌ Erro ao carregar:',
+    'traducoes_salvas': 'Traduções salvas com sucesso!',
+    'erro_salvar_traducoes': 'Erro ao salvar traduções:',
+    'apenas_admin': 'Apenas administradores podem gerenciar traduções!',
     
     // Cookie
     'usamos_cookies': '🍪 Nós usamos cookies',
@@ -148,30 +159,7 @@ const translations = {
     'alemao': 'Deutsch',
     'italiano': 'Italiano',
     'japones': '日本語',
-    'chines': '中文',
-    
-    // Months
-    'janeiro': 'janeiro',
-    'fevereiro': 'fevereiro',
-    'marco': 'março',
-    'abril': 'abril',
-    'maio': 'maio',
-    'junho': 'junho',
-    'julho': 'julho',
-    'agosto': 'agosto',
-    'setembro': 'setembro',
-    'outubro': 'outubro',
-    'novembro': 'novembro',
-    'dezembro': 'dezembro',
-    
-    // Weekdays
-    'domingo': 'domingo',
-    'segunda': 'segunda-feira',
-    'terca': 'terça-feira',
-    'quarta': 'quarta-feira',
-    'quinta': 'quinta-feira',
-    'sexta': 'sexta-feira',
-    'sabado': 'sábado'
+    'chines': '中文'
 };
 
 // Export for use
