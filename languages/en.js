@@ -1,5 +1,5 @@
 // languages/en.js
-const translations = {
+const translationsEn = {
     // Header
     'jornal': 'Journal',
     'entrar': 'Sign In',
@@ -162,6 +162,9 @@ const translations = {
     'chines': 'Chinese'
 };
 
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = translations;
+// Registra no LanguageManager
+if (typeof LanguageManager !== 'undefined') {
+    LanguageManager.registerLanguage('en', translationsEn);
 }
+
+//end
