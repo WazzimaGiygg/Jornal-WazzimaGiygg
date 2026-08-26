@@ -27,7 +27,7 @@ const translations = {
     'saude': 'HEALTH',
     'educacao': 'EDUCATION',
     'arquivo': 'ARCHIVE',
-    'nova_materia': '✏️ NEW ARTICLE',
+    'nova_materia': 'NEW ARTICLE',
     
     // Categories icons
     'cat_todos': '📰',
@@ -56,6 +56,14 @@ const translations = {
     'voltar_inicio': 'Back to homepage',
     'compartilhar_materia': 'Share this article',
     'compilado_por': 'Compiled by',
+    'data_desconhecida': 'Unknown date',
+    'idiomas_materia': 'Languages for this article',
+    'selecione_idiomas': 'Hold Ctrl/Cmd to select multiple languages',
+    'traducoes': '🌐 Translations',
+    'gerenciar_traducoes': '🌐 Manage Translations',
+    'salvar_traducoes': '💾 Save Translations',
+    'adicionar_idioma': '➕ Add Language',
+    'novo_idioma': '(new)',
     
     // Footer
     'doacao': '💝 Donation',
@@ -105,6 +113,9 @@ const translations = {
     'carregando_noticias': 'Loading news...',
     'carregando_materia': 'Loading article...',
     'erro_carregar': '❌ Error loading:',
+    'traducoes_salvas': 'Translations saved successfully!',
+    'erro_salvar_traducoes': 'Error saving translations:',
+    'apenas_admin': 'Only administrators can manage translations!',
     
     // Cookie
     'usamos_cookies': '🍪 We use cookies',
@@ -148,33 +159,9 @@ const translations = {
     'alemao': 'German',
     'italiano': 'Italian',
     'japones': 'Japanese',
-    'chines': 'Chinese',
-    
-    // Months
-    'janeiro': 'January',
-    'fevereiro': 'February',
-    'marco': 'March',
-    'abril': 'April',
-    'maio': 'May',
-    'junho': 'June',
-    'julho': 'July',
-    'agosto': 'August',
-    'setembro': 'September',
-    'outubro': 'October',
-    'novembro': 'November',
-    'dezembro': 'December',
-    
-    // Weekdays
-    'domingo': 'Sunday',
-    'segunda': 'Monday',
-    'terca': 'Tuesday',
-    'quarta': 'Wednesday',
-    'quinta': 'Thursday',
-    'sexta': 'Friday',
-    'sabado': 'Saturday'
+    'chines': 'Chinese'
 };
 
-// Export for use
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = translations;
 }
