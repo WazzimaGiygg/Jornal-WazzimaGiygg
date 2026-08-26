@@ -1,5 +1,5 @@
 // languages/fr.js
-const translations = {
+const translationsFr = {
     // Header
     'jornal': 'Journal',
     'entrar': 'Se Connecter',
@@ -27,7 +27,7 @@ const translations = {
     'saude': 'SANTÉ',
     'educacao': 'ÉDUCATION',
     'arquivo': 'ARCHIVES',
-    'nova_materia': '✏️ NOUVEL ARTICLE',
+    'nova_materia': 'NOUVEL ARTICLE',
     
     // Categories icons
     'cat_todos': '📰',
@@ -56,6 +56,14 @@ const translations = {
     'voltar_inicio': 'Retour à l\'accueil',
     'compartilhar_materia': 'Partager cet article',
     'compilado_por': 'Compilé par',
+    'data_desconhecida': 'Date inconnue',
+    'idiomas_materia': 'Langues de cet article',
+    'selecione_idiomas': 'Maintenez Ctrl/Cmd pour sélectionner plusieurs langues',
+    'traducoes': '🌐 Traductions',
+    'gerenciar_traducoes': '🌐 Gérer les Traductions',
+    'salvar_traducoes': '💾 Enregistrer les Traductions',
+    'adicionar_idioma': '➕ Ajouter une Langue',
+    'novo_idioma': '(nouveau)',
     
     // Footer
     'doacao': '💝 Donation',
@@ -88,30 +96,75 @@ const translations = {
     'editar': '✏️ Modifier',
     'excluir': '🗑️ Supprimer',
     
-    // Months
-    'janeiro': 'janvier',
-    'fevereiro': 'février',
-    'marco': 'mars',
-    'abril': 'avril',
-    'maio': 'mai',
-    'junho': 'juin',
-    'julho': 'juillet',
-    'agosto': 'août',
-    'setembro': 'septembre',
-    'outubro': 'octobre',
-    'novembro': 'novembre',
-    'dezembro': 'décembre',
+    // Toast messages
+    'cookie_aceitos': '✅ Tous les cookies ont été acceptés!',
+    'cookie_recusados': 'ℹ️ Les cookies non essentiels ont été refusés.',
+    'cookie_preferencias': '✅ Vos préférences ont été enregistrées!',
+    'logout_sucesso': 'Déconnexion réussie!',
+    'materia_publicada': 'Article publié avec succès!',
+    'materia_atualizada': 'Article mis à jour avec succès!',
+    'materia_excluida': 'Article supprimé avec succès!',
+    'link_copiado': 'Lien copié pour partager!',
+    'erro_copiar_link': 'Erreur lors de la copie du lien',
+    'sem_materias': '📭 Aucun article trouvé dans cette catégorie.',
+    'aguardem_publicacoes': '📭 Attendez de nouvelles publications...',
+    'materias_breve': '📭 Plus d\'articles bientôt...',
+    'materia_nao_encontrada': '📭 Article non trouvé.',
+    'carregando_noticias': 'Chargement des actualités...',
+    'carregando_materia': 'Chargement de l\'article...',
+    'erro_carregar': '❌ Erreur de chargement:',
+    'traducoes_salvas': 'Traductions enregistrées avec succès!',
+    'erro_salvar_traducoes': 'Erreur lors de l\'enregistrement des traductions:',
+    'apenas_admin': 'Seuls les administrateurs peuvent gérer les traductions!',
     
-    // Weekdays
-    'domingo': 'dimanche',
-    'segunda': 'lundi',
-    'terca': 'mardi',
-    'quarta': 'mercredi',
-    'quinta': 'jeudi',
-    'sexta': 'vendredi',
-    'sabado': 'samedi'
+    // Cookie
+    'usamos_cookies': '🍪 Nous utilisons des cookies',
+    'cookie_texto': 'Ce site utilise des cookies pour améliorer votre expérience, analyser le trafic et afficher des publicités personnalisées. En continuant à naviguer, vous acceptez notre',
+    'politica_privacidade': 'Politique de Confidentialité',
+    'cookies_essenciais': '🔒 Essentiels (obligatoires)',
+    'analise_dados': '📊 Analyse des données',
+    'publicidade_personalizada': '🎯 Publicité personnalisée',
+    'aceitar_todos': '✅ Accepter Tout',
+    'recusar_todos': '❌ Refuser Tout',
+    'personalizar': '⚙️ Personnaliser',
+    
+    // Notifications
+    'notificacoes': '🔔 Notifications',
+    'marcar_todas_lidas': 'Tout marquer comme lu',
+    'nenhuma_notificacao': 'Aucune notification',
+    'notificacao': 'Notification',
+    
+    // Banned
+    'conta_banida': '⚠️ Compte Banni',
+    'conta_banida_texto': 'Votre compte a été banni définitivement du système.',
+    'motivo': 'Motif:',
+    'erro_banimento': 'Si vous pensez qu\'il s\'agit d\'une erreur, contactez le support.',
+    'sair_conta': '🚪 Se déconnecter',
+    
+    // Weather
+    'previsao_tempo': 'Prévisions Météo',
+    'carregando_previsao': 'Chargement des prévisions...',
+    'erro_previsao': 'Impossible de charger les prévisions météo.',
+    'umidade': 'Humidité',
+    'vento': 'Vent',
+    'condicao': 'Condition',
+    'atualizado_agora': 'Mis à jour maintenant',
+    
+    // Language selector
+    'idioma': 'Langue',
+    'portugues': 'Portugais',
+    'ingles': 'Anglais',
+    'espanhol': 'Espagnol',
+    'frances': 'Français',
+    'alemao': 'Allemand',
+    'italiano': 'Italien',
+    'japones': 'Japonais',
+    'chines': 'Chinois'
 };
 
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = translations;
+// Registra no LanguageManager
+if (typeof LanguageManager !== 'undefined') {
+    LanguageManager.registerLanguage('fr', translationsFr);
 }
+
+//end
