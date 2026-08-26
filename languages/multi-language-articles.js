@@ -506,4 +506,6 @@ if (typeof firebase !== 'undefined' && firebase.auth) {
 }
 
 // Disponibiliza globalmente
-window.MultiLanguageArticles = MultiLanguageArticles;
+window.MultiLanguageArticles = MultiLanguageArticles
+
+//exit
