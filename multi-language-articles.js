@@ -19,73 +19,102 @@ class MultiLanguageArticles {
         console.log('🌍 MultiLanguageArticles inicializado');
     }
     
-    // ============================================
-    // BUSCA ARTIGOS NO IDIOMA DO USUÁRIO
-    // ============================================
-    async searchArticles(language = null, category = null, limit = 50) {
-        const targetLang = language || this.currentLanguage || 'pt';
+  // languages/multi-language-articles.js
+// ============================================
+// BUSCA ARTIGOS NO IDIOMA DO USUÁRIO - CORRIGIDA
+// ============================================
+async searchArticles(language = null, category = null, limit = 50) {
+    const targetLang = language || this.currentLanguage || 'pt';
+    
+    console.log(`🔍 MultiLanguageArticles.searchArticles()`);
+    console.log(`   - Idioma alvo: "${targetLang}"`);
+    console.log(`   - Categoria: "${category || 'todos'}"`);
+    console.log(`   - Limite: ${limit}`);
+    
+    try {
+        if (typeof db === 'undefined') {
+            console.error('❌ Firestore não está disponível!');
+            return [];
+        }
         
-        console.log(`🔍 MultiLanguageArticles.searchArticles()`);
-        console.log(`   - Idioma alvo: "${targetLang}"`);
-        console.log(`   - Categoria: "${category || 'todos'}"`);
-        console.log(`   - Limite: ${limit}`);
+        // Busca TODOS os artigos primeiro (não podemos filtrar por idioma diretamente no Firestore)
+        let query = db.collection('articlesdoc')
+            .orderBy('dataPublicacao', 'desc')
+            .limit(limit);
         
-        try {
-            // Verifica se o Firestore está disponível
-            if (typeof db === 'undefined') {
-                console.error('❌ Firestore não está disponível!');
-                return [];
-            }
+        if (category && category !== 'todos') {
+            query = query.where('categoria', '==', category);
+            console.log(`   - Filtro por categoria: "${category}"`);
+        }
+        
+        const snapshot = await query.get();
+        console.log(`   - Total de documentos encontrados: ${snapshot.size}`);
+        
+        const articles = [];
+        let totalAvailable = 0;
+        let totalFallback = 0;
+        let totalSkipped = 0;
+        
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const article = { id: doc.id, ...data };
             
-            // Busca artigos ordenados por data
-            let query = db.collection('articlesdoc')
-                .orderBy('dataPublicacao', 'desc')
-                .limit(limit);
+            // Verifica se o artigo está disponível no idioma solicitado
+            const translatedArticle = this.getArticleInLanguage(article, targetLang);
             
-            if (category && category !== 'todos') {
-                query = query.where('categoria', '==', category);
-                console.log(`   - Filtro por categoria: "${category}"`);
-            }
-            
-            const snapshot = await query.get();
-            console.log(`   - Total de documentos encontrados: ${snapshot.size}`);
-            
-            const articles = [];
-            let totalAvailable = 0;
-            let totalFallback = 0;
-            let totalSkipped = 0;
-            
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const article = { id: doc.id, ...data };
+            if (translatedArticle) {
+                // Só adiciona se o artigo estiver disponível no idioma OU for fallback (português)
+                // Mas se o usuário quer espanhol, só mostra artigos em espanhol ou fallback
+                const isInTargetLang = translatedArticle._currentLanguage === targetLang;
+                const isFallback = translatedArticle._isFallback === true;
                 
-                // Verifica se o artigo está disponível no idioma do usuário
-                const translatedArticle = this.getArticleInLanguage(article, targetLang);
-                if (translatedArticle) {
+                // Se o idioma alvo é diferente de português, só mostra se está disponível
+                if (targetLang !== 'pt') {
+                    // Mostra apenas se estiver no idioma alvo OU se for fallback (português)
+                    if (isInTargetLang || isFallback) {
+                        articles.push(translatedArticle);
+                        if (isFallback) {
+                            totalFallback++;
+                        } else {
+                            totalAvailable++;
+                        }
+                    } else {
+                        totalSkipped++;
+                    }
+                } else {
+                    // Se for português, mostra todos
                     articles.push(translatedArticle);
-                    if (translatedArticle._isFallback) {
+                    if (isFallback) {
                         totalFallback++;
                     } else {
                         totalAvailable++;
                     }
-                } else {
-                    totalSkipped++;
                 }
-            });
-            
-            console.log(`   - Artigos disponíveis no idioma: ${totalAvailable}`);
-            console.log(`   - Artigos em fallback (Português): ${totalFallback}`);
-            console.log(`   - Artigos ignorados (sem tradução): ${totalSkipped}`);
-            console.log(`   - Total retornado: ${articles.length}`);
-            
-            return articles;
-        } catch (error) {
-            console.error('❌ Erro ao buscar artigos:', error);
-            return [];
+            } else {
+                totalSkipped++;
+            }
+        });
+        
+        console.log(`   - Artigos disponíveis no idioma: ${totalAvailable}`);
+        console.log(`   - Artigos em fallback (Português): ${totalFallback}`);
+        console.log(`   - Artigos ignorados (sem tradução): ${totalSkipped}`);
+        console.log(`   - Total retornado: ${articles.length}`);
+        
+        // Se não encontrou nenhum artigo no idioma alvo, busca em português
+        if (articles.length === 0 && targetLang !== 'pt') {
+            console.log(`   📭 Nenhum artigo encontrado em "${targetLang}", buscando em português...`);
+            return await this.searchArticles('pt', category, limit);
         }
+        
+        return articles;
+    } catch (error) {
+        console.error('❌ Erro ao buscar artigos:', error);
+        return [];
     }
+}
     
-    // ============================================
+    // languages/multi-language-articles.js
+// ============================================
 // OBTÉM UM ARTIGO NO IDIOMA ESPECIFICADO - CORRIGIDA
 // ============================================
 getArticleInLanguage(article, targetLang = null) {
@@ -104,12 +133,35 @@ getArticleInLanguage(article, targetLang = null) {
         const articleLang = article.language || 'pt';
         console.log(`   📄 Artigo antigo (single language): ${articleLang}`);
         
-        // Sempre retorna o artigo original, independente do idioma
-        return {
-            ...article,
-            _currentLanguage: articleLang,
-            _isFallback: lang !== articleLang
-        };
+        // Se o idioma do artigo é o mesmo que o solicitado, retorna
+        if (articleLang === lang) {
+            return {
+                ...article,
+                _currentLanguage: lang
+            };
+        }
+        
+        // Se o usuário quer português, retorna o artigo
+        if (lang === 'pt') {
+            return {
+                ...article,
+                _currentLanguage: 'pt'
+            };
+        }
+        
+        // Se o usuário quer outro idioma, mas o artigo está em português
+        // Retorna como fallback
+        if (articleLang === 'pt') {
+            return {
+                ...article,
+                _currentLanguage: 'pt',
+                _isFallback: true
+            };
+        }
+        
+        // Não corresponde a nenhum idioma
+        console.log(`   ⚠️ Artigo não disponível em "${lang}" (está em ${articleLang})`);
+        return null;
     }
     
     // Se for multi-idioma
@@ -133,7 +185,7 @@ getArticleInLanguage(article, targetLang = null) {
     
     // 2. Fallback: tenta português
     if (translations['pt']) {
-        console.log(`   ⚠️ Tradução para "${lang}" não encontrada, usando português`);
+        console.log(`   ⚠️ Tradução para "${lang}" não encontrada, usando português como fallback`);
         return {
             ...article,
             titulo: translations['pt'].titulo || article.titulo,
