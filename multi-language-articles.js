@@ -86,123 +86,116 @@ class MultiLanguageArticles {
     }
     
     // ============================================
-    // OBTÉM UM ARTIGO NO IDIOMA ESPECIFICADO
-    // ============================================
-    getArticleInLanguage(article, targetLang = null) {
-        if (!article) return null;
+// OBTÉM UM ARTIGO NO IDIOMA ESPECIFICADO - CORRIGIDA
+// ============================================
+getArticleInLanguage(article, targetLang = null) {
+    if (!article) {
+        console.warn('⚠️ Artigo é null ou undefined');
+        return null;
+    }
+    
+    const lang = targetLang || this.currentLanguage || 'pt';
+    
+    // LOG para debug
+    console.log(`🔍 getArticleInLanguage: "${article.titulo?.substring(0, 30)}" -> lang: ${lang}`);
+    
+    // Se o artigo não for multi-idioma (artigos antigos)
+    if (!article.isMultiLanguage) {
+        const articleLang = article.language || 'pt';
+        console.log(`   📄 Artigo antigo (single language): ${articleLang}`);
         
-        const lang = targetLang || this.currentLanguage || 'pt';
-        
-        // Se o artigo não for multi-idioma
-        if (!article.isMultiLanguage) {
-            const articleLang = article.language || 'pt';
-            
-            // Se o idioma do artigo é o mesmo que o solicitado
-            if (articleLang === lang) {
-                return {
-                    ...article,
-                    _currentLanguage: lang
-                };
-            }
-            
-            // Se o usuário quer português e o artigo está em português
-            if (lang === 'pt' && articleLang === 'pt') {
-                return {
-                    ...article,
-                    _currentLanguage: 'pt'
-                };
-            }
-            
-            // Se o usuário quer português, retorna o artigo em português
-            if (lang === 'pt') {
-                return {
-                    ...article,
-                    _currentLanguage: 'pt'
-                };
-            }
-            
-            // Se o artigo está em português e o usuário quer outro idioma
-            if (articleLang === 'pt') {
-                return {
-                    ...article,
-                    _currentLanguage: 'pt',
-                    _isFallback: true
-                };
-            }
-            
-            // Se não for português e o usuário quer outro idioma, tenta fallback
-            if (articleLang !== lang && articleLang === 'pt') {
-                return {
-                    ...article,
-                    _currentLanguage: 'pt',
-                    _isFallback: true
-                };
-            }
-            
-            // Não encontrou correspondência
-            return null;
-        }
-        
-        // Se for multi-idioma
-        const translations = article.translations || {};
-        const languages = article.languages || ['pt'];
-        
-        // 1. Tenta encontrar no idioma solicitado
-        if (translations[lang]) {
-            return {
-                ...article,
-                titulo: translations[lang].titulo || article.titulo,
-                resumo: translations[lang].resumo || article.resumo,
-                conteudo: translations[lang].conteudo || article.conteudo,
-                _currentLanguage: lang,
-                _availableLanguages: languages
-            };
-        }
-        
-        // 2. Fallback: tenta português
-        if (translations['pt']) {
-            return {
-                ...article,
-                titulo: translations['pt'].titulo || article.titulo,
-                resumo: translations['pt'].resumo || article.resumo,
-                conteudo: translations['pt'].conteudo || article.conteudo,
-                _currentLanguage: 'pt',
-                _availableLanguages: languages,
-                _isFallback: true
-            };
-        }
-        
-        // 3. Último recurso: usa o título original
+        // Sempre retorna o artigo original, independente do idioma
         return {
             ...article,
+            _currentLanguage: articleLang,
+            _isFallback: lang !== articleLang
+        };
+    }
+    
+    // Se for multi-idioma
+    const translations = article.translations || {};
+    const languages = article.languages || ['pt'];
+    
+    console.log(`   📚 Multi-idioma: disponível em ${languages.join(', ')}`);
+    
+    // 1. Tenta encontrar no idioma solicitado
+    if (translations[lang]) {
+        console.log(`   ✅ Tradução encontrada para "${lang}"`);
+        return {
+            ...article,
+            titulo: translations[lang].titulo || article.titulo,
+            resumo: translations[lang].resumo || article.resumo,
+            conteudo: translations[lang].conteudo || article.conteudo,
+            _currentLanguage: lang,
+            _availableLanguages: languages
+        };
+    }
+    
+    // 2. Fallback: tenta português
+    if (translations['pt']) {
+        console.log(`   ⚠️ Tradução para "${lang}" não encontrada, usando português`);
+        return {
+            ...article,
+            titulo: translations['pt'].titulo || article.titulo,
+            resumo: translations['pt'].resumo || article.resumo,
+            conteudo: translations['pt'].conteudo || article.conteudo,
             _currentLanguage: 'pt',
             _availableLanguages: languages,
             _isFallback: true
         };
     }
     
-    // ============================================
-    // BUSCA ARTIGO POR ID COM TRADUÇÃO
-    // ============================================
-    async getArticleById(articleId, language = null) {
-        try {
-            if (typeof db === 'undefined') {
-                console.error('❌ Firestore não está disponível!');
-                return null;
-            }
-            
-            const doc = await db.collection('articlesdoc').doc(articleId).get();
-            if (!doc.exists) return null;
-            
-            const data = doc.data();
-            const article = { id: doc.id, ...data };
-            
-            return this.getArticleInLanguage(article, language);
-        } catch (error) {
-            console.error('Erro ao buscar artigo por ID:', error);
+    // 3. Último recurso: usa o conteúdo original
+    console.log(`   ⚠️ Nenhuma tradução encontrada, usando original`);
+    return {
+        ...article,
+        _currentLanguage: 'pt',
+        _availableLanguages: languages,
+        _isFallback: true
+    };
+}
+    
+    // languages/multi-language-articles.js
+// ============================================
+// BUSCA ARTIGO POR ID COM TRADUÇÃO - CORRIGIDA
+// ============================================
+async getArticleById(articleId, language = null) {
+    try {
+        if (typeof db === 'undefined') {
+            console.error('❌ Firestore não está disponível!');
             return null;
         }
+        
+        const doc = await db.collection('articlesdoc').doc(articleId).get();
+        if (!doc.exists) {
+            console.warn(`⚠️ Artigo ${articleId} não encontrado`);
+            return null;
+        }
+        
+        const data = doc.data();
+        const article = { id: doc.id, ...data };
+        
+        const targetLang = language || this.currentLanguage || 'pt';
+        
+        // Tenta obter no idioma solicitado
+        const translated = this.getArticleInLanguage(article, targetLang);
+        
+        // Se não conseguiu traduzir, retorna o artigo original
+        if (!translated) {
+            console.log(`📄 Artigo ${articleId} não tem tradução para "${targetLang}", retornando original`);
+            return {
+                ...article,
+                _currentLanguage: article.language || 'pt',
+                _isFallback: true
+            };
+        }
+        
+        return translated;
+    } catch (error) {
+        console.error('❌ Erro ao buscar artigo por ID:', error);
+        return null;
     }
+}
     
     // ============================================
     // VERIFICA SE UM ARTIGO ESTÁ DISPONÍVEL EM UM IDIOMA
