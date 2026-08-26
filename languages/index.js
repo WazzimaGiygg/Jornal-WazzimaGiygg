@@ -15,16 +15,14 @@ const LanguageManager = {
     
     basePath: 'languages/',
     
-    // NOVO MÉTODO: Registra um idioma
+    // Registra um idioma
     registerLanguage(lang, translations) {
-        // Verifica se o idioma já foi registrado
         if (this.translations[lang]) {
             console.warn(`⚠️ Idioma "${lang}" já está registrado. Sobrescrevendo...`);
         }
         this.translations[lang] = translations;
         console.log(`✅ Idioma "${lang}" registrado com sucesso!`);
         
-        // Se for o idioma atual, aplica as traduções
         if (this.currentLang === lang) {
             this.applyTranslations();
         }
@@ -32,32 +30,42 @@ const LanguageManager = {
     
     // Inicializa o gerenciador
     async init(defaultLang = 'pt') {
-        const browserLang = navigator.language.split('-')[0];
-        const savedLang = localStorage.getItem('wzzm_language');
-        
-        let lang = savedLang || browserLang || defaultLang;
-        
-        if (!this.availableLanguages[lang]) {
-            lang = defaultLang;
+        try {
+            const browserLang = navigator.language.split('-')[0];
+            const savedLang = localStorage.getItem('wzzm_language');
+            
+            let lang = savedLang || browserLang || defaultLang;
+            
+            if (!this.availableLanguages[lang]) {
+                lang = defaultLang;
+            }
+            
+            this.currentLang = lang;
+            
+            // Verifica se o idioma já foi registrado
+            if (!this.translations[lang]) {
+                await this.loadLanguage(lang);
+            }
+            
+            this.setLanguageSelector();
+            this.applyTranslations();
+            this.updateDateLocale();
+            
+            document.dispatchEvent(new CustomEvent('languageChanged', { 
+                detail: { language: lang } 
+            }));
+            
+            console.log(`🌍 Language Manager inicializado com idioma: "${lang}"`);
+            return lang;
+        } catch (error) {
+            console.error('Erro ao inicializar Language Manager:', error);
+            return defaultLang;
         }
-        
-        this.currentLang = lang;
-        await this.loadLanguage(lang);
-        this.setLanguageSelector();
-        this.applyTranslations();
-        this.updateDateLocale();
-        
-        document.dispatchEvent(new CustomEvent('languageChanged', { 
-            detail: { language: lang } 
-        }));
-        
-        return lang;
     },
     
     // Carrega um idioma específico
     async loadLanguage(lang) {
         try {
-            // Verifica se o idioma já foi registrado
             if (this.translations[lang]) {
                 this.currentLang = lang;
                 localStorage.setItem('wzzm_language', lang);
@@ -66,10 +74,14 @@ const LanguageManager = {
             }
             
             const response = await fetch(`${this.basePath}${lang}.js`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
             const text = await response.text();
             
-            // Não precisa mais extrair manualmente, pois o arquivo chama registerLanguage
-            // Mas se não registrar, tenta extrair
+            // O arquivo já deve registrar o idioma via registerLanguage
+            // Mas se não registrar, tenta extrair manualmente
             if (!this.translations[lang]) {
                 const match = text.match(/const translations[A-Z][a-z]*\s*=\s*({[\s\S]*?});/);
                 if (match) {
@@ -335,8 +347,8 @@ const LanguageManager = {
                 detail: { language: lang } 
             }));
             
-            if (typeof loadArticles === 'function') {
-                loadArticles();
+            if (typeof window.loadArticles === 'function') {
+                window.loadArticles();
             }
             
             const langName = this.availableLanguages[lang].nativeName;
