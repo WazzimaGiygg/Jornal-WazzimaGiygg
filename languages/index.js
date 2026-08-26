@@ -13,21 +13,30 @@ const LanguageManager = {
         'zh': { name: '中文', nativeName: '中文', flag: '🇨🇳' }
     },
     
-    // Caminho base para os arquivos de tradução
     basePath: 'languages/',
+    
+    // NOVO MÉTODO: Registra um idioma
+    registerLanguage(lang, translations) {
+        // Verifica se o idioma já foi registrado
+        if (this.translations[lang]) {
+            console.warn(`⚠️ Idioma "${lang}" já está registrado. Sobrescrevendo...`);
+        }
+        this.translations[lang] = translations;
+        console.log(`✅ Idioma "${lang}" registrado com sucesso!`);
+        
+        // Se for o idioma atual, aplica as traduções
+        if (this.currentLang === lang) {
+            this.applyTranslations();
+        }
+    },
     
     // Inicializa o gerenciador
     async init(defaultLang = 'pt') {
-        // Detecta idioma do navegador
         const browserLang = navigator.language.split('-')[0];
-        
-        // Verifica se há preferência salva
         const savedLang = localStorage.getItem('wzzm_language');
         
-        // Define o idioma (prioridade: salvo > navegador > padrão)
         let lang = savedLang || browserLang || defaultLang;
         
-        // Verifica se o idioma é suportado
         if (!this.availableLanguages[lang]) {
             lang = defaultLang;
         }
@@ -38,7 +47,6 @@ const LanguageManager = {
         this.applyTranslations();
         this.updateDateLocale();
         
-        // Notifica que o idioma foi alterado
         document.dispatchEvent(new CustomEvent('languageChanged', { 
             detail: { language: lang } 
         }));
@@ -49,22 +57,34 @@ const LanguageManager = {
     // Carrega um idioma específico
     async loadLanguage(lang) {
         try {
+            // Verifica se o idioma já foi registrado
+            if (this.translations[lang]) {
+                this.currentLang = lang;
+                localStorage.setItem('wzzm_language', lang);
+                console.log(`✅ Idioma "${lang}" já carregado da memória`);
+                return true;
+            }
+            
             const response = await fetch(`${this.basePath}${lang}.js`);
             const text = await response.text();
             
-            // Extrai o objeto de tradução do arquivo
-            const match = text.match(/const translations\s*=\s*({[\s\S]*?});/);
-            if (match) {
-                const data = eval('(' + match[1] + ')');
-                this.translations = data;
-                this.currentLang = lang;
-                localStorage.setItem('wzzm_language', lang);
-                return true;
+            // Não precisa mais extrair manualmente, pois o arquivo chama registerLanguage
+            // Mas se não registrar, tenta extrair
+            if (!this.translations[lang]) {
+                const match = text.match(/const translations[A-Z][a-z]*\s*=\s*({[\s\S]*?});/);
+                if (match) {
+                    const data = eval('(' + match[1] + ')');
+                    this.registerLanguage(lang, data);
+                } else {
+                    throw new Error('Não foi possível extrair as traduções');
+                }
             }
-            throw new Error('Formato de tradução inválido');
+            
+            this.currentLang = lang;
+            localStorage.setItem('wzzm_language', lang);
+            return true;
         } catch (error) {
             console.error(`Erro ao carregar idioma ${lang}:`, error);
-            // Tenta carregar o idioma padrão
             if (lang !== 'pt') {
                 console.log('Tentando carregar Português como fallback...');
                 return this.loadLanguage('pt');
@@ -75,9 +95,9 @@ const LanguageManager = {
     
     // Traduz uma chave
     translate(key, params = {}) {
-        let text = this.translations[key] || key;
+        const currentTranslations = this.translations[this.currentLang] || {};
+        let text = currentTranslations[key] || key;
         
-        // Substitui parâmetros
         Object.keys(params).forEach(param => {
             text = text.replace(new RegExp(`{${param}}`, 'g'), params[param]);
         });
@@ -85,24 +105,26 @@ const LanguageManager = {
         return text;
     },
     
-    // Aplica traduções a todos os elementos com data-i18n
+    // Aplica traduções
     applyTranslations() {
-        // Atualiza elementos com data-i18n
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             const translation = this.translate(key);
             if (translation && translation !== key) {
                 if (el.tagName === 'INPUT' && el.getAttribute('data-i18n-attr') === 'placeholder') {
                     el.placeholder = translation;
+                } else if (el.tagName === 'TEXTAREA' && el.getAttribute('data-i18n-attr') === 'placeholder') {
+                    el.placeholder = translation;
                 } else if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
                     // Não altera valor de inputs
+                } else if (el.tagName === 'TITLE') {
+                    document.title = translation;
                 } else {
                     el.textContent = translation;
                 }
             }
         });
         
-        // Atualiza atributos específicos
         document.querySelectorAll('[data-i18n-attr]').forEach(el => {
             const attr = el.getAttribute('data-i18n-attr');
             const key = el.getAttribute('data-i18n');
@@ -112,7 +134,6 @@ const LanguageManager = {
             }
         });
         
-        // Atualiza o título da página
         const titleKey = document.querySelector('title')?.getAttribute('data-i18n');
         if (titleKey) {
             const translation = this.translate(titleKey);
@@ -124,22 +145,27 @@ const LanguageManager = {
     
     // Cria o seletor de idioma
     setLanguageSelector() {
-        // Remove seletor existente
         const existing = document.getElementById('languageSelector');
         if (existing) existing.remove();
         
-        // Cria novo seletor
+        const container = document.getElementById('languageSelectorContainer');
+        if (!container) {
+            console.warn('Container do seletor de idioma não encontrado!');
+            return;
+        }
+        
         const selector = document.createElement('div');
         selector.id = 'languageSelector';
         selector.className = 'language-selector';
-        selector.setAttribute('data-i18n', 'idioma');
         
         const currentLang = this.availableLanguages[this.currentLang];
+        const flag = currentLang ? currentLang.flag : '🌍';
+        const code = this.currentLang.toUpperCase();
         
         selector.innerHTML = `
             <button class="lang-toggle" onclick="LanguageManager.toggleDropdown()">
-                <span class="lang-flag">${currentLang.flag}</span>
-                <span class="lang-code">${this.currentLang.toUpperCase()}</span>
+                <span class="lang-flag">${flag}</span>
+                <span class="lang-code">${code}</span>
                 <span class="lang-arrow">▼</span>
             </button>
             <div class="lang-dropdown" id="langDropdown">
@@ -154,13 +180,7 @@ const LanguageManager = {
             </div>
         `;
         
-        // Adiciona ao header
-        const headerContent = document.querySelector('.header-content');
-        if (headerContent) {
-            headerContent.appendChild(selector);
-        }
-        
-        // Adiciona estilos do seletor
+        container.appendChild(selector);
         this.addSelectorStyles();
     },
     
@@ -175,7 +195,6 @@ const LanguageManager = {
                 position: relative;
                 display: inline-flex;
                 align-items: center;
-                margin-left: 10px;
             }
             
             .lang-toggle {
@@ -269,9 +288,6 @@ const LanguageManager = {
             }
             
             @media (max-width: 768px) {
-                .language-selector {
-                    margin-left: 0;
-                }
                 .lang-name {
                     font-size: 12px;
                 }
@@ -300,11 +316,10 @@ const LanguageManager = {
             return;
         }
         
-        // Mostra indicador de loading
         const toggle = document.querySelector('.lang-toggle');
-        const originalText = toggle?.textContent;
+        const originalText = toggle?.innerHTML;
         if (toggle) {
-            toggle.textContent = '⏳';
+            toggle.innerHTML = '⏳';
             toggle.disabled = true;
         }
         
@@ -316,26 +331,22 @@ const LanguageManager = {
             this.updateDateLocale();
             this.setLanguageSelector();
             
-            // Dispara evento
             document.dispatchEvent(new CustomEvent('languageChanged', { 
                 detail: { language: lang } 
             }));
             
-            // Recarrega artigos para atualizar textos
             if (typeof loadArticles === 'function') {
                 loadArticles();
             }
             
-            // Mostra toast
             const langName = this.availableLanguages[lang].nativeName;
             if (typeof showToast === 'function') {
                 showToast(`🌍 Idioma alterado para ${langName}`);
             }
         }
         
-        // Restaura toggle
         if (toggle) {
-            toggle.textContent = originalText || '🌍';
+            toggle.innerHTML = originalText || '🌍';
             toggle.disabled = false;
         }
     },
@@ -353,7 +364,6 @@ const LanguageManager = {
             };
             
             try {
-                // Tenta usar o locale nativo
                 const localeMap = {
                     'pt': 'pt-BR',
                     'en': 'en-US',
@@ -367,7 +377,6 @@ const LanguageManager = {
                 const locale = localeMap[this.currentLang] || 'pt-BR';
                 dateElement.textContent = now.toLocaleDateString(locale, options);
             } catch {
-                // Fallback: usa traduções manuais
                 const weekdays = {
                     'pt': ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'],
                     'en': ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
@@ -402,7 +411,6 @@ const LanguageManager = {
         }
     },
     
-    // Traduz os meses
     getMonthName(monthIndex) {
         const months = {
             'pt': ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'],
@@ -414,7 +422,6 @@ const LanguageManager = {
         return (months[this.currentLang] || months['pt'])[monthIndex] || '';
     },
     
-    // Formata data com tradução
     formatDate(date) {
         if (!date) return '';
         const d = date.toDate ? date.toDate() : new Date(date);
@@ -432,3 +439,4 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // Disponibiliza globalmente
 window.LanguageManager = LanguageManager;
+console.log('🌍 LanguageManager carregado e disponível globalmente');
