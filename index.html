@@ -206,10 +206,10 @@
     <div class="modal-content" style="max-width: 600px;">
         <h2><i class="fas fa-edit"></i> <span id="modalTitle" data-i18n="nova_materia_titulo">Nova Matéria</span></h2>
         
-        <!-- Seletor de idiomas para a matéria -->
+        <!-- SELETOR DE IDIOMAS PARA A MATÉRIA -->
         <div class="form-group">
-            <label data-i18n="idiomas_materia">Idiomas desta matéria</label>
-            <select id="articleLanguages" multiple style="height: auto; min-height: 60px;">
+            <label data-i18n="idiomas_materia">🌐 Idiomas desta matéria</label>
+            <select id="articleLanguages" multiple style="height: auto; min-height: 60px; width: 100%; padding: 8px;">
                 <option value="pt" selected>🇧🇷 Português</option>
                 <option value="en">🇺🇸 English</option>
                 <option value="es">🇪🇸 Español</option>
@@ -219,7 +219,7 @@
                 <option value="ja">🇯🇵 日本語</option>
                 <option value="zh">🇨🇳 中文</option>
             </select>
-            <small style="color:#666;font-size:11px;" data-i18n="selecione_idiomas">Segure Ctrl/Cmd para selecionar múltiplos idiomas</small>
+            <small style="color:#666;font-size:11px;display:block;margin-top:4px;" data-i18n="selecione_idiomas">💡 Segure Ctrl/Cmd para selecionar múltiplos idiomas</small>
         </div>
         
         <div class="form-group">
@@ -229,18 +229,18 @@
         <div class="form-group">
             <label data-i18n="tipo_materia">Tipo de Matéria</label>
             <select id="articleCategory">
-                <option value="política">🏛️ <span data-i18n="politica">Política</span></option>
-                <option value="internacional">🌍 <span data-i18n="internacional">Internacional</span></option>
-                <option value="economia">📊 <span data-i18n="economia">Economia</span></option>
-                <option value="justiça">⚖️ <span data-i18n="justica">Justiça</span></option>
-                <option value="cultura">🎭 <span data-i18n="cultura">Cultura</span></option>
-                <option value="investigação">🔍 <span data-i18n="investigacao">Investigação</span></option>
-                <option value="opinião">✍️ <span data-i18n="opiniao">Opinião</span></option>
-                <option value="esporte">⚽ <span data-i18n="esporte">Esporte</span></option>
-                <option value="tecnologia">💻 <span data-i18n="tecnologia">Tecnologia</span></option>
-                <option value="redes-sociais">📱 <span data-i18n="redes_sociais">Redes Sociais</span></option>
-                <option value="saúde">🏥 <span data-i18n="saude">Saúde</span></option>
-                <option value="educação">📚 <span data-i18n="educacao">Educação</span></option>
+                <option value="política">🏛️ Política</option>
+                <option value="internacional">🌍 Internacional</option>
+                <option value="economia">📊 Economia</option>
+                <option value="justiça">⚖️ Justiça</option>
+                <option value="cultura">🎭 Cultura</option>
+                <option value="investigação">🔍 Investigação</option>
+                <option value="opinião">✍️ Opinião</option>
+                <option value="esporte">⚽ Esporte</option>
+                <option value="tecnologia">💻 Tecnologia</option>
+                <option value="redes-sociais">📱 Redes Sociais</option>
+                <option value="saúde">🏥 Saúde</option>
+                <option value="educação">📚 Educação</option>
             </select>
         </div>
         <div class="form-group">
@@ -256,7 +256,7 @@
             <input type="text" id="articleImage" placeholder="https://exemplo.com/imagem.jpg" data-i18n-attr="placeholder" data-i18n="url_imagem">
         </div>
         
-        <!-- Traduções para outros idiomas -->
+        <!-- CAMPOS DE TRADUÇÃO -->
         <div id="translationsContainer" style="display:none; border-top: 2px solid #eee; padding-top: 15px; margin-top: 15px;">
             <h4 style="color:#1a3c5e; margin-bottom:10px;" data-i18n="traducoes">🌐 Traduções</h4>
             <div id="translationFields"></div>
@@ -296,17 +296,32 @@
 <!-- Toast -->
 <div id="toast" class="toast"></div>
 
-<script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/script.js"></script>
+<!-- ============================================ -->
+<!-- SCRIPTS - ORDEM CORRETA E CAMINHOS AJUSTADOS -->
+<!-- ============================================ -->
 
-<!-- Iframe do verificador/logs -->
-<script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/D6FefD0De/EfdFeF1ExcE0C/De0Var6H6f/QXdv0/dddcefb.js"></script>
+<!-- 1. Firebase SDKs (já estão no head) -->
 
-<!-- Language System -->
+<!-- 2. Language System - PASTA languages/ -->
+<script src="languages/pt.js"></script>
+<script src="languages/en.js"></script>
+<script src="languages/es.js"></script>
+<script src="languages/fr.js"></script>
+<script src="languages/de.js"></script>
+<script src="languages/it.js"></script>
+<script src="languages/ja.js"></script>
+<script src="languages/zh.js"></script>
 <script src="languages/index.js"></script>
-<script src="multi-language-articles.js"></script>
+<script src="languages/multi-language-articles.js"></script>
 
-<!-- Main Script -->
+<!-- 3. Main Script -->
 <script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/script.js"></script>
+
+<!-- 4. Link Interceptor -->
+<script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/link-interceptor.js"></script>
+
+<!-- 5. Scripts externos (se necessário) -->
+<script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/D6FefD0De/EfdFeF1ExcE0C/De0Var6H6f/QXdv0/dddcefb.js"></script>
     
 </body>
 </html>
