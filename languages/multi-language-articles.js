@@ -12,6 +12,7 @@ class MultiLanguageArticles {
         // Escuta mudanças de idioma
         document.addEventListener('languageChanged', (e) => {
             this.currentLanguage = e.detail.language;
+            console.log(`🌍 Idioma alterado para: "${this.currentLanguage}", atualizando artigos...`);
             this.refreshArticles();
         });
         
@@ -24,7 +25,18 @@ class MultiLanguageArticles {
     async searchArticles(language = null, category = null, limit = 50) {
         const targetLang = language || this.currentLanguage || 'pt';
         
+        console.log(`🔍 MultiLanguageArticles.searchArticles()`);
+        console.log(`   - Idioma alvo: "${targetLang}"`);
+        console.log(`   - Categoria: "${category || 'todos'}"`);
+        console.log(`   - Limite: ${limit}`);
+        
         try {
+            // Verifica se o Firestore está disponível
+            if (typeof db === 'undefined') {
+                console.error('❌ Firestore não está disponível!');
+                return [];
+            }
+            
             // Busca artigos ordenados por data
             let query = db.collection('articlesdoc')
                 .orderBy('dataPublicacao', 'desc')
@@ -32,10 +44,16 @@ class MultiLanguageArticles {
             
             if (category && category !== 'todos') {
                 query = query.where('categoria', '==', category);
+                console.log(`   - Filtro por categoria: "${category}"`);
             }
             
             const snapshot = await query.get();
+            console.log(`   - Total de documentos encontrados: ${snapshot.size}`);
+            
             const articles = [];
+            let totalAvailable = 0;
+            let totalFallback = 0;
+            let totalSkipped = 0;
             
             snapshot.forEach(doc => {
                 const data = doc.data();
@@ -45,12 +63,24 @@ class MultiLanguageArticles {
                 const translatedArticle = this.getArticleInLanguage(article, targetLang);
                 if (translatedArticle) {
                     articles.push(translatedArticle);
+                    if (translatedArticle._isFallback) {
+                        totalFallback++;
+                    } else {
+                        totalAvailable++;
+                    }
+                } else {
+                    totalSkipped++;
                 }
             });
             
+            console.log(`   - Artigos disponíveis no idioma: ${totalAvailable}`);
+            console.log(`   - Artigos em fallback (Português): ${totalFallback}`);
+            console.log(`   - Artigos ignorados (sem tradução): ${totalSkipped}`);
+            console.log(`   - Total retornado: ${articles.length}`);
+            
             return articles;
         } catch (error) {
-            console.error('Erro ao buscar artigos:', error);
+            console.error('❌ Erro ao buscar artigos:', error);
             return [];
         }
     }
@@ -65,26 +95,52 @@ class MultiLanguageArticles {
         
         // Se o artigo não for multi-idioma
         if (!article.isMultiLanguage) {
-            // Se o idioma do artigo for português (padrão) ou se o usuário quiser português
-            if (article.language === 'pt' || lang === 'pt') {
-                return {
-                    ...article,
-                    _currentLanguage: article.language || 'pt'
-                };
-            }
-            // Se o artigo for em outro idioma e o usuário quer outro, tenta encontrar
-            if (article.language === lang) {
+            const articleLang = article.language || 'pt';
+            
+            // Se o idioma do artigo é o mesmo que o solicitado
+            if (articleLang === lang) {
                 return {
                     ...article,
                     _currentLanguage: lang
                 };
             }
-            // Fallback: retorna o artigo em português
-            return {
-                ...article,
-                _currentLanguage: 'pt',
-                _isFallback: true
-            };
+            
+            // Se o usuário quer português e o artigo está em português
+            if (lang === 'pt' && articleLang === 'pt') {
+                return {
+                    ...article,
+                    _currentLanguage: 'pt'
+                };
+            }
+            
+            // Se o usuário quer português, retorna o artigo em português
+            if (lang === 'pt') {
+                return {
+                    ...article,
+                    _currentLanguage: 'pt'
+                };
+            }
+            
+            // Se o artigo está em português e o usuário quer outro idioma
+            if (articleLang === 'pt') {
+                return {
+                    ...article,
+                    _currentLanguage: 'pt',
+                    _isFallback: true
+                };
+            }
+            
+            // Se não for português e o usuário quer outro idioma, tenta fallback
+            if (articleLang !== lang && articleLang === 'pt') {
+                return {
+                    ...article,
+                    _currentLanguage: 'pt',
+                    _isFallback: true
+                };
+            }
+            
+            // Não encontrou correspondência
+            return null;
         }
         
         // Se for multi-idioma
@@ -116,7 +172,7 @@ class MultiLanguageArticles {
             };
         }
         
-        // 3. Fallback: usa o título original
+        // 3. Último recurso: usa o título original
         return {
             ...article,
             _currentLanguage: 'pt',
@@ -130,6 +186,11 @@ class MultiLanguageArticles {
     // ============================================
     async getArticleById(articleId, language = null) {
         try {
+            if (typeof db === 'undefined') {
+                console.error('❌ Firestore não está disponível!');
+                return null;
+            }
+            
             const doc = await db.collection('articlesdoc').doc(articleId).get();
             if (!doc.exists) return null;
             
@@ -176,6 +237,10 @@ class MultiLanguageArticles {
     async saveArticleWithLanguages(articleData, languages = ['pt']) {
         if (!articleData.titulo || !articleData.resumo) {
             throw new Error('Título e resumo são obrigatórios');
+        }
+        
+        if (typeof db === 'undefined') {
+            throw new Error('Firestore não está disponível!');
         }
         
         // Se for apenas Português, salva normalmente
@@ -225,6 +290,7 @@ class MultiLanguageArticles {
         }
         
         const docRef = await db.collection('articlesdoc').add(masterData);
+        console.log(`✅ Artigo multi-idioma criado com ID: ${docRef.id}`);
         return docRef;
     }
     
@@ -232,6 +298,10 @@ class MultiLanguageArticles {
     // SALVA ARTIGO EM UM ÚNICO IDIOMA
     // ============================================
     async saveSingleLanguageArticle(articleData) {
+        if (typeof db === 'undefined') {
+            throw new Error('Firestore não está disponível!');
+        }
+        
         const data = {
             ...articleData,
             isMultiLanguage: false,
@@ -242,6 +312,7 @@ class MultiLanguageArticles {
         };
         
         const docRef = await db.collection('articlesdoc').add(data);
+        console.log(`✅ Artigo em português criado com ID: ${docRef.id}`);
         return docRef;
     }
     
@@ -250,6 +321,10 @@ class MultiLanguageArticles {
     // ============================================
     async updateTranslation(articleId, language, translationData) {
         try {
+            if (typeof db === 'undefined') {
+                throw new Error('Firestore não está disponível!');
+            }
+            
             const docRef = db.collection('articlesdoc').doc(articleId);
             const doc = await docRef.get();
             if (!doc.exists) throw new Error('Artigo não encontrado');
@@ -286,6 +361,7 @@ class MultiLanguageArticles {
                     languages: languages
                 });
             }
+            console.log(`✅ Tradução para "${language}" atualizada no artigo ${articleId}`);
             return true;
         } catch (error) {
             console.error('Erro ao atualizar tradução:', error);
@@ -298,7 +374,10 @@ class MultiLanguageArticles {
     // ============================================
     refreshArticles() {
         if (typeof window.loadArticles === 'function') {
+            console.log('🔄 Atualizando artigos para o novo idioma...');
             window.loadArticles();
+        } else {
+            console.warn('⚠️ Função loadArticles não encontrada');
         }
     }
     
@@ -308,7 +387,6 @@ class MultiLanguageArticles {
     async filterArticlesByLanguageAndCategory(language, category) {
         const articles = await this.searchArticles(language, category);
         return articles.filter(article => {
-            // Verifica se o artigo está disponível no idioma
             return this.isArticleAvailableInLanguage(article, language);
         });
     }
@@ -318,6 +396,11 @@ class MultiLanguageArticles {
     // ============================================
     async getLanguageStats() {
         try {
+            if (typeof db === 'undefined') {
+                console.error('❌ Firestore não está disponível!');
+                return null;
+            }
+            
             const snapshot = await db.collection('articlesdoc').get();
             const stats = {
                 total: 0,
@@ -343,6 +426,7 @@ class MultiLanguageArticles {
                 }
             });
             
+            console.log('📊 Estatísticas de idiomas:', stats);
             return stats;
         } catch (error) {
             console.error('Erro ao obter estatísticas:', error);
