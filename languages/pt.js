@@ -1,5 +1,5 @@
 // languages/pt.js
-const translations = {
+const translationsPt = {
     // Header
     'jornal': 'Jornal',
     'entrar': 'Entrar',
@@ -162,7 +162,9 @@ const translations = {
     'chines': '中文'
 };
 
-// Export for use
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = translations;
+// Registra no LanguageManager
+if (typeof LanguageManager !== 'undefined') {
+    LanguageManager.registerLanguage('pt', translationsPt);
 }
+
+//end
