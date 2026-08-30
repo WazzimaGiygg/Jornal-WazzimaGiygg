@@ -1,342 +1,772 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard de Postagens - WazzimaGiygg</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Comando Console - WazzimaGiygg</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #1a3c5e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js">
-    </script>
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
 
-    <link rel="stylesheet" href="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/novapostagem/admin-style.css" />
-    <link rel="icon" href="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/Favicom.png" type="image/x-icon">
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #1a3c5e;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #1a3c5e;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .header h1 span {
+            color: #c0392b;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #1a3c5e;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .form-group label .required {
+            color: #c0392b;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #1a3c5e;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 60, 94, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231a3c5e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            padding-right: 40px;
+        }
+
+        .form-group select[multiple] {
+            background-image: none;
+            height: auto;
+            min-height: 80px;
+        }
+
+        .form-group select[multiple] option {
+            padding: 8px 12px;
+            margin: 2px 0;
+            border-radius: 5px;
+        }
+
+        .form-group select[multiple] option:checked {
+            background: #1a3c5e;
+            color: white;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #1a3c5e, #2a5f8f);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(26, 60, 94, 0.3);
+        }
+
+        .btn-generate:active {
+            transform: translateY(0);
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            margin-top: 10px;
+        }
+
+        .btn-copy:hover {
+            box-shadow: 0 10px 20px rgba(39, 174, 96, 0.3);
+        }
+
+        .output-area {
+            margin-top: 25px;
+            border-top: 3px solid #1a3c5e;
+            padding-top: 20px;
+        }
+
+        .output-area h3 {
+            color: #1a3c5e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .output-area h3 .badge {
+            background: #c0392b;
+            color: white;
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 400;
+        }
+
+        .command-box {
+            background: #0a1628;
+            color: #a8d8ea;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 400px;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid #1a3c5e;
+        }
+
+        .command-box .line-numbers {
+            color: #555;
+            user-select: none;
+        }
+
+        .command-box .keyword {
+            color: #ff6b6b;
+        }
+
+        .command-box .string {
+            color: #69db7c;
+        }
+
+        .command-box .function {
+            color: #ffd93d;
+        }
+
+        .command-box .comment {
+            color: #868e96;
+            font-style: italic;
+        }
+
+        .copy-feedback {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .copy-feedback.show {
+            transform: translateX(0);
+        }
+
+        .preview-box {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .preview-box h4 {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .preview-box .preview-content {
+            font-size: 14px;
+            color: #1a3c5e;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 400;
+            font-size: 13px;
+            cursor: pointer;
+            background: #f8f9fa;
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid #dee2e6;
+            transition: all 0.2s;
+        }
+
+        .checkbox-group label:hover {
+            background: #e9ecef;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .checkbox-group input[type="checkbox"]:checked+span {
+            color: #1a3c5e;
+            font-weight: 600;
+        }
+
+        .badge-option {
+            display: inline-block;
+            background: #1a3c5e;
+            color: white;
+            padding: 0 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            margin-left: 3px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .command-box {
+                font-size: 11px;
+                padding: 15px;
+            }
+        }
+
+        /* Toast personalizado */
+        .toast-message {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a3c5e;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast-message.show {
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- ===== VERIFICAÇÃO DE ACESSO ===== -->
-    <div id="accessDenied" style="display:none;">
-        <div class="access-denied-box">
-            <i class="fas fa-lock" style="font-size:64px; color:#e74c3c;"></i>
-            <h2>Acesso Negado</h2>
-            <p>Esta página é restrita a administradores.</p>
-            <p style="font-size:14px; color:#888; margin-top:10px;">Faça login com uma conta administrativa para continuar.</p>
-            <button onclick="window.location.href='index.html'" class="btn-primary" style="margin-top:20px;">
-                <i class="fas fa-arrow-left"></i> Voltar para o Jornal
+    <div class="container">
+        <div class="header">
+            <h1>📰 Gerador de <span>Comando</span> Console</h1>
+            <p>Preencha os campos abaixo e gere o comando para colar no console do WazzimaGiygg</p>
+        </div>
+
+        <form id="articleForm">
+            <div class="form-group">
+                <label>📌 Título da Matéria <span class="required">*</span></label>
+                <input type="text" id="title" placeholder="Ex: Descoberta Revoluciona a Tecnologia" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>📂 Categoria <span class="required">*</span></label>
+                    <select id="category" required>
+                        <option value="política">🏛️ Política</option>
+                        <option value="internacional">🌍 Internacional</option>
+                        <option value="economia">📊 Economia</option>
+                        <option value="justiça">⚖️ Justiça</option>
+                        <option value="cultura">🎭 Cultura</option>
+                        <option value="investigação">🔍 Investigação</option>
+                        <option value="opinião">✍️ Opinião</option>
+                        <option value="esporte">⚽ Esporte</option>
+                        <option value="tecnologia" selected>💻 Tecnologia</option>
+                        <option value="redes-sociais">📱 Redes Sociais</option>
+                        <option value="saúde">🏥 Saúde</option>
+                        <option value="educação">📚 Educação</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>🌐 Idiomas</label>
+                    <select id="languages" multiple>
+                        <option value="pt" selected>🇧🇷 Português</option>
+                        <option value="en">🇺🇸 English</option>
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="de">🇩🇪 Deutsch</option>
+                        <option value="it">🇮🇹 Italiano</option>
+                        <option value="ja">🇯🇵 日本語</option>
+                        <option value="zh">🇨🇳 中文</option>
+                    </select>
+                    <small style="color:#666;font-size:11px;">💡 Segure Ctrl/Cmd para selecionar múltiplos</small>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>📝 Resumo/Descrição <span class="required">*</span></label>
+                <textarea id="excerpt" placeholder="Breve resumo da matéria..." rows="2" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>📄 Conteúdo Completo (HTML) <span class="required">*</span></label>
+                <textarea id="content" placeholder="Conteúdo completo da matéria com formatação HTML..." rows="4" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>🖼️ URL da Imagem</label>
+                <input type="text" id="image" placeholder="https://exemplo.com/imagem.jpg">
+                <small style="color:#666;font-size:11px;">Deixe em branco para usar imagem padrão</small>
+            </div>
+
+            <div class="form-group">
+                <label>⚙️ Opções Adicionais</label>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="autoExecute" checked>
+                        <span>▶️ Auto-executar no console</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" id="showPreview" checked>
+                        <span>👁️ Mostrar prévia</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" id="useModal" checked>
+                        <span>📋 Usar modal (recomendado)</span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="button" class="btn-generate" onclick="generateCommand()">
+                ⚡ Gerar Comando para Console
             </button>
-        </div>
-    </div>
+        </form>
 
-    <!-- ===== BANNED OVERLAY ===== -->
-    <div id="bannedOverlay" class="banned-overlay">
-        <div class="banned-box">
-            <div class="icon">🚫</div>
-            <h2>⚠️ Conta Banida</h2>
-            <p>Sua conta foi banida permanentemente do sistema.</p>
-            <div id="banDetails" class="ban-details">Motivo: Violação das políticas de uso</div>
-            <button class="btn-logout-banned" onclick="logoutBanned()">🚪 Sair da conta</button>
-        </div>
-    </div>
+        <div class="output-area" id="outputArea" style="display: none;">
+            <h3>
+                📋 Comando Gerado
+                <span class="badge">Copie e cole no console</span>
+            </h3>
+            <div class="command-box" id="commandOutput"></div>
+            <button class="btn-generate btn-copy" onclick="copyCommand()">
+                📋 Copiar Comando
+            </button>
+            <button class="btn-generate" onclick="executeCommandDirectly()" style="background: linear-gradient(135deg, #e67e22, #f39c12);">
+                🚀 Executar Agora (se estiver no site)
+            </button>
 
-    <!-- ===== HEADER DO DASHBOARD ===== -->
-    <header class="dashboard-header">
-        <div class="header-content">
-            <div class="logo-area" onclick="window.location.href='index.html'">
-                <img src="https://wazzimagiygg.com/favicom.png" alt="Logo" />
-                <div>
-                    <h1>WazzimaGiygg</h1>
-                    <small>Dashboard de Postagens</small>
-                </div>
-            </div>
-            <div class="user-area">
-                <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">👤</div>
-                    <div>
-                        <div class="user-name" id="userName">Carregando...</div>
-                        <div class="user-email" id="userEmail">aguarde</div>
-                    </div>
-                </div>
-                <span id="userBadge" class="badge-admin">Admin</span>
-                <button class="btn-logout" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Sair
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- ===== CONTEÚDO PRINCIPAL ===== -->
-    <div class="dashboard-container">
-
-        <!-- ===== SIDEBAR ===== -->
-        <aside class="sidebar">
-            <div class="sidebar-menu">
-                <div class="menu-item active" onclick="switchTab('posts')">
-                    <i class="fas fa-newspaper"></i>
-                    <span>Minhas Postagens</span>
-                    <span class="badge" id="postCount">0</span>
-                </div>
-                <div class="menu-item" onclick="switchTab('create')">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>Nova Postagem</span>
-                </div>
-                <div class="menu-item" onclick="switchTab('categories')">
-                    <i class="fas fa-tags"></i>
-                    <span>Categorias</span>
-                </div>
-                <div class="menu-item" onclick="window.location.href='index.html'">
-                    <i class="fas fa-globe"></i>
-                    <span>Ver Jornal</span>
-                </div>
-            </div>
-            <div class="sidebar-footer">
-                <div class="version">v2.0 • Admin</div>
-            </div>
-        </aside>
-
-        <!-- ===== CONTEÚDO ===== -->
-        <main class="main-content">
-
-            <!-- ===== TAB: MINHAS POSTAGENS ===== -->
-            <section id="tabPosts" class="tab-content active">
-                <div class="page-header">
-                    <h2><i class="fas fa-newspaper"></i> Minhas Postagens</h2>
-                    <button class="btn-primary" onclick="switchTab('create')">
-                        <i class="fas fa-plus"></i> Nova Postagem
-                    </button>
-                </div>
-
-                <!-- Filtros -->
-                <div class="filters-bar">
-                    <div class="filter-group">
-                        <label>Categoria:</label>
-                        <select id="filterCategory" onchange="filterPosts()">
-                            <option value="all">Todas</option>
-                            <option value="política">🏛️ Política</option>
-                            <option value="internacional">🌍 Internacional</option>
-                            <option value="economia">📊 Economia</option>
-                            <option value="justiça">⚖️ Justiça</option>
-                            <option value="cultura">🎭 Cultura</option>
-                            <option value="investigação">🔍 Investigação</option>
-                            <option value="opinião">✍️ Opinião</option>
-                            <option value="esporte">⚽ Esporte</option>
-                            <option value="tecnologia">💻 Tecnologia</option>
-                            <option value="redes-sociais">📱 Redes Sociais</option>
-                            <option value="saúde">🏥 Saúde</option>
-                            <option value="educação">📚 Educação</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Status:</label>
-                        <select id="filterStatus" onchange="filterPosts()">
-                            <option value="all">Todos</option>
-                            <option value="published">Publicados</option>
-                            <option value="draft">Rascunhos</option>
-                        </select>
-                    </div>
-                    <div class="filter-group search-group">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="searchPosts" placeholder="Buscar postagens..." oninput="filterPosts()" />
-                    </div>
-                </div>
-
-                <!-- Lista de Posts -->
-                <div id="postsList" class="posts-list">
-                    <div class="loading-state">
-                        <div class="spinner"></div>
-                        <p>Carregando postagens...</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ===== TAB: NOVA POSTAGEM ===== -->
-            <section id="tabCreate" class="tab-content">
-                <div class="page-header">
-                    <h2 id="createTitle"><i class="fas fa-plus-circle"></i> Nova Postagem</h2>
-                    <button class="btn-outline" onclick="resetForm()">
-                        <i class="fas fa-undo"></i> Limpar
-                    </button>
-                </div>
-
-                <form id="postForm" class="post-form" onsubmit="return false;">
-                    <div class="form-row">
-                        <div class="form-group" style="flex:2;">
-                            <label for="postTitle">Título da Matéria <span class="required">*</span></label>
-                            <input type="text" id="postTitle" placeholder="Ex: Nova descoberta científica revoluciona a medicina" required />
-                        </div>
-                        <div class="form-group" style="flex:1;">
-                            <label for="postCategory">Categoria <span class="required">*</span></label>
-                            <select id="postCategory" required>
-                                <option value="">Selecione...</option>
-                                <option value="política">🏛️ Política</option>
-                                <option value="internacional">🌍 Internacional</option>
-                                <option value="economia">📊 Economia</option>
-                                <option value="justiça">⚖️ Justiça</option>
-                                <option value="cultura">🎭 Cultura</option>
-                                <option value="investigação">🔍 Investigação</option>
-                                <option value="opinião">✍️ Opinião</option>
-                                <option value="esporte">⚽ Esporte</option>
-                                <option value="tecnologia">💻 Tecnologia</option>
-                                <option value="redes-sociais">📱 Redes Sociais</option>
-                                <option value="saúde">🏥 Saúde</option>
-                                <option value="educação">📚 Educação</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="postImage">URL da Imagem (opcional)</label>
-                        <div class="image-input-wrapper">
-                            <input type="text" id="postImage" placeholder="https://exemplo.com/imagem.jpg" />
-                            <button type="button" class="btn-preview-image" onclick="previewImage()">
-                                <i class="fas fa-eye"></i> Pré-visualizar
-                            </button>
-                        </div>
-                        <div id="imagePreview" class="image-preview" style="display:none;">
-                            <img id="imagePreviewImg" src="" alt="Pré-visualização" />
-                            <button type="button" class="btn-remove-image" onclick="removeImagePreview()">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="postExcerpt">Resumo/Descrição <span class="required">*</span></label>
-                        <textarea id="postExcerpt" placeholder="Breve resumo da matéria (máx. 300 caracteres)" rows="3" maxlength="300" required></textarea>
-                        <div class="char-counter" id="excerptCounter">0/300</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="postContent">Conteúdo Completo <span class="required">*</span></label>
-                        <div class="editor-toolbar">
-                            <button type="button" onclick="insertTag('b')"><b>B</b></button>
-                            <button type="button" onclick="insertTag('i')"><i>I</i></button>
-                            <button type="button" onclick="insertTag('u')"><u>U</u></button>
-                            <button type="button" onclick="insertTag('h2')">H2</button>
-                            <button type="button" onclick="insertTag('h3')">H3</button>
-                            <button type="button" onclick="insertTag('p')">P</button>
-                            <button type="button" onclick="insertTag('ul')">• Lista</button>
-                            <button type="button" onclick="insertTag('blockquote')">" Citação</button>
-                            <button type="button" onclick="insertTag('a')">🔗 Link</button>
-                            <button type="button" onclick="insertImageTag()">🖼️ Imagem</button>
-                        </div>
-                        <textarea id="postContent" placeholder="Conteúdo completo da matéria com formatação HTML..." rows="10" required></textarea>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" class="btn-success" onclick="savePost()">
-                            <i class="fas fa-check"></i> <span id="saveButtonText">Publicar</span>
-                        </button>
-                        <button type="button" class="btn-secondary" onclick="saveAsDraft()">
-                            <i class="fas fa-save"></i> Salvar como Rascunho
-                        </button>
-                        <button type="button" class="btn-danger" onclick="cancelEdit()" id="cancelEditBtn" style="display:none;">
-                            <i class="fas fa-times"></i> Cancelar Edição
-                        </button>
-                    </div>
-                </form>
-            </section>
-
-            <!-- ===== TAB: CATEGORIAS ===== -->
-            <section id="tabCategories" class="tab-content">
-                <div class="page-header">
-                    <h2><i class="fas fa-tags"></i> Gerenciar Categorias</h2>
-                </div>
-                <div class="categories-grid">
-                    <div class="category-card" style="background: linear-gradient(135deg, #2c3e50, #34495e);">
-                        <i class="fas fa-newspaper"></i>
-                        <h3>Todas</h3>
-                        <p>Ver todas as postagens</p>
-                    </div>
-                    <div class="category-card" style="background: linear-gradient(135deg, #c0392b, #e74c3c);">
-                        <i class="fas fa-landmark"></i>
-                        <h3>Política</h3>
-                        <p>Notícias políticas</p>
-                    </div>
-                    <div class="category-card" style="background: linear-gradient(135deg, #2980b9, #3498db);">
-                        <i class="fas fa-globe-americas"></i>
-                        <h3>Internacional</h3>
-                        <p>Mundo</p>
-                    </div>
-                    <div class="category-card" style="background: linear-gradient(135deg, #27ae60, #2ecc71);">
-                        <i class="fas fa-chart-line"></i>
-                        <h3>Economia</h3>
-                        <p>Finanças e negócios</p>
-                    </div>
-                    <div class="category-card" style="background: linear-gradient(135deg, #8e44ad, #9b59b6);">
-                        <i class="fas fa-gavel"></i>
-                        <h3>Justiça</h3>
-                        <p>Direito e legislação</p>
-                    </div>
-                    <div class="category-card" style="background: linear-gradient(135deg, #e67e22, #f39c12);">
-                        <i class="fas fa-palette"></i>
-                        <h3>Cultura</h3>
-                        <p>Arte e entretenimento</p>
-                    </div>
-                    <div class="category-card" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
-                        <i class="fas fa-search"></i>
-                        <h3>Investigação</h3>
-                        <p>Reportagens especiais</p>
-                    </div>
-                    <div class="category-card" style="background: linear-gradient(135deg, #d35400, #e67e22);">
-                        <i class="fas fa-pen-fancy"></i>
-                        <h3>Opinião</h3>
-                        <p>Artigos de opinião</p>
-                    </div>
-                    <div class="category-card" style="background: linear-gradient(135deg, #2c3e50, #4a6cf7);">
-                        <i class="fas fa-futbol"></i>
-                        <h3>Esporte</h3>
-                        <p>Esportes em geral</p>
-                    </div>
-                    <div class="category-card" style="background: linear-gradient(135deg, #0f3460, #16213e);">
-                        <i class="fas fa-microchip"></i>
-                        <h3>Tecnologia</h3>
-                        <p>Inovação e tech</p>
-                    </div>
-                    <div class="category-card" style="background: linear-gradient(135deg, #e84393, #fd79a8);">
-                        <i class="fas fa-share-alt"></i>
-                        <h3>Redes Sociais</h3>
-                        <p>Digital e social media</p>
-                    </div>
-                    <div class="category-card" style="background: linear-gradient(135deg, #00b894, #00cec9);">
-                        <i class="fas fa-heartbeat"></i>
-                        <h3>Saúde</h3>
-                        <p>Bem-estar e medicina</p>
-                    </div>
-                    <div class="category-card" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe);">
-                        <i class="fas fa-graduation-cap"></i>
-                        <h3>Educação</h3>
-                        <p>Ensino e conhecimento</p>
-                    </div>
-                </div>
-            </section>
-
-        </main>
-    </div>
-
-    <!-- ===== MODAL DE CONFIRMAÇÃO ===== -->
-    <div id="confirmModal" class="modal">
-        <div class="modal-content" style="max-width:400px;">
-            <h3 id="confirmTitle">Confirmar</h3>
-            <p id="confirmMessage">Tem certeza que deseja realizar esta ação?</p>
-            <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
-                <button class="btn-secondary" onclick="closeConfirmModal()">Cancelar</button>
-                <button class="btn-danger" id="confirmActionBtn">Confirmar</button>
+            <div class="preview-box" id="previewBox">
+                <h4>📰 Prévia da Matéria</h4>
+                <div class="preview-content" id="previewContent"></div>
             </div>
         </div>
     </div>
 
-    <!-- ===== TOAST ===== -->
-    <div id="toast" class="toast"></div>
+    <div class="toast-message" id="toastMessage"></div>
 
-    <script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/novapostagem/admin-script.js"></script>
+    <script>
+        function generateCommand() {
+            const title = document.getElementById('title').value.trim();
+            const category = document.getElementById('category').value;
+            const excerpt = document.getElementById('excerpt').value.trim();
+            const content = document.getElementById('content').value.trim();
+            const image = document.getElementById('image').value.trim() || 'https://via.placeholder.com/800x400/1a3c5e/ffffff?text=WazzimaGiygg';
+            const languagesSelect = document.getElementById('languages');
+            const languages = Array.from(languagesSelect.selectedOptions).map(opt => opt.value);
+            const useModal = document.getElementById('useModal').checked;
+
+            // Validação básica
+            if (!title || !excerpt || !content) {
+                showToast('⚠️ Preencha todos os campos obrigatórios!', 'error');
+                return;
+            }
+
+            // Escapar caracteres especiais para o comando
+            const escapeString = (str) => {
+                return str.replace(/\\/g, '\\\\')
+                          .replace(/`/g, '\\`')
+                          .replace(/\${/g, '\\${');
+            };
+
+            const escapedTitle = escapeString(title);
+            const escapedExcerpt = escapeString(excerpt);
+            const escapedContent = escapeString(content);
+            const escapedImage = escapeString(image);
+
+            // Construir o objeto do artigo
+            let articleObject = `{
+    title: '${escapedTitle}',
+    category: '${category}',
+    excerpt: '${escapedExcerpt}',
+    content: \`${escapedContent}\`,
+    image: '${escapedImage}',
+    languages: ${JSON.stringify(languages)}
+}`;
+
+            // Gerar o comando completo
+            let command = '';
+            
+            if (useModal) {
+                // Método usando o modal (recomendado)
+                command = `// 📰 Publicar matéria via modal
+console.log('🚀 Iniciando publicação...');
+
+// 1. Verificar se está logado
+const user = firebase?.auth()?.currentUser;
+if (!user) {
+    console.error('❌ Você precisa estar logado para publicar!');
+    console.log('💡 Use: showLoginModal() para fazer login');
+} else {
+    console.log('✅ Usuário logado:', user.email);
+    
+    // 2. Abrir modal
+    document.getElementById('articleModal').style.display = 'block';
+    
+    // 3. Preencher campos
+    document.getElementById('articleTitle').value = '${escapedTitle}';
+    document.getElementById('articleCategory').value = '${category}';
+    document.getElementById('articleExcerpt').value = '${escapedExcerpt}';
+    document.getElementById('articleContent').value = \`${escapedContent}\`;
+    document.getElementById('articleImage').value = '${escapedImage}';
+    
+    // 4. Selecionar idiomas
+    const langSelect = document.getElementById('articleLanguages');
+    ${languages.map(lang => `Array.from(langSelect.options).forEach(opt => {
+        if (opt.value === '${lang}') opt.selected = true;
+    });`).join('\n    ')}
+    
+    // 5. Disparar evento de criação/edição
+    // Forçar o modal a reconhecer como nova matéria
+    if (typeof currentArticleId !== 'undefined') {
+        window.currentArticleId = null;
+    }
+    
+    // 6. Criar botão de publicação se não existir
+    let publishBtn = document.querySelector('#articleModal .btn-primary');
+    if (publishBtn) {
+        console.log('✅ Clique no botão "Publicar Matéria"');
+        publishBtn.click();
+    } else {
+        console.warn('⚠️ Botão de publicação não encontrado');
+    }
+    
+    console.log('📝 Matéria preparada para publicação!');
+}`;
+            } else {
+                // Método direto (sem modal)
+                command = `// 📰 Publicar matéria diretamente no Firestore
+console.log('🚀 Iniciando publicação direta...');
+
+const articleData = ${articleObject};
+
+// Verificar autenticação
+const user = firebase?.auth()?.currentUser;
+if (!user) {
+    console.error('❌ Você precisa estar logado para publicar!');
+    console.log('💡 Use: showLoginModal() para fazer login');
+} else {
+    console.log('✅ Usuário logado:', user.email);
+    
+    // Adicionar metadados
+    articleData.timestamp = new Date().toISOString();
+    articleData.author = user.displayName || user.email;
+    articleData.authorId = user.uid;
+    articleData.views = 0;
+    articleData.comments = [];
+    
+    // Salvar no Firestore
+    if (typeof db !== 'undefined' && db.collection) {
+        db.collection('articles').add(articleData)
+            .then(docRef => {
+                console.log('✅ Matéria publicada com sucesso! ID:', docRef.id);
+                console.log('🔗 Link:', window.location.origin + '/?id=' + docRef.id);
+                
+                // Mostrar toast de sucesso
+                if (typeof showToast === 'function') {
+                    showToast('✅ Matéria publicada!', 'success');
+                }
+                
+                // Recarregar a lista de matérias
+                if (typeof loadArticles === 'function') {
+                    loadArticles();
+                }
+            })
+            .catch(err => {
+                console.error('❌ Erro ao publicar:', err);
+                console.log('💡 Verifique as permissões do Firestore');
+            });
+    } else {
+        console.error('❌ Firestore não está disponível');
+    }
+}`;
+            }
+
+            // Adicionar opção de auto-execução
+            if (document.getElementById('autoExecute').checked) {
+                command = `// 🔄 Auto-execução ativada
+(function() {
+    console.log('⚡ Executando comando automaticamente...');
+    
+    // Verificar se está no site correto
+    if (!window.location.hostname.includes('wazzimagiygg')) {
+        console.warn('⚠️ Este comando deve ser executado no site WazzimaGiygg');
+        console.log('🌐 URL atual:', window.location.href);
+        return;
+    }
+    
+    ${command}
+})();`;
+            }
+
+            // Mostrar o comando
+            document.getElementById('outputArea').style.display = 'block';
+            const commandOutput = document.getElementById('commandOutput');
+            commandOutput.textContent = command;
+
+            // Atualizar prévia
+            if (document.getElementById('showPreview').checked) {
+                updatePreview(title, category, excerpt, content, image, languages);
+            }
+
+            // Scroll para a área de output
+            document.getElementById('outputArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            showToast('✅ Comando gerado com sucesso!', 'success');
+        }
+
+        function updatePreview(title, category, excerpt, content, image, languages) {
+            const previewContent = document.getElementById('previewContent');
+            const langFlags = languages.map(l => {
+                const flags = {
+                    'pt': '🇧🇷',
+                    'en': '🇺🇸',
+                    'es': '🇪🇸',
+                    'fr': '🇫🇷',
+                    'de': '🇩🇪',
+                    'it': '🇮🇹',
+                    'ja': '🇯🇵',
+                    'zh': '🇨🇳'
+                };
+                return flags[l] || l;
+            }).join(' ');
+
+            previewContent.innerHTML = `
+                <div style="border: 2px solid #1a3c5e; border-radius: 8px; padding: 15px; background: white;">
+                    <h3 style="color: #1a3c5e; margin: 0 0 5px 0;">${title}</h3>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; color: #666; margin-bottom: 10px;">
+                        <span>📂 ${category}</span>
+                        <span>🌐 ${langFlags}</span>
+                    </div>
+                    <p style="color: #333; font-size: 14px; margin: 5px 0;">${excerpt}</p>
+                    <div style="font-size: 13px; color: #555; margin-top: 8px; padding: 8px; background: #f8f9fa; border-radius: 5px;">
+                        ${content.length > 150 ? content.substring(0, 150) + '...' : content}
+                    </div>
+                    <div style="margin-top: 8px;">
+                        <img src="${image}" alt="Imagem da matéria" style="max-width: 100%; height: auto; border-radius: 5px; max-height: 100px; object-fit: cover;">
+                    </div>
+                </div>
+            `;
+        }
+
+        function copyCommand() {
+            const commandText = document.getElementById('commandOutput').textContent;
+            navigator.clipboard.writeText(commandText).then(() => {
+                showToast('📋 Comando copiado para a área de transferência!', 'success');
+            }).catch(() => {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = commandText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('📋 Comando copiado!', 'success');
+            });
+        }
+
+        function executeCommandDirectly() {
+            const commandText = document.getElementById('commandOutput').textContent;
+            try {
+                // Verificar se está no ambiente correto
+                if (typeof firebase === 'undefined' || typeof db === 'undefined') {
+                    showToast('⚠️ Você não está no site WazzimaGiygg ou o Firebase não foi carregado!', 'error');
+                    return;
+                }
+                
+                // Executar o comando
+                eval(commandText);
+                showToast('🚀 Comando executado! Verifique o console.', 'success');
+            } catch (error) {
+                showToast('❌ Erro ao executar: ' + error.message, 'error');
+                console.error('Erro:', error);
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toastMessage');
+            toast.textContent = message;
+            toast.className = 'toast-message show';
+            
+            // Cores diferentes para tipos
+            if (type === 'error') {
+                toast.style.background = '#c0392b';
+            } else if (type === 'success') {
+                toast.style.background = '#27ae60';
+            } else {
+                toast.style.background = '#1a3c5e';
+            }
+            
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.className = 'toast-message';
+            }, 3000);
+        }
+
+        // Adicionar exemplos rápidos
+        document.addEventListener('DOMContentLoaded', () => {
+            // Exemplo de notícia
+            const exampleBtn = document.createElement('button');
+            exampleBtn.textContent = '📝 Carregar Exemplo';
+            exampleBtn.style.cssText = `
+                display: block;
+                margin-top: 10px;
+                padding: 8px 16px;
+                background: #f8f9fa;
+                border: 2px solid #dee2e6;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 13px;
+                color: #1a3c5e;
+                font-weight: 600;
+                transition: all 0.2s;
+            `;
+            exampleBtn.onmouseover = () => {
+                exampleBtn.style.background = '#e9ecef';
+            };
+            exampleBtn.onmouseout = () => {
+                exampleBtn.style.background = '#f8f9fa';
+            };
+            exampleBtn.onclick = loadExample;
+            
+            document.querySelector('.form-group:last-child').after(exampleBtn);
+        });
+
+        function loadExample() {
+            document.getElementById('title').value = '🔬 Descoberta Científica Revoluciona a Tecnologia';
+            document.getElementById('category').value = 'tecnologia';
+            document.getElementById('excerpt').value = 'Pesquisadores anunciam avanço que pode transformar a indústria de computadores nos próximos anos. O novo material é 1000x mais eficiente que os atuais semicondutores.';
+            document.getElementById('content').value = `<h2 style="color: #1a3c5e;">Detalhes da Descoberta</h2>
+<p>Uma equipe internacional de cientistas publicou hoje um estudo que promete revolucionar a forma como processamos dados.</p>
+<p>O novo material desenvolvido é 1000x mais eficiente que os atuais semicondutores.</p>
+<blockquote style="border-left: 4px solid #1a3c5e; padding-left: 15px; margin: 15px 0; color: #555;">
+"Estamos diante de um novo paradigma tecnológico que poderá impactar todas as áreas da computação nos próximos 5 anos." - Dr. Silva, pesquisador líder.
+</blockquote>
+<p>Os testes iniciais mostraram resultados promissores, com redução significativa no consumo de energia e aumento de performance.</p>`;
+            document.getElementById('image').value = 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=800&h=400&fit=crop';
+            
+            // Selecionar idiomas
+            const langSelect = document.getElementById('languages');
+            Array.from(langSelect.options).forEach(opt => {
+                opt.selected = ['pt', 'en', 'es'].includes(opt.value);
+            });
+
+            showToast('📝 Exemplo carregado!', 'success');
+            
+            // Scroll para o topo
+            document.querySelector('.container').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
 
 </body>
 </html>
