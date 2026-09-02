@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +6,7 @@
     <meta name="description" content="Jornal WazzimaGiygg - Notícias, análises e investigações com credibilidade e independência">
     <meta name="keywords" content="jornal, notícias, WazzimaGiygg, política, economia, internacional">
     <meta name="author" content="WazzimaGiygg Core">
-    <title data-i18n="jornal">Jornal WazzimaGiygg - Edição Digital</title>
+    <title>Jornal WazzimaGiygg - Edição Digital</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700;900&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -25,11 +25,11 @@
 <div id="bannedOverlay" class="banned-overlay">
     <div class="banned-box">
         <div class="icon">🚫</div>
-        <h2 data-i18n="conta_banida">⚠️ Conta Banida</h2>
-        <p data-i18n="conta_banida_texto">Sua conta foi banida permanentemente do sistema.</p>
-        <div id="banDetails" class="ban-details" data-i18n="motivo">Motivo: Violação das políticas de uso</div>
-        <p style="font-size: 14px; color: #666;" data-i18n="erro_banimento">Se você acredita que isso é um erro, entre em contato com o suporte.</p>
-        <button class="btn-logout-banned" onclick="logoutBanned()" data-i18n="sair_conta">🚪 Sair da conta</button>
+        <h2>⚠️ Conta Banida</h2>
+        <p>Sua conta foi banida permanentemente do sistema.</p>
+        <div id="banDetails" class="ban-details">Motivo: Violação das políticas de uso</div>
+        <p style="font-size: 14px; color: #666;">Se você acredita que isso é um erro, entre em contato com o suporte.</p>
+        <button class="btn-logout-banned" onclick="logoutBanned()">🚪 Sair da conta</button>
     </div>
 </div>
 
@@ -37,28 +37,29 @@
 <div id="cookieConsent" class="cookie-consent">
     <div class="cookie-content">
         <div class="cookie-text">
-            <h3 data-i18n="usamos_cookies">🍪 Nós usamos cookies</h3>
-            <p data-i18n="cookie_texto">Este site utiliza cookies para melhorar sua experiência, analisar tráfego e exibir anúncios personalizados. Ao continuar navegando, você concorda com nossa 
-               <a href="https://wazzimagiygg.com/LGPD" target="_blank" style="color: #4a9eff; text-decoration: underline;" data-i18n="politica_privacidade">Política de Privacidade</a>.</p>
+            <h3>🍪 Nós usamos cookies</h3>
+            <p>Este site utiliza cookies para melhorar sua experiência, analisar tráfego e exibir anúncios personalizados. 
+               Ao continuar navegando, você concorda com nossa 
+               <a href="https://wazzimagiygg.com/LGPD" target="_blank" style="color: #4a9eff; text-decoration: underline;">Política de Privacidade</a>.</p>
             <div class="cookie-options">
                 <label>
                     <input type="checkbox" id="cookieEssential" checked disabled> 
-                    <span data-i18n="cookies_essenciais">🔒 Essenciais (obrigatórios)</span>
+                    <span>🔒 Essenciais (obrigatórios)</span>
                 </label>
                 <label>
                     <input type="checkbox" id="cookieAnalytics" checked> 
-                    <span data-i18n="analise_dados">📊 Análise de dados</span>
+                    <span>📊 Análise de dados</span>
                 </label>
                 <label>
                     <input type="checkbox" id="cookieAdvertising" checked> 
-                    <span data-i18n="publicidade_personalizada">🎯 Publicidade personalizada</span>
+                    <span>🎯 Publicidade personalizada</span>
                 </label>
             </div>
         </div>
         <div class="cookie-buttons">
-            <button id="cookieAcceptAll" class="cookie-btn accept" data-i18n="aceitar_todos">✅ Aceitar Todos</button>
-            <button id="cookieRejectAll" class="cookie-btn reject" data-i18n="recusar_todos">❌ Recusar Todos</button>
-            <button id="cookieCustomize" class="cookie-btn customize" data-i18n="personalizar">⚙️ Personalizar</button>
+            <button id="cookieAcceptAll" class="cookie-btn accept">✅ Aceitar Todos</button>
+            <button id="cookieRejectAll" class="cookie-btn reject">❌ Recusar Todos</button>
+            <button id="cookieCustomize" class="cookie-btn customize">⚙️ Personalizar</button>
         </div>
     </div>
 </div>
@@ -70,19 +71,16 @@
             <img src="https://wazzimagiygg.com/favicom.png" alt="Logo">
             <div>
                 <h1>WazzimaGiygg</h1>
-                <small data-i18n="jornal">Jornal</small>
+                <small>Jornal</small>
             </div>
         </div>
         <div class="user-info-header" id="userInfo">
             <div class="user-avatar" id="userAvatar">👤</div>
             <div>
-                <div class="user-name" id="userName" data-i18n="carregando">Carregando...</div>
-                <div class="user-email" id="userEmail" data-i18n="aguarde">aguarde</div>
+                <div class="user-name" id="userName">Carregando...</div>
+                <div class="user-email" id="userEmail">aguarde</div>
             </div>
             <span id="userBadge"></span>
-            
-            <!-- SELETOR DE IDIOMA -->
-            <div id="languageSelectorContainer"></div>
             
             <!-- NOTIFICATION BELL -->
             <div class="notification-bell" id="notificationBell" onclick="toggleNotifications(event)">
@@ -90,20 +88,20 @@
                 <span class="notification-badge" id="notifBadge" style="display:none;">0</span>
                 <div class="notification-dropdown" id="notifDropdown">
                     <div class="notification-dropdown-header">
-                        <h3 data-i18n="notificacoes">🔔 Notificações</h3>
-                        <button onclick="markAllAsRead(event)" data-i18n="marcar_todas_lidas">Marcar todas como lidas</button>
+                        <h3>🔔 Notificações</h3>
+                        <button onclick="markAllAsRead(event)">Marcar todas como lidas</button>
                     </div>
                     <div id="notificationList">
                         <div class="notification-empty">
                             <span class="material-icons">notifications_off</span>
-                            <p data-i18n="nenhuma_notificacao">Nenhuma notificação</p>
+                            <p>Nenhuma notificação</p>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <button class="btn-logout" id="btnLogout" style="display:none;" onclick="logout()" data-i18n="sair">Sair</button>
-            <button class="btn-login" id="btnLogin" onclick="showLoginModal()" data-i18n="entrar">
+            <button class="btn-logout" id="btnLogout" style="display:none;" onclick="logout()">Sair</button>
+            <button class="btn-login" id="btnLogin" onclick="showLoginModal()">
                 <span class="material-icons" style="font-size:16px;">person</span> Entrar
             </button>
         </div>
@@ -114,7 +112,7 @@
     <!-- CABEÇALHO DO JORNAL -->
     <div class="newspaper-header">
         <div class="newspaper-name" onclick="navigateToHome()">WAZZIMA<span>GIYGG</span></div>
-        <div class="newspaper-motto" data-i18n="jornal_inevitavel">O JORNAL INEVITÁVEL!</div>
+        <div class="newspaper-motto">O JORNAL INEVITÁVEL!</div>
         <div class="issue-info">
             <span class="issue-date"><i class="far fa-calendar-alt"></i> <span id="currentDate"></span></span>
             <span><i class="fas fa-map-marker-alt"></i> Santa Fé do Sul - São Paulo - Brazil</span>
@@ -124,25 +122,25 @@
     <!-- Menu de Navegação -->
     <div class="nav-menu">
         <ul>
-            <li><a onclick="filterByCategory('todos')" class="active" data-cat="todos"><span class="cat-icon">📰</span><span data-i18n="todos">TODOS</span></a></li>
-            <li><a onclick="filterByCategory('política')" data-cat="política"><span class="cat-icon">🏛️</span><span data-i18n="politica">POLÍTICA</span></a></li>
-            <li><a onclick="filterByCategory('internacional')" data-cat="internacional"><span class="cat-icon">🌍</span><span data-i18n="internacional">INTERNACIONAL</span></a></li>
-            <li><a onclick="filterByCategory('economia')" data-cat="economia"><span class="cat-icon">📊</span><span data-i18n="economia">ECONOMIA</span></a></li>
-            <li><a onclick="filterByCategory('justiça')" data-cat="justiça"><span class="cat-icon">⚖️</span><span data-i18n="justica">JUSTIÇA</span></a></li>
-            <li><a onclick="filterByCategory('cultura')" data-cat="cultura"><span class="cat-icon">🎭</span><span data-i18n="cultura">CULTURA</span></a></li>
-            <li><a onclick="filterByCategory('investigação')" data-cat="investigação"><span class="cat-icon">🔍</span><span data-i18n="investigacao">INVESTIGAÇÃO</span></a></li>
-            <li><a onclick="filterByCategory('opinião')" data-cat="opinião"><span class="cat-icon">✍️</span><span data-i18n="opiniao">OPINIÃO</span></a></li>
-            <li><a onclick="filterByCategory('esporte')" data-cat="esporte"><span class="cat-icon">⚽</span><span data-i18n="esporte">ESPORTE</span></a></li>
-            <li><a onclick="filterByCategory('tecnologia')" data-cat="tecnologia"><span class="cat-icon">💻</span><span data-i18n="tecnologia">TECNOLOGIA</span></a></li>
-            <li><a onclick="filterByCategory('redes-sociais')" data-cat="redes-sociais"><span class="cat-icon">📱</span><span data-i18n="redes_sociais">REDES SOCIAIS</span></a></li>
-            <li><a onclick="filterByCategory('saúde')" data-cat="saúde"><span class="cat-icon">🏥</span><span data-i18n="saude">SAÚDE</span></a></li>
-            <li><a onclick="filterByCategory('educação')" data-cat="educação"><span class="cat-icon">📚</span><span data-i18n="educacao">EDUCAÇÃO</span></a></li>
+            <li><a onclick="filterByCategory('todos')" class="active" data-cat="todos"><span class="cat-icon">📰</span>TODOS</a></li>
+            <li><a onclick="filterByCategory('política')" data-cat="política"><span class="cat-icon">🏛️</span>POLÍTICA</a></li>
+            <li><a onclick="filterByCategory('internacional')" data-cat="internacional"><span class="cat-icon">🌍</span>INTERNACIONAL</a></li>
+            <li><a onclick="filterByCategory('economia')" data-cat="economia"><span class="cat-icon">📊</span>ECONOMIA</a></li>
+            <li><a onclick="filterByCategory('justiça')" data-cat="justiça"><span class="cat-icon">⚖️</span>JUSTIÇA</a></li>
+            <li><a onclick="filterByCategory('cultura')" data-cat="cultura"><span class="cat-icon">🎭</span>CULTURA</a></li>
+            <li><a onclick="filterByCategory('investigação')" data-cat="investigação"><span class="cat-icon">🔍</span>INVESTIGAÇÃO</a></li>
+            <li><a onclick="filterByCategory('opinião')" data-cat="opinião"><span class="cat-icon">✍️</span>OPINIÃO</a></li>
+            <li><a onclick="filterByCategory('esporte')" data-cat="esporte"><span class="cat-icon">⚽</span>ESPORTE</a></li>
+            <li><a onclick="filterByCategory('tecnologia')" data-cat="tecnologia"><span class="cat-icon">💻</span>TECNOLOGIA</a></li>
+            <li><a onclick="filterByCategory('redes-sociais')" data-cat="redes-sociais"><span class="cat-icon">📱</span>REDES SOCIAIS</a></li>
+            <li><a onclick="filterByCategory('saúde')" data-cat="saúde"><span class="cat-icon">🏥</span>SAÚDE</a></li>
+            <li><a onclick="filterByCategory('educação')" data-cat="educação"><span class="cat-icon">📚</span>EDUCAÇÃO</a></li>
             <li><a href="archive.html" style="background: rgba(255,255,255,0.1); border-left: 2px solid rgba(255,255,255,0.2);">
-            <span class="cat-icon">📚</span><span data-i18n="arquivo">ARQUIVO</span>
+            <span class="cat-icon">📚</span>ARQUIVO
             </a></li>
             <li id="adminNewArticleBtn" style="display:none; border-left: 2px solid rgba(255,255,255,0.3);">
                 <a onclick="showNewArticleModal()" class="admin-btn" style="background: #c0392b; color: white; font-weight: 700; padding: 12px 24px;">
-                    ✏️ <span data-i18n="nova_materia">NOVA MATÉRIA</span>
+                    ✏️ NOVA MATÉRIA
                 </a>
             </li>
         </ul>
@@ -157,21 +155,21 @@
 <!-- ===== FOOTER PADRONIZADO ===== -->
 <footer class="site-footer">
     <div class="footer-links">
-        <a href="https://wazzimagiygg.com/donate/" class="footer-link" target="_blank" data-i18n="doacao">💝 Doação</a>
+        <a href="https://wazzimagiygg.com/donate/" class="footer-link" target="_blank">💝 Doação</a>
         <span class="footer-divider">|</span>
-        <a href="https://wazzimagiygg.com/desktop.html" class="footer-link" target="_blank" data-i18n="desktop">🖥️ Desktop</a>
+        <a href="https://wazzimagiygg.com/desktop.html" class="footer-link" target="_blank">🖥️ Desktop</a>
         <span class="footer-divider">|</span>
-        <a href="https://wazzimagiygg.com/LGPD" class="footer-link" target="_blank" data-i18n="lgpd">🔒 LGPD</a>
+        <a href="https://wazzimagiygg.com/LGPD" class="footer-link" target="_blank">🔒 LGPD</a>
         <span class="footer-divider">|</span>
-        <a href="https://wazzimagiygg.com/MarcoCivil" class="footer-link" target="_blank" data-i18n="marco_civil">📜 Marco Civil</a>
+        <a href="https://wazzimagiygg.com/MarcoCivil" class="footer-link" target="_blank">📜 Marco Civil</a>
         <span class="footer-divider">|</span>
-        <a href="https://support.wazzimagiygg.com/" class="footer-link" target="_blank" data-i18n="ticket">🎫 Ticket</a>
+        <a href="https://support.wazzimagiygg.com/" class="footer-link" target="_blank">🎫 Ticket</a>
         <span class="footer-divider">|</span>
-        <a href="https://wazzimagiygg.com/produtos/" class="footer-link highlight" target="_blank" data-i18n="produtos">🛍️ Produtos</a>
+        <a href="https://wazzimagiygg.com/produtos/" class="footer-link highlight" target="_blank">🛍️ Produtos</a>
         <span class="footer-divider">|</span>
-        <a href="https://painel.wazzimagiygg.com/" class="footer-link highlight" target="_blank" data-i18n="sua_conta">👤 Sua conta</a>
+        <a href="https://painel.wazzimagiygg.com/" class="footer-link highlight" target="_blank">👤 Sua conta</a>
     </div>
-    <div class="footer-copyright" data-i18n="jornal_verdade">
+    <div class="footer-copyright">
         © 2026 WazzimaGiygg Core — O Jornal da Verdade
     </div>
 </footer>
@@ -179,54 +177,38 @@
 <!-- Modal Login -->
 <div id="loginModal" class="modal">
     <div class="modal-content">
-        <h2 data-i18n="entrar_google"><i class="fab fa-google"></i> Entrar com Google</h2>
-        <p data-i18n="fazer_login_google">Faça login com sua conta Google para acessar recursos administrativos.</p>
-        <button class="btn-primary" onclick="loginWithGoogle()" style="width:100%;" data-i18n="entrar_google">
+        <h2><i class="fab fa-google"></i> Entrar com Google</h2>
+        <p>Faça login com sua conta Google para acessar recursos administrativos.</p>
+        <button class="btn-primary" onclick="loginWithGoogle()" style="width:100%;">
             <i class="fab fa-google"></i> Entrar com Google
         </button>
-        <button class="btn-close" onclick="closeModals()" data-i18n="fechar">Fechar</button>
+        <button class="btn-close" onclick="closeModals()">Fechar</button>
     </div>
 </div>
 
 <!-- Modal Compartilhar -->
 <div id="shareModal" class="modal">
     <div class="modal-content">
-        <h2 data-i18n="compartilhar"><i class="fas fa-share-alt"></i> Compartilhar Matéria</h2>
-        <p data-i18n="copie_link">Copie o link abaixo para compartilhar esta matéria:</p>
+        <h2><i class="fas fa-share-alt"></i> Compartilhar Matéria</h2>
+        <p>Copie o link abaixo para compartilhar esta matéria:</p>
         <div class="share-url-container" id="shareUrlContainer"></div>
-        <button class="btn-primary" onclick="copyShareUrl()" style="width: 100%; margin-bottom: 10px;" data-i18n="copiar_link">
+        <button class="btn-primary" onclick="copyShareUrl()" style="width: 100%; margin-bottom: 10px;">
             <i class="fas fa-copy"></i> Copiar Link
         </button>
-        <button class="btn-close" onclick="closeModals()" data-i18n="fechar">Fechar</button>
+        <button class="btn-close" onclick="closeModals()">Fechar</button>
     </div>
 </div>
 
 <!-- Modal Nova Matéria (apenas admin) -->
 <div id="articleModal" class="modal">
     <div class="modal-content" style="max-width: 600px;">
-        <h2><i class="fas fa-edit"></i> <span id="modalTitle" data-i18n="nova_materia_titulo">Nova Matéria</span></h2>
-        
+        <h2><i class="fas fa-edit"></i> <span id="modalTitle">Nova Matéria</span></h2>
         <div class="form-group">
-            <label data-i18n="idiomas_materia">🌐 Idiomas desta matéria</label>
-            <select id="articleLanguages" multiple style="height: auto; min-height: 60px; width: 100%; padding: 8px;">
-                <option value="pt" selected>🇧🇷 Português</option>
-                <option value="en">🇺🇸 English</option>
-                <option value="es">🇪🇸 Español</option>
-                <option value="fr">🇫🇷 Français</option>
-                <option value="de">🇩🇪 Deutsch</option>
-                <option value="it">🇮🇹 Italiano</option>
-                <option value="ja">🇯🇵 日本語</option>
-                <option value="zh">🇨🇳 中文</option>
-            </select>
-            <small style="color:#666;font-size:11px;display:block;margin-top:4px;" data-i18n="selecione_idiomas">💡 Segure Ctrl/Cmd para selecionar múltiplos idiomas</small>
-        </div>
-        
-        <div class="form-group">
-            <label data-i18n="titulo_materia">Título da Matéria</label>
-            <input type="text" id="articleTitle" placeholder="Título principal" data-i18n-attr="placeholder" data-i18n="titulo_materia">
+            <label>Título da Matéria</label>
+            <input type="text" id="articleTitle" placeholder="Título principal">
         </div>
         <div class="form-group">
-            <label data-i18n="tipo_materia">Tipo de Matéria</label>
+            <label>Tipo de Matéria</label>
             <select id="articleCategory">
                 <option value="política">🏛️ Política</option>
                 <option value="internacional">🌍 Internacional</option>
@@ -243,25 +225,19 @@
             </select>
         </div>
         <div class="form-group">
-            <label data-i18n="resumo_descricao">Resumo/Descrição</label>
-            <textarea id="articleExcerpt" placeholder="Breve resumo da matéria..." rows="3" data-i18n-attr="placeholder" data-i18n="resumo_descricao"></textarea>
+            <label>Resumo/Descrição</label>
+            <textarea id="articleExcerpt" placeholder="Breve resumo da matéria..." rows="3"></textarea>
         </div>
         <div class="form-group">
-            <label data-i18n="conteudo_completo">Conteúdo Completo (HTML)</label>
-            <textarea id="articleContent" placeholder="Conteúdo completo da matéria com formatação HTML..." rows="6" data-i18n-attr="placeholder" data-i18n="conteudo_completo"></textarea>
+            <label>Conteúdo Completo (HTML)</label>
+            <textarea id="articleContent" placeholder="Conteúdo completo da matéria com formatação HTML..." rows="6"></textarea>
         </div>
         <div class="form-group">
-            <label data-i18n="url_imagem">URL da Imagem (opcional)</label>
-            <input type="text" id="articleImage" placeholder="https://exemplo.com/imagem.jpg" data-i18n-attr="placeholder" data-i18n="url_imagem">
+            <label>URL da Imagem (opcional)</label>
+            <input type="text" id="articleImage" placeholder="https://exemplo.com/imagem.jpg">
         </div>
-        
-        <div id="translationsContainer" style="display:none; border-top: 2px solid #eee; padding-top: 15px; margin-top: 15px;">
-            <h4 style="color:#1a3c5e; margin-bottom:10px;" data-i18n="traducoes">🌐 Traduções</h4>
-            <div id="translationFields"></div>
-        </div>
-        
-        <button class="btn-primary" onclick="saveArticle()" style="width: 100%;" data-i18n="publicar_materia">Publicar Matéria</button>
-        <button class="btn-close" onclick="closeModals()" data-i18n="cancelar">Cancelar</button>
+        <button class="btn-primary" onclick="saveArticle()" style="width: 100%;">Publicar Matéria</button>
+        <button class="btn-close" onclick="closeModals()">Cancelar</button>
     </div>
 </div>
 
@@ -272,52 +248,33 @@
         <div id="viewAdminActions" style="margin-top: 20px; display: none;">
             <hr>
             <div style="display: flex; gap: 10px; justify-content: space-between; flex-wrap: wrap;">
-                <button class="btn-share" onclick="showShareModal()" data-i18n="compartilhar">
+                <button class="btn-share" onclick="showShareModal()">
                     <i class="fas fa-share-alt"></i> Compartilhar
                 </button>
                 <div style="display: flex; gap: 10px;">
-                    <button class="btn-warning" onclick="editCurrentArticle()" data-i18n="editar">✏️ Editar</button>
-                    <button class="btn-danger" onclick="deleteCurrentArticle()" data-i18n="excluir">🗑️ Excluir</button>
+                    <button class="btn-warning" onclick="editCurrentArticle()">✏️ Editar</button>
+                    <button class="btn-danger" onclick="deleteCurrentArticle()">🗑️ Excluir</button>
                 </div>
             </div>
         </div>
         <div id="viewUserActions" style="margin-top: 20px; display: none;">
             <hr>
-            <button class="btn-share" onclick="showShareModal()" style="width: 100%;" data-i18n="compartilhar_materia">
+            <button class="btn-share" onclick="showShareModal()" style="width: 100%;">
                 <i class="fas fa-share-alt"></i> Compartilhar esta matéria
             </button>
         </div>
-        <button class="btn-close" onclick="closeModals()" data-i18n="fechar">Fechar</button>
+        <button class="btn-close" onclick="closeModals()">Fechar</button>
     </div>
 </div>
 
 <!-- Toast -->
 <div id="toast" class="toast"></div>
 
-<!-- ============================================ -->
-<!-- SCRIPTS - ORDEM CORRETA -->
-<!-- ============================================ -->
-
-<!-- Language System -->
-<script src="languages/pt.js"></script>
-<script src="languages/en.js"></script>
-<script src="languages/es.js"></script>
-<script src="languages/fr.js"></script>
-<script src="languages/de.js"></script>
-<script src="languages/it.js"></script>
-<script src="languages/ja.js"></script>
-<script src="languages/zh.js"></script>
-<script src="languages/index.js"></script>
-<script src="languages/multi-language-articles.js"></script>
-
-<!-- Main Script -->
 <script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/script.js"></script>
 
-<!-- Link Interceptor -->
-<script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/jornal/link-interceptor.js"></script>
-
-<!-- Scripts externos -->
+<!-- Iframe do verificador/logs -->
 <script src="https://gspotfverwazzimagiygg.wazzimagiygg.com/D6FefD0De/EfdFeF1ExcE0C/De0Var6H6f/QXdv0/dddcefb.js"></script>
     
 </body>
 </html>
+<!--  -->
